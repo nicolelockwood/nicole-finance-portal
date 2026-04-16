@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Portal · Nicole Lockwood</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
+
+:root {
+  --ocean-deep: #0D2B3E;
+  --ocean-mid: #1A4A62;
+  --ocean-teal: #2E8BA8;
+  --ocean-light: #5EB5CC;
+  --amber: #C87820;
+  --warm-white: #F4F0EB;
+  --glass: rgba(244,240,235,0.74);
+  --glass-strong: rgba(244,240,235,0.90);
+  --glass-border: rgba(255,255,255,0.64);
+  --glass-shadow: 0 6px 28px rgba(13,43,62,0.14), 0 2px 6px rgba(13,43,62,0.08);
+  --glass-shadow-lg: 0 14px 44px rgba(13,43,62,0.18), 0 4px 10px rgba(13,43,62,0.09);
+  --text-primary: #0D2B3E;
+  --text-secondary: #2C5570;
+  --text-tertiary: #6A8FA8;
+  --text-light: rgba(244,240,235,0.93);
+  --text-light-sub: rgba(244,240,235,0.55);
+  /* Refined semantic — less saturated */
+  --positive: #1E6645;
+  --positive-muted: rgba(30,102,69,0.13);
+  --warning: #5E3D5C;
+  --warning-muted: rgba(94,61,92,0.10);
+  --danger: #7A2820;
+  --teal-muted: rgba(46,139,168,0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --sidebar-w: 232px;
+  /* Scene thumbnail for icons */
+  --scene-bg: url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=400&q=70&fit=crop');
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;min-height:100vh;color:var(--text-primary);font-size:14px;line-height:1.5;overflow-x:hidden;}
+
+/* BG */
+.bg-scene{position:fixed;inset:0;background-image:url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1920&q=85&fit=crop');background-size:cover;background-position:center 40%;z-index:0;}
+.bg-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(13,43,62,0.30) 0%,rgba(26,74,98,0.16) 50%,rgba(46,139,168,0.10) 100%);}
+
+/* LAYOUT */
+.app{position:relative;z-index:1;display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;background:rgba(13,43,62,0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1px solid rgba(94,181,204,0.15);}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid rgba(94,181,204,0.12);}
+.logo-mark{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:34px;height:34px;border-radius:9px;overflow:hidden;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(46,139,168,0.35);}
+.logo-icon::before{content:'';position:absolute;inset:0;background-image:var(--scene-bg);background-size:cover;background-position:center;}
+.logo-icon::after{content:'';position:absolute;inset:0;background:rgba(13,43,62,0.38);}
+.logo-icon svg{position:relative;z-index:1;width:16px;height:16px;color:white;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:var(--warm-white);line-height:1.1;}
+.logo-sub{font-size:10px;color:var(--text-light-sub);letter-spacing:.05em;margin-top:1px;}
+.sidebar-nav{padding:14px 12px;flex:1;overflow-y:auto;}
+.nav-section{margin-bottom:22px;}
+.nav-label{font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(94,181,204,0.5);padding:0 8px;margin-bottom:5px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--text-light-sub);font-size:13px;font-weight:400;transition:all .18s ease;border:none;background:none;width:100%;text-align:left;}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;}
+.nav-item:hover{background:rgba(94,181,204,0.09);color:var(--text-light);}
+.nav-item.active{background:rgba(94,181,204,0.16);color:var(--ocean-light);font-weight:500;}
+.sidebar-bottom{padding:14px 12px;border-top:1px solid rgba(94,181,204,0.10);}
+.user-pill{display:flex;align-items:center;gap:10px;padding:8px 10px;}
+.user-avatar{width:30px;height:30px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0;}
+.user-avatar::before{content:'';position:absolute;inset:0;background-image:var(--scene-bg);background-size:cover;background-position:center;}
+.user-avatar::after{content:'';position:absolute;inset:0;background:rgba(13,43,62,0.22);}
+.user-avatar span{position:relative;z-index:1;font-size:11px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;height:100%;}
+.user-name{font-size:12px;font-weight:500;color:var(--text-light);}
+.user-role{font-size:10px;color:var(--text-light-sub);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1;padding:28px 28px 48px;max-width:calc(100vw - var(--sidebar-w));}
+.page{display:none;}.page.active{display:block;}
+
+/* GLASS */
+.glass{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius);box-shadow:var(--glass-shadow);}
+.glass-strong{background:var(--glass-strong);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid var(--glass-border);border-radius:var(--radius);box-shadow:var(--glass-shadow-lg);}
+
+/* PHOTO ICON — key component */
+.photo-icon{border-radius:9px;overflow:hidden;position:relative;flex-shrink:0;}
+.photo-icon::before{content:'';position:absolute;inset:0;background-image:var(--scene-bg);background-size:cover;background-position:center;}
+.photo-icon::after{content:'';position:absolute;inset:0;background:rgba(13,43,62,0.38);}
+.photo-icon svg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;color:white;}
+.photo-icon.sm{width:28px;height:28px;}
+.photo-icon.sm svg{width:13px;height:13px;}
+.photo-icon.md{width:34px;height:34px;}
+.photo-icon.md svg{width:15px;height:15px;}
+.photo-icon.lg{width:40px;height:40px;}
+.photo-icon.lg svg{width:17px;height:17px;}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;letter-spacing:-.01em;color:var(--warm-white);text-shadow:0 2px 12px rgba(13,43,62,0.45);}
+.page-subtitle{font-size:12px;color:rgba(244,240,235,0.58);margin-top:3px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .18s ease;}
+.btn-primary{background:linear-gradient(135deg,var(--ocean-teal),var(--ocean-light));color:white;box-shadow:0 3px 12px rgba(46,139,168,0.28);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(46,139,168,0.38);}
+.btn-glass{background:var(--glass);backdrop-filter:blur(12px);color:var(--text-primary);border:1px solid var(--glass-border);}
+.btn-glass:hover{background:var(--glass-strong);}
+.btn-sm{padding:7px 14px;font-size:12px;}
+.btn svg{width:14px;height:14px;}
+
+/* STATS — premium refinement */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{padding:18px 20px;}
+.stat-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:10px;}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500;letter-spacing:-.02em;color:var(--text-primary);line-height:1;}
+.stat-value.positive{color:var(--positive);}
+.stat-value.teal{color:var(--ocean-mid);}
+.stat-meta{font-size:11px;color:var(--text-tertiary);margin-top:6px;font-weight:300;}
+
+/* CARDS */
+.card-header{padding:15px 20px;border-bottom:1px solid rgba(13,43,62,0.07);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13px;font-weight:500;color:var(--text-primary);}
+.card-subtitle{font-size:11px;color:var(--text-tertiary);margin-top:1px;font-weight:300;}
+.card-body{padding:20px;}
+.content-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;}
+
+/* SUMMARY ROWS — refined */
+.summary-rows{display:flex;flex-direction:column;}
+.summary-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(13,43,62,0.065);font-size:13px;}
+.summary-row:last-child{border-bottom:none;}
+.summary-row.hl{background:rgba(46,139,168,0.065);margin:0 -20px;padding:10px 20px;}
+.summary-row.total{font-weight:500;}
+.row-label{color:var(--text-secondary);font-weight:300;}
+.row-val{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:400;color:var(--text-primary);}
+.row-val.deduct{color:var(--positive);}
+.row-val.payable{color:var(--warning);}
+.row-val.net{color:var(--ocean-mid);font-weight:500;font-size:14px;}
+
+/* TXN */
+.txn-list{display:flex;flex-direction:column;}
+.txn-item{display:flex;align-items:center;gap:13px;padding:11px 20px;border-bottom:1px solid rgba(13,43,62,0.055);transition:background .12s;cursor:pointer;}
+.txn-item:last-child{border-bottom:none;}
+.txn-item:hover{background:rgba(46,139,168,0.04);}
+.txn-info{flex:1;min-width:0;}
+.txn-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.txn-meta{font-size:11px;color:var(--text-tertiary);margin-top:1px;font-weight:300;}
+.txn-amt{font-family:'DM Mono',monospace;font-size:13px;font-weight:400;}
+.txn-amt.expense{color:var(--text-secondary);}
+.txn-amt.income{color:var(--positive);}
+.receipt-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;background:rgba(46,139,168,0.09);color:var(--ocean-teal);font-size:10px;font-weight:400;margin-top:3px;}
+
+/* GOAL BARS */
+.goal-item{margin-bottom:16px;}
+.goal-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;}
+.goal-label span:first-child{color:var(--text-secondary);font-weight:300;}
+.goal-label span:last-child{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:400;color:var(--text-primary);}
+.goal-bar{height:5px;background:rgba(13,43,62,0.09);border-radius:3px;overflow:hidden;}
+.goal-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ocean-mid),var(--ocean-teal));transition:width .7s ease;}
+.goal-fill.amber{background:linear-gradient(90deg,var(--amber),#D99040);}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:11.5px;font-weight:500;color:var(--text-secondary);}
+.input{background:rgba(244,240,235,0.68);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.52);border-radius:var(--radius-sm);padding:9px 12px;font-family:inherit;font-size:13px;color:var(--text-primary);outline:none;transition:all .15s;width:100%;}
+.input:focus{background:rgba(244,240,235,0.92);border-color:rgba(46,139,168,0.48);box-shadow:0 0 0 3px rgba(46,139,168,0.09);}
+.input-pfx{position:relative;}
+.input-pfx .pfx{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);font-size:13px;pointer-events:none;}
+.input-pfx .input{padding-left:24px;}
+select.input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%236A8FA8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;background-color:rgba(244,240,235,0.68);}
+textarea.input{resize:vertical;min-height:80px;}
+
+/* RECEIPT */
+.receipt-zone{border:1.5px dashed rgba(46,139,168,0.30);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(244,240,235,0.25);position:relative;}
+.receipt-zone:hover{border-color:var(--ocean-teal);background:rgba(46,139,168,0.04);}
+.receipt-zone.has-file{border-style:solid;border-color:var(--ocean-teal);background:rgba(46,139,168,0.04);}
+.receipt-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.zone-title{font-size:13px;font-weight:400;margin-bottom:3px;color:var(--text-primary);}
+.zone-sub{font-size:11px;color:var(--text-tertiary);font-weight:300;}
+.receipt-preview{display:none;align-items:center;gap:12px;background:var(--glass);border-radius:var(--radius-sm);padding:10px 12px;margin-top:12px;border:1px solid var(--glass-border);}
+.receipt-preview.visible{display:flex;}
+.receipt-thumb{width:40px;height:40px;object-fit:cover;border-radius:6px;}
+.rp-name{font-size:12px;font-weight:400;}
+.rp-size{font-size:11px;color:var(--text-tertiary);font-weight:300;}
+
+/* AI SCAN */
+.ai-scan-bar{background:linear-gradient(135deg,rgba(46,139,168,0.09),rgba(94,181,204,0.06));border:1px solid rgba(46,139,168,0.2);border-radius:var(--radius);padding:12px 15px;display:none;align-items:center;gap:12px;margin-top:12px;}
+.ai-scan-bar.visible{display:flex;}
+.ai-scan-bar.scanning{animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+.ai-scan-text{flex:1;font-size:12px;}
+.ai-scan-title{font-weight:500;color:var(--ocean-mid);}
+.ai-scan-sub{color:var(--text-tertiary);margin-top:1px;font-weight:300;}
+
+/* MONEY MAP */
+.map-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.map-card{padding:18px 20px;}
+.map-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.map-card-title{font-size:13px;font-weight:500;}
+.map-card-sub{font-size:11px;color:var(--text-tertiary);font-weight:300;}
+.map-stream{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(13,43,62,0.055);font-size:12px;}
+.map-stream:last-child{border-bottom:none;}
+.map-stream-name{color:var(--text-secondary);font-weight:300;}
+.map-stream-input{font-family:'DM Mono',monospace;font-size:12px;background:rgba(244,240,235,0.5);border:1px solid rgba(13,43,62,0.09);border-radius:6px;padding:4px 8px;width:115px;text-align:right;color:var(--text-primary);outline:none;}
+.map-stream-input:focus{border-color:rgba(46,139,168,0.38);background:rgba(244,240,235,0.85);}
+.map-stream-static{font-family:'DM Mono',monospace;font-size:12px;font-weight:400;}
+.map-total-bar{background:linear-gradient(135deg,var(--ocean-mid),var(--ocean-deep));border-radius:var(--radius);padding:18px 24px;color:white;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.map-total-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-bottom:6px;}
+.map-total-value{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;}
+.map-total-value.amber{color:#FFD580;}
+.map-total-value.green{color:#a7f3c8;}
+.map-total-value.red{color:#fca5a5;}
+
+/* P&L */
+.pl-section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--text-tertiary);margin-bottom:8px;}
+.pl-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(13,43,62,0.065);font-size:13px;}
+.pl-row:last-child{border-bottom:none;}
+.pl-row.total{font-weight:500;font-size:14px;padding-top:12px;}
+.pl-row-cat{color:var(--text-secondary);font-size:12px;font-weight:300;}
+.pl-val{font-family:'DM Mono',monospace;font-weight:400;}
+.pl-val.income{color:var(--positive);}
+.pl-val.profit{color:var(--ocean-mid);font-size:16px;font-weight:500;}
+.divider{height:1px;background:rgba(13,43,62,0.07);margin:18px 0;}
+
+/* PERIOD TABS */
+.period-tabs{display:flex;gap:3px;background:rgba(13,43,62,0.07);border-radius:var(--radius-sm);padding:3px;}
+.period-tab{padding:5px 12px;border-radius:7px;font-size:12px;font-weight:400;cursor:pointer;border:none;background:none;color:var(--text-secondary);transition:all .15s;}
+.period-tab.active{background:var(--glass-strong);color:var(--text-primary);box-shadow:0 1px 4px rgba(13,43,62,0.09);}
+
+/* SUPER */
+.super-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(13,43,62,0.065);}
+.super-row:last-child{border-bottom:none;}
+.super-label{font-size:13px;color:var(--text-secondary);font-weight:300;}
+.super-input{font-family:'DM Mono',monospace;font-size:12px;background:rgba(244,240,235,0.6);border:1px solid rgba(13,43,62,0.1);border-radius:6px;padding:5px 8px;width:75px;text-align:right;color:var(--text-primary);outline:none;}
+.super-input:focus{border-color:rgba(46,139,168,0.4);}
+
+/* INVOICE BUILDER */
+.invoice-preview-wrap{background:white;border-radius:var(--radius);box-shadow:var(--glass-shadow-lg);overflow:hidden;}
+.inv-header{background:var(--ocean-deep);padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;}
+.inv-header-left{color:var(--warm-white);}
+.inv-company{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;margin-bottom:4px;}
+.inv-company-detail{font-size:11px;opacity:.65;line-height:1.7;font-weight:300;}
+.inv-badge{background:rgba(94,181,204,0.22);border:1px solid rgba(94,181,204,0.35);color:var(--ocean-light);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:4px;display:inline-block;margin-bottom:10px;}
+.inv-body{padding:28px 32px;}
+.inv-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+.inv-meta-section h4{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:8px;}
+.inv-meta-section p{font-size:13px;color:var(--text-primary);line-height:1.7;font-weight:300;}
+.inv-meta-section strong{font-weight:500;}
+.inv-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+.inv-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-tertiary);padding:8px 12px;text-align:left;border-bottom:2px solid rgba(13,43,62,0.1);}
+.inv-table th:last-child,.inv-table td:last-child{text-align:right;}
+.inv-table td{padding:12px 12px;border-bottom:1px solid rgba(13,43,62,0.06);font-size:13px;color:var(--text-primary);vertical-align:top;}
+.inv-table td.desc-cell{font-weight:400;}
+.inv-table td.desc-detail{font-size:11px;color:var(--text-tertiary);margin-top:4px;line-height:1.6;font-weight:300;}
+.inv-table td.amount{font-family:'DM Mono',monospace;font-size:13px;font-weight:400;}
+.inv-totals{display:flex;justify-content:flex-end;margin-bottom:24px;}
+.inv-totals-inner{width:240px;}
+.inv-total-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(13,43,62,0.07);font-size:13px;}
+.inv-total-row:last-child{border-bottom:none;font-weight:600;font-size:14px;color:var(--ocean-deep);padding-top:12px;}
+.inv-total-row span:last-child{font-family:'DM Mono',monospace;font-weight:400;}
+.inv-total-row:last-child span:last-child{font-weight:600;}
+.inv-payment{background:rgba(46,139,168,0.06);border-radius:var(--radius-sm);padding:16px 20px;border:1px solid rgba(46,139,168,0.14);}
+.inv-payment h4{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ocean-teal);margin-bottom:10px;}
+.inv-payment-detail{font-size:12px;color:var(--text-secondary);line-height:1.8;font-weight:300;}
+.inv-payment-detail strong{font-weight:500;color:var(--text-primary);}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-tertiary);}
+.empty-state svg{width:28px;height:28px;margin-bottom:10px;opacity:.2;}
+.empty-state p{font-size:13px;line-height:1.7;font-weight:300;}
+
+/* BACK */
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(244,240,235,0.65);cursor:pointer;margin-bottom:18px;border:none;background:none;padding:0;transition:color .15s;font-weight:300;}
+.back-btn:hover{color:var(--warm-white);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:rgba(13,43,62,0.95);backdrop-filter:blur(16px);color:var(--warm-white);padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:400;transform:translateY(60px);opacity:0;transition:all .3s ease;z-index:1000;display:flex;align-items:center;gap:8px;box-shadow:var(--glass-shadow-lg);border:1px solid rgba(94,181,204,0.16);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast svg{width:15px;height:15px;color:var(--ocean-light);flex-shrink:0;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(94,181,204,0.2);border-radius:3px;}
+
+@media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr);}.content-grid{grid-template-columns:1fr;}.map-grid{grid-template-columns:1fr 1fr;}.map-total-bar{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.sidebar{width:100%;height:56px;bottom:auto;flex-direction:row;align-items:center;padding:0 16px;}.sidebar-nav,.sidebar-bottom{display:none;}.sidebar-logo{border-bottom:none;padding:0;}.main{margin-left:0;margin-top:56px;padding:14px;max-width:100vw;}.stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.form-grid{grid-template-columns:1fr;}.map-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="bg-scene"></div>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div><div class="logo-name">Finance Portal</div><div class="logo-sub">Nicole Lockwood</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <button class="nav-item active" onclick="showPage('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</button>
+      <button class="nav-item" onclick="showPage('moneymap')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Money Map</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Transactions</div>
+      <button class="nav-item" onclick="showPage('expenses')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg>Expenses</button>
+      <button class="nav-item" onclick="showPage('income')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Income</button>
+      <button class="nav-item" onclick="showPage('invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Invoices</button>
+      <button class="nav-item" onclick="showPage('super')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>Super</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Reports</div>
+      <button class="nav-item" onclick="showPage('pl')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Profit & Loss</button>
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-pill">
+      <div class="user-avatar"><span>NL</span></div>
+      <div><div class="user-name">Nicole Lockwood</div><div class="user-role">Sole trader · AUS</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="page-dashboard" class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Dashboard</div><div class="page-subtitle">Financial year · 1 Jul 2025 – 30 Jun 2026</div></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-glass btn-sm" onclick="showPage('expenses');showExpenseForm()">+ Expense</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('income');showIncomeForm()">+ Income</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card glass"><div class="stat-label">Gross Income</div><div class="stat-value positive" id="dash-income">$0.00</div><div class="stat-meta">This financial year</div></div>
+    <div class="stat-card glass"><div class="stat-label">Total Expenses</div><div class="stat-value" id="dash-expenses">$0.00</div><div class="stat-meta">Business deductions</div></div>
+    <div class="stat-card glass"><div class="stat-label">Net Profit</div><div class="stat-value teal" id="dash-profit">$0.00</div><div class="stat-meta">After expenses</div></div>
+    <div class="stat-card glass"><div class="stat-label">Actually Yours</div><div class="stat-value positive" id="dash-yours">$0.00</div><div class="stat-meta">After tax & super</div></div>
+  </div>
+  <div class="content-grid">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="glass-strong">
+        <div class="card-header"><div><div class="card-title">Financial year breakdown</div><div class="card-subtitle">FY2025–26 · Australian tax + Medicare + super</div></div></div>
+        <div class="card-body">
+          <div class="summary-rows">
+            <div class="summary-row"><span class="row-label">Gross income</span><span class="row-val" id="sum-gross">$0.00</span></div>
+            <div class="summary-row"><span class="row-label">Business expenses (deductible)</span><span class="row-val deduct" id="sum-exp">− $0.00</span></div>
+            <div class="summary-row hl"><span class="row-label" style="font-weight:400;">Taxable income</span><span class="row-val" id="sum-taxable">$0.00</span></div>
+            <div class="summary-row"><span class="row-label">Estimated income tax</span><span class="row-val payable" id="sum-tax">− $0.00</span></div>
+            <div class="summary-row"><span class="row-label">Medicare levy (2%)</span><span class="row-val payable" id="sum-medicare">− $0.00</span></div>
+            <div class="summary-row"><span class="row-label">Super (<span id="sum-super-rate-lbl">11.5</span>% of gross)</span><span class="row-val payable" id="sum-super">− $0.00</span></div>
+            <div class="summary-row total hl"><span class="row-label" style="font-weight:500;">What's actually yours</span><span class="row-val net" id="sum-yours">$0.00</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="glass">
+        <div class="card-header"><div class="card-title">Recent transactions</div><button class="btn btn-glass btn-sm" onclick="showPage('expenses')">View all</button></div>
+        <div class="txn-list" id="recent-txns"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg><p>No transactions yet.</p></div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="glass">
+        <div class="card-header"><div class="card-title">Income goals</div></div>
+        <div class="card-body">
+          <div class="goal-item"><div class="goal-label"><span>April target</span><span id="g-month-val">$0 / $8,000</span></div><div class="goal-bar"><div class="goal-fill" id="g-month-bar" style="width:0%"></div></div></div>
+          <div class="goal-item"><div class="goal-label"><span>Financial year</span><span id="g-year-val">$0 / $96,000</span></div><div class="goal-bar"><div class="goal-fill" id="g-year-bar" style="width:0%"></div></div></div>
+          <div class="goal-item" style="margin-bottom:0;"><div class="goal-label"><span>Post-tax & super</span><span id="g-save-val">$0.00</span></div><div class="goal-bar"><div class="goal-fill amber" id="g-save-bar" style="width:0%"></div></div></div>
+        </div>
+      </div>
+      <div class="glass">
+        <div class="card-header"><div class="card-title">Transfer guide</div><div class="card-subtitle">What to move where</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="summary-row" style="padding:11px 20px;"><span class="row-label">Set aside for tax</span><span class="row-val payable" id="qt-tax">$0.00</span></div>
+          <div class="summary-row" style="padding:11px 20px;"><span class="row-label">Set aside for super</span><span class="row-val" style="color:var(--ocean-mid);" id="qt-super">$0.00</span></div>
+          <div class="summary-row" style="padding:11px 20px;border-bottom:none;"><span class="row-label" style="font-weight:500;">Free to use / save</span><span class="row-val net" id="qt-free">$0.00</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MONEY MAP ═══ -->
+<div id="page-moneymap" class="page">
+  <div class="page-header"><div><div class="page-title">Money Map</div><div class="page-subtitle">Where it comes from. Where it needs to go.</div></div></div>
+  <div class="map-grid">
+    <div class="map-card glass">
+      <div class="map-card-hdr">
+        <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+        <div><div class="map-card-title">Income Streams</div><div class="map-card-sub">Annual targets</div></div>
+      </div>
+      <div class="map-stream"><span class="map-stream-name">Board / Governance</span><input class="map-stream-input" type="number" id="ms-board" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Consulting</span><input class="map-stream-input" type="number" id="ms-consult" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Commission</span><input class="map-stream-input" type="number" id="ms-commission" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Mission / Speaking</span><input class="map-stream-input" type="number" id="ms-mission" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Investments</span><input class="map-stream-input" type="number" id="ms-invest" placeholder="0" oninput="updateMoneyMap()"></div>
+    </div>
+    <div class="map-card glass">
+      <div class="map-card-hdr">
+        <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div><div class="map-card-title">Life Costs</div><div class="map-card-sub">What it costs to live</div></div>
+      </div>
+      <div class="map-stream"><span class="map-stream-name">Monthly budget (now)</span><input class="map-stream-input" type="number" id="life-now" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Monthly budget (future)</span><input class="map-stream-input" type="number" id="life-future" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Safety buffer (target)</span><input class="map-stream-input" type="number" id="life-buffer" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Debts to clear</span><input class="map-stream-input" type="number" id="life-debt" placeholder="0" oninput="updateMoneyMap()"></div>
+    </div>
+    <div class="map-card glass">
+      <div class="map-card-hdr">
+        <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div><div class="map-card-title">This Year (Actual)</div><div class="map-card-sub">Live from your entries</div></div>
+      </div>
+      <div class="map-stream"><span class="map-stream-name">Gross income logged</span><span class="map-stream-static positive" id="mm-actual-income" style="color:var(--positive);">$0</span></div>
+      <div class="map-stream"><span class="map-stream-name">Expenses logged</span><span class="map-stream-static" id="mm-actual-expenses">$0</span></div>
+      <div class="map-stream"><span class="map-stream-name">Tax + super obligations</span><span class="map-stream-static" id="mm-actual-obligations" style="color:var(--warning);">$0</span></div>
+      <div class="map-stream" style="border-bottom:none;"><span class="map-stream-name" style="font-weight:500;">Net in pocket</span><span class="map-stream-static" id="mm-actual-net" style="color:var(--ocean-mid);font-weight:500;">$0</span></div>
+    </div>
+  </div>
+  <div class="map-total-bar">
+    <div><div class="map-total-label">Income target (annual)</div><div class="map-total-value" id="mm-total-target">$0</div></div>
+    <div><div class="map-total-label">Annual life cost (now)</div><div class="map-total-value amber" id="mm-total-life">$0</div></div>
+    <div><div class="map-total-label">Annual surplus / gap</div><div class="map-total-value green" id="mm-total-surplus">+$0</div></div>
+    <div><div class="map-total-label">Buffer months covered</div><div class="map-total-value" id="mm-months">—</div></div>
+  </div>
+</div>
+
+<!-- ═══ EXPENSES ═══ -->
+<div id="page-expenses" class="page">
+  <div id="expenses-list-view">
+    <div class="page-header"><div><div class="page-title">Expenses</div><div class="page-subtitle">All business expenditure</div></div><button class="btn btn-primary" onclick="showExpenseForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add expense</button></div>
+    <div class="glass"><div class="txn-list" id="expense-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div></div></div>
+  </div>
+  <div id="expenses-form-view" style="display:none;">
+    <button class="back-btn" onclick="hideExpenseForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back to expenses</button>
+    <div class="page-header" style="margin-bottom:20px;"><div class="page-title">Add expense</div></div>
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;">
+      <div class="glass-strong">
+        <div class="card-header"><div class="card-title">Expense details</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>Total amount</label><div class="input-pfx"><span class="pfx">$</span><input type="number" class="input" id="exp-amount" placeholder="0.00" step="0.01"></div></div>
+            <div class="field"><label>Date</label><input type="date" class="input" id="exp-date"></div>
+            <div class="field"><label>Vendor / Supplier</label><input type="text" class="input" id="exp-vendor" placeholder="e.g. Adobe, Officeworks"></div>
+            <div class="field"><label>Category</label><select class="input" id="exp-category"><option value="">Select category</option><option>Software & subscriptions</option><option>Office supplies</option><option>Professional development</option><option>Marketing & advertising</option><option>Travel & transport</option><option>Meals & entertainment</option><option>Equipment</option><option>Contractor payments</option><option>Bank & finance fees</option><option>Other</option></select></div>
+            <div class="field"><label>Business use %</label><div class="input-pfx"><input type="number" class="input" id="exp-biz-use" value="100" min="0" max="100"><span class="pfx" style="left:auto;right:12px;">%</span></div></div>
+            <div class="field"><label>GST</label><select class="input" id="exp-gst"><option>No GST</option><option>GST included (10%)</option></select></div>
+          </div>
+          <div style="margin-top:16px;" class="field"><label>Description (optional)</label><input type="text" class="input" id="exp-desc" placeholder="Brief note"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="glass">
+          <div class="card-header"><div class="card-title">Receipt</div></div>
+          <div class="card-body">
+            <div class="receipt-zone" id="receipt-drop-zone" onclick="triggerFileInput()">
+              <input type="file" id="receipt-file-input" accept="image/*" capture="environment" onchange="handleReceiptUpload(event)">
+              <div style="margin-bottom:10px;"><div class="photo-icon lg" style="margin:0 auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>
+              <div class="zone-title">Upload receipt</div><div class="zone-sub">Tap to photograph or upload</div>
+            </div>
+            <div class="receipt-preview" id="receipt-preview">
+              <img class="receipt-thumb" id="receipt-thumb-img" src="" alt="">
+              <div style="flex:1;"><div class="rp-name" id="receipt-file-name">—</div><div class="rp-size" id="receipt-file-size">—</div></div>
+              <button class="btn btn-glass btn-sm" onclick="clearReceipt()">Remove</button>
+            </div>
+            <div class="ai-scan-bar" id="ai-scan-bar">
+              <div class="photo-icon md" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+              <div class="ai-scan-text"><div class="ai-scan-title" id="ai-scan-title">Receipt ready</div><div class="ai-scan-sub" id="ai-scan-sub">AI can read and autofill fields</div></div>
+              <button class="btn btn-primary btn-sm" id="ai-scan-btn" onclick="scanReceipt()">Scan</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveExpense()">Save expense</button>
+        <button class="btn btn-glass" style="width:100%;justify-content:center;" onclick="hideExpenseForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INCOME ═══ -->
+<div id="page-income" class="page">
+  <div id="income-list-view">
+    <div class="page-header"><div><div class="page-title">Income</div><div class="page-subtitle">All business income</div></div><button class="btn btn-primary" onclick="showIncomeForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add income</button></div>
+    <div class="glass"><div class="txn-list" id="income-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p>No income recorded yet.</p></div></div></div>
+  </div>
+  <div id="income-form-view" style="display:none;">
+    <button class="back-btn" onclick="hideIncomeForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back to income</button>
+    <div class="page-header" style="margin-bottom:20px;"><div class="page-title">Add income</div></div>
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;">
+      <div class="glass-strong">
+        <div class="card-header"><div class="card-title">Income details</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>Amount received</label><div class="input-pfx"><span class="pfx">$</span><input type="number" class="input" id="inc-amount" placeholder="0.00" step="0.01"></div></div>
+            <div class="field"><label>Date received</label><input type="date" class="input" id="inc-date"></div>
+            <div class="field"><label>Client / Source</label><input type="text" class="input" id="inc-client" placeholder="e.g. Spacecubed"></div>
+            <div class="field"><label>Category</label><select class="input" id="inc-category"><option value="">Select category</option><option>Board / Governance</option><option>Consulting</option><option>Commission</option><option>Speaking / Mission</option><option>Investments</option><option>Retainer</option><option>Project fee</option><option>Other</option></select></div>
+            <div class="field"><label>GST</label><select class="input" id="inc-gst"><option>No GST</option><option>GST included (10%)</option></select></div>
+            <div class="field"><label>Invoice ref (optional)</label><input type="text" class="input" id="inc-invoice" placeholder="e.g. INV-0215"></div>
+          </div>
+          <div style="margin-top:16px;" class="field"><label>Notes (optional)</label><input type="text" class="input" id="inc-desc" placeholder="Brief note"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="glass">
+          <div class="card-header"><div class="card-title">Attachment</div></div>
+          <div class="card-body">
+            <div class="receipt-zone" onclick="triggerIncomeFileInput()">
+              <input type="file" id="income-file-input" accept="image/*,application/pdf" onchange="handleIncomeUpload(event)">
+              <div style="margin-bottom:10px;"><div class="photo-icon lg" style="margin:0 auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div>
+              <div class="zone-title">Attach proof of payment</div><div class="zone-sub">Bank receipt, screenshot, remittance</div>
+            </div>
+            <div class="receipt-preview" id="income-preview">
+              <img class="receipt-thumb" id="income-thumb-img" src="" alt="">
+              <div style="flex:1;"><div class="rp-name" id="income-file-name">—</div></div>
+              <button class="btn btn-glass btn-sm" onclick="clearIncomeFile()">Remove</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveIncome()">Save income</button>
+        <button class="btn btn-glass" style="width:100%;justify-content:center;" onclick="hideIncomeForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INVOICES ═══ -->
+<div id="page-invoices" class="page">
+  <div id="invoices-list-view">
+    <div class="page-header">
+      <div><div class="page-title">Invoices</div><div class="page-subtitle">Lockwood Advisory Pty Ltd</div></div>
+      <button class="btn btn-primary" onclick="showInvoiceForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New invoice</button>
+    </div>
+    <div class="glass"><div class="txn-list" id="invoice-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No invoices yet. Create your first one.</p></div></div></div>
+  </div>
+
+  <div id="invoices-form-view" style="display:none;">
+    <button class="back-btn" onclick="hideInvoiceForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back to invoices</button>
+    <div class="page-header" style="margin-bottom:20px;"><div class="page-title">New invoice</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <!-- Left: form -->
+      <div class="glass-strong">
+        <div class="card-header"><div class="card-title">Invoice details</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="form-grid">
+            <div class="field"><label>Invoice number</label><input type="text" class="input" id="inv-number" placeholder="INV-0216"></div>
+            <div class="field"><label>Invoice date</label><input type="date" class="input" id="inv-date"></div>
+            <div class="field"><label>Period / Description</label><input type="text" class="input" id="inv-period" placeholder="e.g. 1 Apr – 30 Apr 2026"></div>
+            <div class="field"><label>Payment terms</label><select class="input" id="inv-terms"><option>7 days</option><option selected>10 business days</option><option>14 days</option><option>30 days</option></select></div>
+          </div>
+          <div class="divider" style="margin:4px 0;"></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Bill to</div>
+          <div class="form-grid">
+            <div class="field"><label>Organisation name</label><input type="text" class="input" id="inv-org" placeholder="e.g. Spacecubed"></div>
+            <div class="field"><label>Contact name</label><input type="text" class="input" id="inv-contact" placeholder="e.g. Nate Sturcke"></div>
+            <div class="field" style="grid-column:1/-1;"><label>Contact email</label><input type="email" class="input" id="inv-email" placeholder="e.g. nate@spacecubed.com"></div>
+          </div>
+          <div class="divider" style="margin:4px 0;"></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Contract scope</div>
+          <div class="field"><label>Contract / project description</label><input type="text" class="input" id="inv-scope" placeholder="e.g. Consulting services to support ECHO development"></div>
+          <div class="field"><label>Services rendered (one per line)</label><textarea class="input" id="inv-services" rows="6" placeholder="9/3/26: Meeting with Scitech to finalise scope&#10;11/3/26: Meeting with Harriet re Mannifera ecosystem&#10;..."></textarea></div>
+          <div class="form-grid">
+            <div class="field"><label>Amount (excl. GST)</label><div class="input-pfx"><span class="pfx">$</span><input type="number" class="input" id="inv-amount" placeholder="3000" step="0.01" oninput="updateInvoicePreview()"></div></div>
+            <div class="field"><label>GST</label><select class="input" id="inv-gst" onchange="updateInvoicePreview()"><option value="yes">GST included (10%)</option><option value="no">No GST</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: live preview -->
+      <div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(244,240,235,0.5);margin-bottom:12px;">Live preview</div>
+        <div class="invoice-preview-wrap" id="inv-preview-wrap">
+          <div class="inv-header">
+            <div class="inv-header-left">
+              <div class="inv-badge">Tax Invoice</div>
+              <div class="inv-company">Lockwood Advisory Pty Ltd</div>
+              <div class="inv-company-detail">PO Box 809, South Fremantle WA 6162<br>nicole@lockwoodadvisory.com.au<br>ABN 76 979 340 565</div>
+            </div>
+          </div>
+          <div class="inv-body">
+            <div class="inv-meta-grid">
+              <div class="inv-meta-section">
+                <h4>Billed to</h4>
+                <p><strong id="prev-org">—</strong><br><span id="prev-contact">—</span><br><span id="prev-email" style="color:var(--text-tertiary);font-size:12px;">—</span></p>
+              </div>
+              <div class="inv-meta-section" style="text-align:right;">
+                <h4>Invoice details</h4>
+                <p><strong id="prev-number">INV-—</strong><br>Date: <span id="prev-date">—</span><br>Period: <span id="prev-period">—</span><br>Terms: <span id="prev-terms">10 business days</span></p>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px;font-weight:300;"><strong style="font-weight:500;color:var(--text-primary);">Contract Scope:</strong> <span id="prev-scope">—</span></div>
+            <table class="inv-table">
+              <thead><tr><th>Organisation</th><th>Description</th><th>Excl. GST</th><th>Incl. GST</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td id="prev-org-cell">—</td>
+                  <td>
+                    <div class="desc-cell" id="prev-services-title">Services rendered</div>
+                    <div class="desc-detail" id="prev-services-list"></div>
+                  </td>
+                  <td class="amount" id="prev-excl">$0.00</td>
+                  <td class="amount" id="prev-incl">$0.00</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="inv-totals">
+              <div class="inv-totals-inner">
+                <div class="inv-total-row"><span>Total</span><span id="prev-total-excl">$0.00</span></div>
+                <div class="inv-total-row"><span>GST (10%)</span><span id="prev-gst-amt">$0.00</span></div>
+                <div class="inv-total-row"><span>Total (incl. GST)</span><span id="prev-total-incl">$0.00</span></div>
+              </div>
+            </div>
+            <div class="inv-payment">
+              <h4>Payment Details</h4>
+              <div class="inv-payment-detail">
+                <strong>Account Name:</strong> N and N Lockwood<br>
+                <strong>BSB:</strong> 086061<br>
+                <strong>Account #:</strong> 816239874<br>
+                <strong>Institution:</strong> National Australia Bank
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveInvoice()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save invoice</button>
+          <button class="btn btn-glass" style="flex:1;justify-content:center;" onclick="downloadInvoicePDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUPER ═══ -->
+<div id="page-super" class="page">
+  <div class="page-header"><div><div class="page-title">Super Contributions</div><div class="page-subtitle">Tax-deductible for sole traders · FY2025–26 concessional cap $30,000</div></div></div>
+  <div class="content-grid">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="glass-strong">
+        <div class="card-header"><div class="card-title">Super rate settings</div><div class="card-subtitle">Flows through all calculations</div></div>
+        <div class="card-body">
+          <div class="super-row"><span class="super-label">Contribution rate (% of gross income)</span><div style="display:flex;align-items:center;gap:6px;"><input class="super-input" type="number" id="super-rate-input" value="11.5" min="0" max="30" step="0.5" oninput="updateSuperRate()"><span style="font-size:11px;color:var(--text-tertiary);">%</span></div></div>
+          <div class="super-row"><span class="super-label">Super fund</span><input type="text" class="input" style="width:200px;" id="super-fund" placeholder="e.g. Australian Super"></div>
+          <div class="super-row"><span class="super-label">Concessional cap (FY2025–26)</span><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:400;">$30,000</span></div>
+        </div>
+      </div>
+      <div class="glass">
+        <div class="card-header"><div class="card-title">This financial year</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="summary-row" style="padding:12px 20px;"><span class="row-label">Gross income</span><span class="row-val" id="super-gross">$0.00</span></div>
+          <div class="summary-row" style="padding:12px 20px;"><span class="row-label">Super at <span id="super-rate-disp">11.5</span>%</span><span class="row-val" style="color:var(--ocean-mid);" id="super-calc">$0.00</span></div>
+          <div class="summary-row" style="padding:12px 20px;"><span class="row-label">Concessional cap remaining</span><span class="row-val deduct" id="super-cap-rem">$30,000.00</span></div>
+          <div class="summary-row total" style="padding:14px 20px;border-bottom:none;"><span>As tax deduction</span><span class="row-val deduct" id="super-deduct">$0.00</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="glass">
+      <div class="card-header"><div class="card-title">Why super matters here</div></div>
+      <div class="card-body" style="font-size:13px;line-height:1.85;color:var(--text-secondary);font-weight:300;">
+        <p style="margin-bottom:14px;">As a sole trader, voluntary super contributions are <strong style="color:var(--text-primary);font-weight:500;">fully tax-deductible</strong> when you lodge a Notice of Intent with your fund.</p>
+        <p style="margin-bottom:14px;">This reduces taxable income — coming off the top of your highest bracket. At $96k gross income, that's saving 32.5c in the dollar.</p>
+        <p style="margin-bottom:14px;">The <strong style="color:var(--text-primary);font-weight:500;">11.5% rate</strong> is the 2025–26 employer baseline. You can contribute more (up to $30k concessionally) to reduce tax further.</p>
+        <p style="color:var(--text-tertiary);font-size:11.5px;">Always confirm with your accountant.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ P&L ═══ -->
+<div id="page-pl" class="page">
+  <div class="page-header">
+    <div><div class="page-title">Profit & Loss</div><div class="page-subtitle">Financial year · 1 Jul 2025 – 30 Jun 2026</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="period-tabs"><button class="period-tab active">This FY</button><button class="period-tab">Last FY</button></div>
+      <button class="btn btn-glass btn-sm" onclick="exportPL()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+    </div>
+  </div>
+  <div class="content-grid">
+    <div class="glass-strong">
+      <div class="card-body">
+        <div class="pl-section-title" style="margin-bottom:8px;">Income</div>
+        <div id="pl-income-rows"><div class="pl-row"><span class="pl-row-cat">No income recorded</span><span class="pl-val income">$0.00</span></div></div>
+        <div class="pl-row total"><span>Total Income</span><span class="pl-val income" id="pl-total-income">$0.00</span></div>
+        <div class="divider"></div>
+        <div class="pl-section-title" style="margin-bottom:8px;">Expenses</div>
+        <div id="pl-expense-rows"><div class="pl-row"><span class="pl-row-cat">No expenses recorded</span><span class="pl-val">$0.00</span></div></div>
+        <div class="pl-row total"><span>Total Expenses</span><span class="pl-val" id="pl-total-expenses">$0.00</span></div>
+        <div class="divider"></div>
+        <div class="pl-row total" style="background:rgba(46,139,168,0.065);margin:0 -20px;padding:16px 20px;border-radius:0 0 var(--radius) var(--radius);"><span>Net Profit</span><span class="pl-val profit" id="pl-net-profit">$0.00</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="glass">
+        <div class="card-header"><div class="card-title">Full obligations</div></div>
+        <div class="card-body" style="padding:0;">
+          <div class="summary-row" style="padding:11px 20px;"><span class="row-label">Taxable income</span><span class="row-val" id="pl-taxable">$0.00</span></div>
+          <div class="summary-row" style="padding:11px 20px;"><span class="row-label">Income tax</span><span class="row-val payable" id="pl-tax">$0.00</span></div>
+          <div class="summary-row" style="padding:11px 20px;"><span class="row-label">Medicare levy</span><span class="row-val payable" id="pl-medicare">$0.00</span></div>
+          <div class="summary-row" style="padding:11px 20px;"><span class="row-label">Super (<span id="pl-super-rate">11.5</span>%)</span><span class="row-val" style="color:var(--ocean-mid);" id="pl-super">$0.00</span></div>
+          <div class="summary-row total" style="padding:14px 20px;border-bottom:none;"><span>Actually yours</span><span class="row-val net" id="pl-yours">$0.00</span></div>
+        </div>
+      </div>
+      <div class="glass"><div class="card-body" style="text-align:center;"><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px;font-weight:300;">For your accountant</div><button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="exportPL()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export full P&L as CSV</button></div></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Saved</span></div>
+
+<script>
+const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5};
+
+// ── NAV ──
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>{if(b.getAttribute('onclick')?.includes("'"+p+"'"))b.classList.add('active');});
+  if(p==='dashboard')updateDashboard();
+  if(p==='pl')updatePL();
+  if(p==='super')updateSuperPage();
+  if(p==='moneymap')updateMoneyMap();
+}
+
+// ── CALCS ──
+function calcTax(i){if(i<=0)return 0;if(i<=18200)return 0;if(i<=45000)return(i-18200)*.19;if(i<=135000)return 5092+(i-45000)*.325;if(i<=190000)return 29467+(i-135000)*.37;return 50067+(i-190000)*.45;}
+function getCalcs(){
+  const gross=state.income.reduce((s,i)=>s+i.amount,0);
+  const expenses=state.expenses.reduce((s,e)=>s+(e.amount*e.bizUse/100),0);
+  const taxable=Math.max(0,gross-expenses);
+  const tax=calcTax(taxable);
+  const medicare=taxable>0?taxable*.02:0;
+  const superAmt=gross*(state.superRate/100);
+  const yours=Math.max(0,gross-expenses-tax-medicare-superAmt);
+  return{gross,expenses,taxable,tax,medicare,superAmt,totalObligation:tax+medicare+superAmt,yours};
+}
+function fmt(v){return'$'+v.toFixed(2);}
+function fmtK(v){return'$'+Math.round(v).toLocaleString();}
+
+// ── DASHBOARD ──
+function updateDashboard(){
+  const c=getCalcs();
+  document.getElementById('dash-income').textContent=fmt(c.gross);
+  document.getElementById('dash-expenses').textContent=fmt(c.expenses);
+  document.getElementById('dash-profit').textContent=fmt(c.gross-c.expenses);
+  document.getElementById('dash-yours').textContent=fmt(c.yours);
+  document.getElementById('sum-gross').textContent=fmt(c.gross);
+  document.getElementById('sum-exp').textContent='− '+fmt(c.expenses);
+  document.getElementById('sum-taxable').textContent=fmt(c.taxable);
+  document.getElementById('sum-tax').textContent='− '+fmt(c.tax);
+  document.getElementById('sum-medicare').textContent='− '+fmt(c.medicare);
+  document.getElementById('sum-super').textContent='− '+fmt(c.superAmt);
+  document.getElementById('sum-super-rate-lbl').textContent=state.superRate;
+  document.getElementById('sum-yours').textContent=fmt(c.yours);
+  document.getElementById('qt-tax').textContent=fmt(c.tax+c.medicare);
+  document.getElementById('qt-super').textContent=fmt(c.superAmt);
+  document.getElementById('qt-free').textContent=fmt(c.yours);
+  const mInc=state.income.filter(i=>new Date(i.date).getMonth()===new Date().getMonth()).reduce((s,i)=>s+i.amount,0);
+  document.getElementById('g-month-val').textContent=fmtK(mInc)+' / $8,000';
+  document.getElementById('g-year-val').textContent=fmtK(c.gross)+' / $96,000';
+  document.getElementById('g-save-val').textContent=fmt(c.yours);
+  document.getElementById('g-month-bar').style.width=Math.min(100,mInc/8000*100)+'%';
+  document.getElementById('g-year-bar').style.width=Math.min(100,c.gross/96000*100)+'%';
+  document.getElementById('g-save-bar').style.width=Math.min(100,c.yours/40000*100)+'%';
+  const all=[...state.expenses.map(e=>({...e,_t:'expense'})),...state.income.map(i=>({...i,_t:'income'}))].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+  const rtxn=document.getElementById('recent-txns');
+  if(!all.length)rtxn.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg><p>No transactions yet.</p></div>`;
+  else rtxn.innerHTML=all.map(t=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t._t==='expense'?'<path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/>':'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'}</svg></div><div class="txn-info"><div class="txn-name">${t._t==='expense'?t.vendor:t.client}</div><div class="txn-meta">${formatDate(t.date)} · ${t.category||'Uncategorised'}</div></div><div class="txn-amt ${t._t}">${t._t==='expense'?'−':'+'}$${t.amount.toFixed(2)}</div></div>`).join('');
+}
+
+// ── SUPER ──
+function updateSuperRate(){
+  const v=parseFloat(document.getElementById('super-rate-input').value)||11.5;
+  state.superRate=v;
+  ['super-rate-disp','sum-super-rate-lbl','pl-super-rate'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+  updateSuperPage();updateDashboard();
+}
+function updateSuperPage(){
+  const c=getCalcs();
+  document.getElementById('super-gross').textContent=fmt(c.gross);
+  document.getElementById('super-calc').textContent=fmt(c.superAmt);
+  document.getElementById('super-cap-rem').textContent=fmt(Math.max(0,30000-c.superAmt));
+  document.getElementById('super-deduct').textContent=fmt(c.superAmt);
+}
+
+// ── MONEY MAP ──
+function updateMoneyMap(){
+  const board=parseFloat(document.getElementById('ms-board').value)||0;
+  const consult=parseFloat(document.getElementById('ms-consult').value)||0;
+  const commission=parseFloat(document.getElementById('ms-commission').value)||0;
+  const mission=parseFloat(document.getElementById('ms-mission').value)||0;
+  const invest=parseFloat(document.getElementById('ms-invest').value)||0;
+  const lifeNow=parseFloat(document.getElementById('life-now').value)||0;
+  const buffer=parseFloat(document.getElementById('life-buffer').value)||0;
+  const total=board+consult+commission+mission+invest;
+  const annualLife=lifeNow*12;
+  const surplus=total-annualLife;
+  const months=buffer>0&&lifeNow>0?(buffer/lifeNow).toFixed(1)+'mo':'—';
+  document.getElementById('mm-total-target').textContent=fmtK(total);
+  document.getElementById('mm-total-life').textContent=fmtK(annualLife);
+  const sEl=document.getElementById('mm-total-surplus');
+  sEl.textContent=(surplus>=0?'+':'')+fmtK(surplus);
+  sEl.className='map-total-value '+(surplus>=0?'green':'red');
+  document.getElementById('mm-months').textContent=months;
+  const c=getCalcs();
+  document.getElementById('mm-actual-income').textContent=fmtK(c.gross);
+  document.getElementById('mm-actual-expenses').textContent=fmtK(c.expenses);
+  document.getElementById('mm-actual-obligations').textContent=fmtK(c.totalObligation);
+  document.getElementById('mm-actual-net').textContent=fmtK(c.yours);
+}
+
+// ── P&L ──
+function updatePL(){
+  const c=getCalcs();
+  const incCats={},expCats={};
+  state.income.forEach(i=>{const cat=i.category||'Other';incCats[cat]=(incCats[cat]||0)+i.amount;});
+  state.expenses.forEach(e=>{const cat=e.category||'Other';expCats[cat]=(expCats[cat]||0)+(e.amount*e.bizUse/100);});
+  document.getElementById('pl-income-rows').innerHTML=Object.keys(incCats).length?Object.entries(incCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val income">$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No income recorded</span><span class="pl-val income">$0.00</span></div>`;
+  document.getElementById('pl-expense-rows').innerHTML=Object.keys(expCats).length?Object.entries(expCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val">$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No expenses recorded</span><span class="pl-val">$0.00</span></div>`;
+  document.getElementById('pl-total-income').textContent=fmt(c.gross);
+  document.getElementById('pl-total-expenses').textContent=fmt(c.expenses);
+  document.getElementById('pl-net-profit').textContent=fmt(c.gross-c.expenses);
+  document.getElementById('pl-taxable').textContent=fmt(c.taxable);
+  document.getElementById('pl-tax').textContent=fmt(c.tax+c.medicare);
+  document.getElementById('pl-medicare').textContent=fmt(c.medicare);
+  document.getElementById('pl-super').textContent=fmt(c.superAmt);
+  document.getElementById('pl-yours').textContent=fmt(c.yours);
+}
+
+// ── EXPENSE FORM ──
+function showExpenseForm(){document.getElementById('expenses-list-view').style.display='none';document.getElementById('expenses-form-view').style.display='block';document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];}
+function hideExpenseForm(){document.getElementById('expenses-list-view').style.display='block';document.getElementById('expenses-form-view').style.display='none';clearReceipt();['exp-amount','exp-vendor','exp-desc','exp-category'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('exp-biz-use').value='100';}
+function triggerFileInput(){document.getElementById('receipt-file-input').click();}
+function handleReceiptUpload(e){const file=e.target.files[0];if(!file)return;state.receiptFile=file;const r=new FileReader();r.onload=ev=>{document.getElementById('receipt-thumb-img').src=ev.target.result;document.getElementById('receipt-file-name').textContent=file.name;document.getElementById('receipt-file-size').textContent=(file.size/1024).toFixed(1)+' KB';document.getElementById('receipt-preview').classList.add('visible');document.getElementById('receipt-drop-zone').classList.add('has-file');document.getElementById('ai-scan-bar').classList.add('visible');document.getElementById('ai-scan-btn').textContent='Scan now';};r.readAsDataURL(file);}
+function clearReceipt(){state.receiptFile=null;document.getElementById('receipt-file-input').value='';document.getElementById('receipt-preview').classList.remove('visible');document.getElementById('receipt-drop-zone').classList.remove('has-file');document.getElementById('ai-scan-bar').classList.remove('visible');}
+async function scanReceipt(){
+  if(!state.receiptFile)return;
+  const bar=document.getElementById('ai-scan-bar');const btn=document.getElementById('ai-scan-btn');
+  bar.classList.add('scanning');btn.textContent='Reading…';btn.disabled=true;
+  document.getElementById('ai-scan-title').textContent='Reading receipt…';
+  try{
+    const b64=await fileToBase64(state.receiptFile);
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:state.receiptFile.type||'image/jpeg',data:b64}},{type:'text',text:`Receipt scanner for Australian sole trader. Return ONLY valid JSON, no markdown:\n{"vendor":"business name","amount":0.00,"date":"YYYY-MM-DD","category":"Software & subscriptions|Office supplies|Professional development|Marketing & advertising|Travel & transport|Meals & entertainment|Equipment|Contractor payments|Bank & finance fees|Other","gst":"No GST or GST included (10%)","description":"brief description"}\nUse null for unreadable fields. Amount is number only.`}]}]})});
+    const data=await resp.json();
+    const parsed=JSON.parse((data.content?.[0]?.text||'').replace(/```json|```/g,'').trim());
+    if(parsed.vendor)document.getElementById('exp-vendor').value=parsed.vendor;
+    if(parsed.amount)document.getElementById('exp-amount').value=parsed.amount;
+    if(parsed.date)document.getElementById('exp-date').value=parsed.date;
+    if(parsed.category)document.getElementById('exp-category').value=parsed.category;
+    if(parsed.gst)document.getElementById('exp-gst').value=parsed.gst;
+    if(parsed.description)document.getElementById('exp-desc').value=parsed.description;
+    document.getElementById('ai-scan-title').textContent='✓ Fields filled — please review';
+    document.getElementById('ai-scan-sub').textContent='Check and adjust before saving';
+  }catch(err){document.getElementById('ai-scan-title').textContent='Could not read receipt';document.getElementById('ai-scan-sub').textContent='Fill in fields manually';}
+  bar.classList.remove('scanning');btn.textContent='Re-scan';btn.disabled=false;
+}
+function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+function saveExpense(){
+  const amount=parseFloat(document.getElementById('exp-amount').value);
+  const vendor=document.getElementById('exp-vendor').value.trim();
+  const date=document.getElementById('exp-date').value;
+  if(!amount||!vendor||!date){showToast('Please fill in amount, vendor and date');return;}
+  const category=document.getElementById('exp-category').value;
+  const bizUse=parseInt(document.getElementById('exp-biz-use').value)||100;
+  const desc=document.getElementById('exp-desc').value.trim();
+  const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_$${amount.toFixed(2)}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
+  state.expenses.push({id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName});
+  hideExpenseForm();renderExpenses();updateDashboard();showToast(`Saved · ${vendor} · $${amount.toFixed(2)}`);
+}
+function renderExpenses(){
+  const list=document.getElementById('expense-list');
+  if(!state.expenses.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div>`;return;}
+  list.innerHTML=state.expenses.slice().reverse().map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−$${e.amount.toFixed(2)}</div></div>`).join('');
+}
+
+// ── INCOME FORM ──
+function showIncomeForm(){document.getElementById('income-list-view').style.display='none';document.getElementById('income-form-view').style.display='block';document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];}
+function hideIncomeForm(){document.getElementById('income-list-view').style.display='block';document.getElementById('income-form-view').style.display='none';clearIncomeFile();['inc-amount','inc-client','inc-desc','inc-category','inc-invoice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function triggerIncomeFileInput(){document.getElementById('income-file-input').click();}
+function handleIncomeUpload(e){const file=e.target.files[0];if(!file)return;state.incomeFile=file;const r=new FileReader();r.onload=ev=>{document.getElementById('income-thumb-img').src=ev.target.result;document.getElementById('income-file-name').textContent=file.name;document.getElementById('income-preview').classList.add('visible');};r.readAsDataURL(file);}
+function clearIncomeFile(){state.incomeFile=null;document.getElementById('income-file-input').value='';document.getElementById('income-preview').classList.remove('visible');}
+function saveIncome(){
+  const amount=parseFloat(document.getElementById('inc-amount').value);
+  const client=document.getElementById('inc-client').value.trim();
+  const date=document.getElementById('inc-date').value;
+  if(!amount||!client||!date){showToast('Please fill in amount, client and date');return;}
+  const category=document.getElementById('inc-category').value;
+  const desc=document.getElementById('inc-desc').value.trim();
+  const invoiceRef=document.getElementById('inc-invoice').value.trim();
+  const attachName=state.incomeFile?`${date}_${client.replace(/\s+/g,'-')}_$${amount.toFixed(2)}_${(category||'Income').replace(/[\s&]+/g,'-')}.${state.incomeFile.name.split('.').pop()}`:null;
+  state.income.push({id:Date.now(),type:'income',amount,client,date,category,desc,invoiceRef,attachName});
+  hideIncomeForm();renderIncome();updateDashboard();showToast(`Saved · ${client} · $${amount.toFixed(2)}`);
+}
+function renderIncome(){
+  const list=document.getElementById('income-list');
+  if(!state.income.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p>No income recorded yet.</p></div>`;return;}
+  list.innerHTML=state.income.slice().reverse().map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+$${i.amount.toFixed(2)}</div></div>`).join('');
+}
+
+// ── INVOICE ──
+function showInvoiceForm(){
+  document.getElementById('invoices-list-view').style.display='none';
+  document.getElementById('invoices-form-view').style.display='block';
+  document.getElementById('inv-date').value=new Date().toISOString().split('T')[0];
+  // Auto-generate next invoice number
+  const last=state.invoices.length?state.invoices[state.invoices.length-1].number:'INV-0215';
+  const num=parseInt(last.split('-')[1]||215)+1;
+  document.getElementById('inv-number').value='INV-'+String(num).padStart(4,'0');
+  updateInvoicePreview();
+}
+function hideInvoiceForm(){document.getElementById('invoices-list-view').style.display='block';document.getElementById('invoices-form-view').style.display='none';}
+
+function updateInvoicePreview(){
+  const number=document.getElementById('inv-number').value||'INV-—';
+  const date=document.getElementById('inv-date').value;
+  const period=document.getElementById('inv-period').value||'—';
+  const terms=document.getElementById('inv-terms').value;
+  const org=document.getElementById('inv-org').value||'—';
+  const contact=document.getElementById('inv-contact').value||'—';
+  const email=document.getElementById('inv-email').value||'—';
+  const scope=document.getElementById('inv-scope').value||'—';
+  const services=document.getElementById('inv-services').value;
+  const amount=parseFloat(document.getElementById('inv-amount').value)||0;
+  const hasGst=document.getElementById('inv-gst').value==='yes';
+  const excl=hasGst?amount:amount;
+  const gstAmt=hasGst?amount*0.1:0;
+  const incl=excl+gstAmt;
+
+  document.getElementById('prev-number').textContent=number;
+  document.getElementById('prev-date').textContent=date?formatDate(date):'—';
+  document.getElementById('prev-period').textContent=period;
+  document.getElementById('prev-terms').textContent=terms;
+  document.getElementById('prev-org').textContent=org;
+  document.getElementById('prev-contact').textContent=contact;
+  document.getElementById('prev-email').textContent=email;
+  document.getElementById('prev-scope').textContent=scope;
+  document.getElementById('prev-org-cell').textContent=org;
+  document.getElementById('prev-services-list').innerHTML=services?services.split('\n').filter(Boolean).map(l=>`<div>· ${l.trim()}</div>`).join(''):'';
+  document.getElementById('prev-excl').textContent=fmt(excl);
+  document.getElementById('prev-incl').textContent=fmt(incl);
+  document.getElementById('prev-total-excl').textContent=fmt(excl);
+  document.getElementById('prev-gst-amt').textContent=fmt(gstAmt);
+  document.getElementById('prev-total-incl').textContent=fmt(incl);
+}
+
+// Wire up all invoice inputs
+['inv-number','inv-date','inv-period','inv-terms','inv-org','inv-contact','inv-email','inv-scope','inv-services'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener('input',updateInvoicePreview);
+});
+
+function saveInvoice(){
+  const number=document.getElementById('inv-number').value.trim();
+  const org=document.getElementById('inv-org').value.trim();
+  const amount=parseFloat(document.getElementById('inv-amount').value);
+  const date=document.getElementById('inv-date').value;
+  if(!number||!org||!amount||!date){showToast('Please fill in invoice number, org, date and amount');return;}
+  const hasGst=document.getElementById('inv-gst').value==='yes';
+  const gstAmt=hasGst?amount*0.1:0;
+  state.invoices.push({id:Date.now(),number,org,date,amount,gstAmt,total:amount+gstAmt,status:'outstanding',contact:document.getElementById('inv-contact').value,period:document.getElementById('inv-period').value,scope:document.getElementById('inv-scope').value,services:document.getElementById('inv-services').value});
+  renderInvoices();hideInvoiceForm();
+  showToast(`Invoice ${number} saved · ${org}`);
+}
+
+function renderInvoices(){
+  const list=document.getElementById('invoice-list');
+  if(!state.invoices.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No invoices yet.</p></div>`;return;}
+  list.innerHTML=state.invoices.slice().reverse().map(inv=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">$${inv.total.toFixed(2)}</div><span style="font-size:10px;background:rgba(26,107,66,0.1);color:var(--positive);padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status}</span></div></div>`).join('');
+}
+
+async function downloadInvoicePDF(){
+  const number=document.getElementById('inv-number').value||'INV-0000';
+  const org=document.getElementById('inv-org').value||'Client';
+  const date=document.getElementById('inv-date').value;
+  const period=document.getElementById('inv-period').value;
+  const terms=document.getElementById('inv-terms').value;
+  const contact=document.getElementById('inv-contact').value;
+  const email=document.getElementById('inv-email').value;
+  const scope=document.getElementById('inv-scope').value;
+  const services=document.getElementById('inv-services').value;
+  const amount=parseFloat(document.getElementById('inv-amount').value)||0;
+  const hasGst=document.getElementById('inv-gst').value==='yes';
+  const gstAmt=hasGst?amount*0.1:0;
+  const total=amount+gstAmt;
+
+  // Generate clean HTML → print as PDF
+  const filename=`LockwoodAdvisory_Invoice_${number}_${org.replace(/\s+/g,'')}.pdf`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;font-size:13px;color:#0D2B3E;line-height:1.5;}
+  .header{background:#0D2B3E;padding:28px 36px;display:flex;justify-content:space-between;align-items:flex-start;}
+  .header-left{color:#F4F0EB;}
+  .badge{background:rgba(94,181,204,0.2);border:1px solid rgba(94,181,204,0.4);color:#5EB5CC;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:3px;display:inline-block;margin-bottom:10px;}
+  .company-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:4px;}
+  .company-detail{font-size:10px;opacity:.6;line-height:1.7;font-weight:300;}
+  .body{padding:28px 36px;}
+  .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:22px;}
+  .meta-section h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6A8FA8;margin-bottom:7px;}
+  .meta-section p{font-size:12px;line-height:1.8;font-weight:300;}
+  .meta-section strong{font-weight:500;}
+  .meta-section.right{text-align:right;}
+  .scope{font-size:11px;color:#6A8FA8;margin-bottom:12px;font-weight:300;}
+  .scope strong{font-weight:500;color:#0D2B3E;}
+  table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+  th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6A8FA8;padding:7px 10px;text-align:left;border-bottom:2px solid rgba(13,43,62,0.1);}
+  th:last-child,td:last-child{text-align:right;}
+  td{padding:10px 10px;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;vertical-align:top;font-weight:300;}
+  .desc-detail{font-size:10.5px;color:#6A8FA8;margin-top:3px;line-height:1.6;}
+  .mono{font-family:'DM Mono',monospace;font-size:12px;font-weight:400;}
+  .totals{display:flex;justify-content:flex-end;margin-bottom:22px;}
+  .totals-inner{width:220px;}
+  .total-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;}
+  .total-row:last-child{border-bottom:none;font-weight:600;font-size:13px;padding-top:10px;}
+  .payment{background:rgba(46,139,168,0.06);border-radius:8px;padding:14px 18px;border:1px solid rgba(46,139,168,0.14);}
+  .payment h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2E8BA8;margin-bottom:8px;}
+  .payment p{font-size:11px;color:#2C5570;line-height:1.9;font-weight:300;}
+  .payment strong{font-weight:500;color:#0D2B3E;}
+</style></head><body>
+<div class="header">
+  <div class="header-left">
+    <div class="badge">Tax Invoice</div>
+    <div class="company-name">Lockwood Advisory Pty Ltd</div>
+    <div class="company-detail">PO Box 809, South Fremantle WA 6162<br>nicole@lockwoodadvisory.com.au · ABN 76 979 340 565</div>
+  </div>
+</div>
+<div class="body">
+  <div class="meta-grid">
+    <div class="meta-section">
+      <h4>Billed to</h4>
+      <p><strong>${org}</strong><br>${contact}<br>${email}</p>
+    </div>
+    <div class="meta-section right">
+      <h4>Invoice details</h4>
+      <p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p>
+    </div>
+  </div>
+  <div class="scope"><strong>Contract Scope:</strong> ${scope||'—'}</div>
+  <table>
+    <thead><tr><th>Organisation</th><th>Description</th><th>Excl. GST</th><th>Incl. GST</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>${org}</td>
+        <td>
+          <div>Services rendered</div>
+          <div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>`· ${l.trim()}`).join('<br>'):'—'}</div>
+        </td>
+        <td class="mono">$${amount.toFixed(2)}</td>
+        <td class="mono">$${total.toFixed(2)}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="totals">
+    <div class="totals-inner">
+      <div class="total-row"><span>Total</span><span class="mono">$${amount.toFixed(2)}</span></div>
+      <div class="total-row"><span>GST (10%)</span><span class="mono">$${gstAmt.toFixed(2)}</span></div>
+      <div class="total-row"><span>Total (incl. GST)</span><span class="mono">$${total.toFixed(2)}</span></div>
+    </div>
+  </div>
+  <div class="payment">
+    <h4>Payment Details</h4>
+    <p><strong>Account Name:</strong> N and N Lockwood<br><strong>BSB:</strong> 086061<br><strong>Account #:</strong> 816239874<br><strong>Institution:</strong> National Australia Bank</p>
+  </div>
+</div>
+</body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.document.title=filename;
+  setTimeout(()=>{win.print();},600);
+  showToast(`Invoice ${number} — print/save as PDF`);
+}
+
+// ── EXPORT ──
+function exportPL(){
+  const c=getCalcs();
+  const rows=[['Type','Date','Description','Category','Amount','Business Use %','Receipt/Attachment'],...state.income.map(i=>['Income',i.date,i.client+(i.desc?' - '+i.desc:''),i.category,i.amount.toFixed(2),'100',i.attachName||'']),...state.expenses.map(e=>['Expense',e.date,e.vendor+(e.desc?' - '+e.desc:''),e.category,e.amount.toFixed(2),e.bizUse,e.receiptName||'']),[],...[['SUMMARY'],['Gross Income','','','',c.gross.toFixed(2)],['Total Expenses','','','',c.expenses.toFixed(2)],['Taxable Income','','','',c.taxable.toFixed(2)],['Income Tax','','','',c.tax.toFixed(2)],['Medicare Levy','','','',c.medicare.toFixed(2)],['Super ('+state.superRate+'%)','','','',c.superAmt.toFixed(2)],['Net (Yours)','','','',c.yours.toFixed(2)]].map(r=>[...r,...Array(7-r.length).fill('')])];
+  const csv=rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='LockwoodAdvisory_PL_FY2025-26.csv';a.click();URL.revokeObjectURL(url);
+  showToast('P&L exported');
+}
+
+// ── UTILS ──
+function formatDate(d){return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+
+// Init
+document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];
+updateDashboard();updateMoneyMap();
+</script>
+</body>
+</html>
