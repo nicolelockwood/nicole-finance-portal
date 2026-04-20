@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finance Portal · Nicole Lockwood</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
 
@@ -306,8 +307,38 @@ textarea.input{resize:vertical;min-height:80px;}
 </style>
 </head>
 <body>
+<div id="login-screen" style="display:none;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div class="bg-scene"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:24px;">
+    <div class="glass-strong" style="padding:36px 32px;text-align:center;">
+      <div style="margin-bottom:24px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;color:var(--text-primary);margin-bottom:6px;">Finance Portal</div>
+        <div style="font-size:12px;color:var(--text-tertiary);font-weight:300;">Nicole Lockwood · Lockwood Advisory</div>
+      </div>
+      <div id="login-form-wrap">
+        <div class="field" style="text-align:left;margin-bottom:16px;">
+          <label style="font-size:11.5px;font-weight:500;color:var(--text-secondary);">Email address</label>
+          <input type="email" class="input" id="login-email" placeholder="your@email.com" style="margin-top:5px;" onkeydown="if(event.key==='Enter')sendMagicLink()">
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:12px;" onclick="sendMagicLink()" id="login-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+          Send magic link
+        </button>
+        <p style="font-size:11px;color:var(--text-tertiary);font-weight:300;line-height:1.6;">We'll email you a secure link — no password needed.<br>Works for Nicole and Scarlet.</p>
+      </div>
+      <div id="login-sent-wrap" style="display:none;">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(46,139,168,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--ocean-teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:8px;">Check your email</div>
+        <p style="font-size:12px;color:var(--text-tertiary);font-weight:300;line-height:1.7;">Magic link sent to <strong id="login-sent-email" style="color:var(--text-primary);font-weight:500;"></strong><br>Click the link to sign in — it expires in 1 hour.</p>
+        <button class="btn btn-glass" style="width:100%;justify-content:center;margin-top:16px;" onclick="resetLoginForm()">Try different email</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="bg-scene"></div>
-<div class="app">
+<div class="app" id="main-app" style="display:none;">
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
@@ -340,9 +371,12 @@ textarea.input{resize:vertical;min-height:80px;}
     </div>
   </nav>
   <div class="sidebar-bottom">
-    <div class="user-pill">
+    <div class="user-pill" style="justify-content:space-between;">
       <div class="user-avatar"><span>NL</span></div>
-      <div><div class="user-name">Nicole Lockwood</div><div class="user-role">Sole trader · AUS</div></div>
+      <div><div class="user-name">Nicole Lockwood</div><div class="user-role" id="sidebar-user-email">Sole trader · AUS</div></div>
+      <button onclick="signOut()" style="background:none;border:none;cursor:pointer;color:var(--text-light-sub);padding:4px;transition:color .15s;" title="Sign out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
   </div>
 </aside>
@@ -809,49 +843,137 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Saved</span></div>
 
 <script>
-const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5,lastSaved:null,moneyMap:{msBoard:0,msConsult:0,msCommission:0,msMission:0,msInvest:0,lifeNow:0,lifeFuture:0,lifeBuffer:0,lifeDebt:0},superFund:''};
+// ── SUPABASE ──
+const { createClient } = supabase;
+const sb = createClient('https://mkctnzgjywxwglnyokxq.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rY3RuemdqeXd4d2dsbnlva3hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDcwNDcsImV4cCI6MjA5MDQyMzA0N30.tZAXE9tnZzGzIrmJ597GH1Vr0V_RJJC-mkakweEpI58');
 
-// ── PERSISTENCE ──
-function loadState(){
-  const stored=localStorage.getItem('nicoleLockwoodState');
-  if(stored){
-    try{
-      const loaded=JSON.parse(stored);
-      Object.assign(state,loaded);
-      state.lastSaved=loaded.lastSaved?new Date(loaded.lastSaved):null;
-    }catch(e){console.warn('Failed to load state',e);}
+// ── STATE ──
+const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5,lastSaved:null,moneyMap:{msBoard:0,msConsult:0,msCommission:0,msMission:0,msInvest:0,lifeNow:0,lifeFuture:0,lifeBuffer:0,lifeDebt:0},superFund:''};
+let currentUser = null;
+
+// ── AUTH ──
+async function sendMagicLink(){
+  const email = document.getElementById('login-email').value.trim();
+  if(!email){ showLoginError('Please enter your email'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: 'https://nicolelockwood.github.io/nicole-finance-portal/' } });
+  if(error){ btn.textContent = 'Send magic link'; btn.disabled = false; showLoginError(error.message); return; }
+  document.getElementById('login-sent-email').textContent = email;
+  document.getElementById('login-form-wrap').style.display = 'none';
+  document.getElementById('login-sent-wrap').style.display = 'block';
+}
+
+function showLoginError(msg){ showToast(msg); }
+function resetLoginForm(){
+  document.getElementById('login-form-wrap').style.display = 'block';
+  document.getElementById('login-sent-wrap').style.display = 'none';
+  document.getElementById('login-btn').textContent = 'Send magic link';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-email').value = '';
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  currentUser = null;
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  resetLoginForm();
+}
+
+function showApp(user){
+  currentUser = user;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'flex';
+  const emailEl = document.getElementById('sidebar-user-email');
+  if(emailEl) emailEl.textContent = user.email;
+  loadAllData();
+}
+
+// ── PERSISTENCE — SUPABASE ──
+async function loadAllData(){
+  if(!currentUser) return;
+  const uid = currentUser.id;
+  try{
+    const [expRes, incRes, invRes, mmRes, superRes] = await Promise.all([
+      sb.from('expenses').select('*').eq('user_id', uid).order('date', {ascending:false}),
+      sb.from('income').select('*').eq('user_id', uid).order('date', {ascending:false}),
+      sb.from('invoices').select('*').eq('user_id', uid).order('created_at', {ascending:false}),
+      sb.from('money_map').select('*').eq('user_id', uid).limit(1),
+      sb.from('settings').select('*').eq('user_id', uid).limit(1),
+    ]);
+    state.expenses = (expRes.data||[]).map(e=>({id:e.id,type:'expense',amount:e.amount,vendor:e.vendor,date:e.date,category:e.category,bizUse:e.biz_use,desc:e.description,receiptName:e.receipt_name}));
+    state.income = (incRes.data||[]).map(i=>({id:i.id,type:'income',amount:i.amount,client:i.client,date:i.date,category:i.category,desc:i.description,invoiceRef:i.invoice_ref,attachName:i.attach_name}));
+    state.invoices = (invRes.data||[]).map(i=>({id:i.id,number:i.number,org:i.org,date:i.date,amount:i.amount,gstAmt:i.gst_amt,total:i.total,status:i.status,contact:i.contact,period:i.period,scope:i.scope,services:i.services}));
+    if(mmRes.data&&mmRes.data[0]){
+      const mm = mmRes.data[0];
+      state.moneyMap = {msBoard:mm.ms_board||0,msConsult:mm.ms_consult||0,msCommission:mm.ms_commission||0,msMission:mm.ms_mission||0,msInvest:mm.ms_invest||0,lifeNow:mm.life_now||0,lifeFuture:mm.life_future||0,lifeBuffer:mm.life_buffer||0,lifeDebt:mm.life_debt||0};
+    }
+    if(superRes.data&&superRes.data[0]){
+      state.superRate = superRes.data[0].super_rate||11.5;
+      state.superFund = superRes.data[0].super_fund||'';
+    }
+  } catch(e){ console.error('Load error:',e); }
+  restoreMoneyMapAndSuper();
+  document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];
+  setQuoteDates(); addQuoteLineItem(); addQuoteLineItem(); updateQuotePreview();
+  updateDashboard(); updateMoneyMap();
+  renderExpenses(); renderIncome(); renderInvoices();
+  document.getElementById('last-saved-display').textContent = 'All data saved to cloud';
+}
+
+async function saveExpenseDB(expense){
+  if(!currentUser) return;
+  const row = {user_id:currentUser.id,amount:expense.amount,vendor:expense.vendor,date:expense.date,category:expense.category,biz_use:expense.bizUse,description:expense.desc,receipt_name:expense.receiptName};
+  if(typeof expense.id === 'number'){
+    const {data,error} = await sb.from('expenses').insert(row).select().single();
+    if(data) expense.id = data.id;
+    if(error) console.error('Save expense error:',error);
   }
 }
 
-function saveState(){
-  state.lastSaved=new Date();
-  localStorage.setItem('nicoleLockwoodState',JSON.stringify(state));
-  updateLastSavedDisplay();
-  showToast('✓ Saved');
+async function saveIncomeDB(inc){
+  if(!currentUser) return;
+  const row = {user_id:currentUser.id,amount:inc.amount,client:inc.client,date:inc.date,category:inc.category,description:inc.desc,invoice_ref:inc.invoiceRef,attach_name:inc.attachName};
+  if(typeof inc.id === 'number'){
+    const {data,error} = await sb.from('income').insert(row).select().single();
+    if(data) inc.id = data.id;
+    if(error) console.error('Save income error:',error);
+  }
 }
 
+async function saveInvoiceDB(inv){
+  if(!currentUser) return;
+  const row = {user_id:currentUser.id,number:inv.number,org:inv.org,date:inv.date,amount:inv.amount,gst_amt:inv.gstAmt,total:inv.total,status:inv.status,contact:inv.contact,period:inv.period,scope:inv.scope,services:inv.services};
+  const {data,error} = await sb.from('invoices').insert(row).select().single();
+  if(data) inv.id = data.id;
+  if(error) console.error('Save invoice error:',error);
+}
+
+async function updateInvoiceStatusDB(id, status){
+  if(!currentUser) return;
+  await sb.from('invoices').update({status}).eq('id', id).eq('user_id', currentUser.id);
+}
+
+async function saveMoneyMapDB(){
+  if(!currentUser) return;
+  const mm = state.moneyMap;
+  await sb.from('money_map').upsert({user_id:currentUser.id,ms_board:mm.msBoard,ms_consult:mm.msConsult,ms_commission:mm.msCommission,ms_mission:mm.msMission,ms_invest:mm.msInvest,life_now:mm.lifeNow,life_future:mm.lifeFuture,life_buffer:mm.lifeBuffer,life_debt:mm.lifeDebt},{onConflict:'user_id'});
+}
+
+async function saveSettingsDB(){
+  if(!currentUser) return;
+  await sb.from('settings').upsert({user_id:currentUser.id,super_rate:state.superRate,super_fund:state.superFund},{onConflict:'user_id'});
+}
+
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
 function updateLastSavedDisplay(){
   const display=document.getElementById('last-saved-display');
-  if(!display)return;
-  if(!state.lastSaved){
-    display.textContent='All data saved locally';
-    return;
-  }
-  const now=new Date();
-  const diff=Math.floor((now-state.lastSaved)/1000);
-  let text='';
-  if(diff<5)text='Just now';
-  else if(diff<60)text=diff+'s ago';
-  else if(diff<3600)text=Math.floor(diff/60)+'m ago';
-  else if(diff<86400)text=Math.floor(diff/3600)+'h ago';
-  else text=Math.floor(diff/86400)+'d ago';
-  display.textContent='Last updated '+text+' • All data saved locally';
-  setTimeout(updateLastSavedDisplay,5000);
+  if(display) display.textContent='All data saved to cloud ✓';
 }
+function saveState(){ updateLastSavedDisplay(); showToast('✓ Saved'); }
 
-loadState();
-
-// Restore Money Map and Super Fund values
 function restoreMoneyMapAndSuper(){
   if(state.moneyMap){
     document.getElementById('ms-board').value=state.moneyMap.msBoard||0;
@@ -864,11 +986,11 @@ function restoreMoneyMapAndSuper(){
     document.getElementById('life-buffer').value=state.moneyMap.lifeBuffer||0;
     document.getElementById('life-debt').value=state.moneyMap.lifeDebt||0;
   }
-  if(state.superFund){
-    document.getElementById('super-fund').value=state.superFund;
-  }
+  if(state.superRate) document.getElementById('super-rate-input').value=state.superRate;
+  if(state.superFund) document.getElementById('super-fund').value=state.superFund;
+  ['super-rate-disp','sum-super-rate-lbl','pl-super-rate'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=state.superRate;});
 }
-restoreMoneyMapAndSuper();
+
 function showPage(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
@@ -921,10 +1043,10 @@ function updateDashboard(){
   document.getElementById('g-month-bar').style.width=Math.min(100,mInc/8000*100)+'%';
   document.getElementById('g-year-bar').style.width=Math.min(100,c.gross/96000*100)+'%';
   document.getElementById('g-save-bar').style.width=Math.min(100,c.yours/40000*100)+'%';
-  const all=[...state.expenses.map(e=>({...e,_t:'expense'})),...state.income.map(i=>({...i,_t:'income'}))].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+  const all=[...state.expenses.map(e=>(({...e,_t:'expense'}))),...state.income.map(i=>(({...i,_t:'income'})))].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
   const rtxn=document.getElementById('recent-txns');
   if(!all.length)rtxn.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg><p>No transactions yet.</p></div>`;
-  else rtxn.innerHTML=all.map(t=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t._t==='expense'?'<path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/>':'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'}</svg></div><div class="txn-info"><div class="txn-name">${t._t==='expense'?t.vendor:t.client}</div><div class="txn-meta">${formatDate(t.date)} · ${t.category||'Uncategorised'}</div></div><div class="txn-amt ${t._t}">${t._t==='expense'?'−':'+'}$${t.amount.toFixed(2)}</div></div>`).join('');
+  else rtxn.innerHTML=all.map(t=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t._t==='expense'?'<path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/>':'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'}</svg></div><div class="txn-info"><div class="txn-name">${t._t==='expense'?t.vendor:t.client}</div><div class="txn-meta">${formatDate(t.date)} · ${t.category||'Uncategorised'}</div></div><div class="txn-amt ${t._t}">${t._t==='expense'?'−':'+'}\$${t.amount.toFixed(2)}</div></div>`).join('');
 }
 
 // ── SUPER ──
@@ -932,7 +1054,7 @@ function updateSuperRate(){
   const v=parseFloat(document.getElementById('super-rate-input').value)||11.5;
   state.superRate=v;
   ['super-rate-disp','sum-super-rate-lbl','pl-super-rate'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v;});
-  updateSuperPage();updateDashboard();saveState();
+  updateSuperPage();updateDashboard();saveSettingsDB();saveState();
 }
 function updateSuperPage(){
   const c=getCalcs();
@@ -955,10 +1077,8 @@ function updateMoneyMapAndSave(){
     lifeBuffer:parseFloat(document.getElementById('life-buffer').value)||0,
     lifeDebt:parseFloat(document.getElementById('life-debt').value)||0
   };
-  saveState();
-  updateMoneyMap();
+  saveMoneyMapDB();saveState();updateMoneyMap();
 }
-
 function updateMoneyMap(){
   const board=parseFloat(document.getElementById('ms-board').value)||0;
   const consult=parseFloat(document.getElementById('ms-consult').value)||0;
@@ -990,8 +1110,8 @@ function updatePL(){
   const incCats={},expCats={};
   state.income.forEach(i=>{const cat=i.category||'Other';incCats[cat]=(incCats[cat]||0)+i.amount;});
   state.expenses.forEach(e=>{const cat=e.category||'Other';expCats[cat]=(expCats[cat]||0)+(e.amount*e.bizUse/100);});
-  document.getElementById('pl-income-rows').innerHTML=Object.keys(incCats).length?Object.entries(incCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val income">$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No income recorded</span><span class="pl-val income">$0.00</span></div>`;
-  document.getElementById('pl-expense-rows').innerHTML=Object.keys(expCats).length?Object.entries(expCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val">$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No expenses recorded</span><span class="pl-val">$0.00</span></div>`;
+  document.getElementById('pl-income-rows').innerHTML=Object.keys(incCats).length?Object.entries(incCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val income">\$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No income recorded</span><span class="pl-val income">$0.00</span></div>`;
+  document.getElementById('pl-expense-rows').innerHTML=Object.keys(expCats).length?Object.entries(expCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val">\$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No expenses recorded</span><span class="pl-val">$0.00</span></div>`;
   document.getElementById('pl-total-income').textContent=fmt(c.gross);
   document.getElementById('pl-total-expenses').textContent=fmt(c.expenses);
   document.getElementById('pl-net-profit').textContent=fmt(c.gross-c.expenses);
@@ -1004,7 +1124,7 @@ function updatePL(){
 
 // ── EXPENSE FORM ──
 function showExpenseForm(){document.getElementById('expenses-list-view').style.display='none';document.getElementById('expenses-form-view').style.display='block';document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];}
-function hideExpenseForm(){document.getElementById('expenses-list-view').style.display='block';document.getElementById('expenses-form-view').style.display='none';clearReceipt();['exp-amount','exp-vendor','exp-desc','exp-category'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('exp-biz-use').value='100';}
+function hideExpenseForm(){document.getElementById('expenses-list-view').style.display='block';document.getElementById('expenses-form-view').style.display='none';clearReceipt();['exp-amount','exp-vendor','exp-desc','exp-category'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});document.getElementById('exp-biz-use').value='100';}
 function triggerFileInput(){document.getElementById('receipt-file-input').click();}
 function handleReceiptUpload(e){const file=e.target.files[0];if(!file)return;state.receiptFile=file;const r=new FileReader();r.onload=ev=>{document.getElementById('receipt-thumb-img').src=ev.target.result;document.getElementById('receipt-file-name').textContent=file.name;document.getElementById('receipt-file-size').textContent=(file.size/1024).toFixed(1)+' KB';document.getElementById('receipt-preview').classList.add('visible');document.getElementById('receipt-drop-zone').classList.add('has-file');document.getElementById('ai-scan-bar').classList.add('visible');document.getElementById('ai-scan-btn').textContent='Scan now';};r.readAsDataURL(file);}
 function clearReceipt(){state.receiptFile=null;document.getElementById('receipt-file-input').value='';document.getElementById('receipt-preview').classList.remove('visible');document.getElementById('receipt-drop-zone').classList.remove('has-file');document.getElementById('ai-scan-bar').classList.remove('visible');}
@@ -1014,22 +1134,13 @@ async function scanReceipt(){
   bar.classList.add('scanning');btn.textContent='Reading…';btn.disabled=true;
   document.getElementById('ai-scan-title').textContent='Reading receipt…';
   try{
-    const b64=await fileToBase64(state.receiptFile);
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:state.receiptFile.type||'image/jpeg',data:b64}},{type:'text',text:`Receipt scanner for Australian sole trader. Return ONLY valid JSON, no markdown:\n{"vendor":"business name","amount":0.00,"date":"YYYY-MM-DD","category":"Software & subscriptions|Office supplies|Professional development|Marketing & advertising|Travel & transport|Meals & entertainment|Equipment|Contractor payments|Bank & finance fees|Other","gst":"No GST or GST included (10%)","description":"brief description"}\nUse null for unreadable fields. Amount is number only.`}]}]})});
-    const data=await resp.json();
-    const parsed=JSON.parse((data.content?.[0]?.text||'').replace(/```json|```/g,'').trim());
-    if(parsed.vendor)document.getElementById('exp-vendor').value=parsed.vendor;
-    if(parsed.amount)document.getElementById('exp-amount').value=parsed.amount;
-    if(parsed.date)document.getElementById('exp-date').value=parsed.date;
-    if(parsed.category)document.getElementById('exp-category').value=parsed.category;
-    if(parsed.gst)document.getElementById('exp-gst').value=parsed.gst;
-    if(parsed.description)document.getElementById('exp-desc').value=parsed.description;
-    document.getElementById('ai-scan-title').textContent='✓ Fields filled — please review';
-    document.getElementById('ai-scan-sub').textContent='Check and adjust before saving';
+    document.getElementById('ai-scan-title').textContent='AI scan — coming soon';
+    document.getElementById('ai-scan-sub').textContent='Fill fields manually for now';
   }catch(err){document.getElementById('ai-scan-title').textContent='AI scan — coming soon';document.getElementById('ai-scan-sub').textContent='Fill fields manually for now';console.error('Scan error:',err);}finally{bar.classList.remove('scanning');btn.textContent='Scan now';btn.disabled=false;}
 }
 function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
-function saveExpense(){
+
+async function saveExpense(){
   const amount=parseFloat(document.getElementById('exp-amount').value);
   const vendor=document.getElementById('exp-vendor').value.trim();
   const date=document.getElementById('exp-date').value;
@@ -1037,23 +1148,27 @@ function saveExpense(){
   const category=document.getElementById('exp-category').value;
   const bizUse=parseInt(document.getElementById('exp-biz-use').value)||100;
   const desc=document.getElementById('exp-desc').value.trim();
-  const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_$${amount.toFixed(2)}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
-  state.expenses.push({id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName});
-  hideExpenseForm();renderExpenses();updateDashboard();saveState();showToast(`Saved · ${vendor} · $${amount.toFixed(2)}`);
+  const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_\$${amount.toFixed(2)}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
+  const expense={id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName};
+  state.expenses.unshift(expense);
+  await saveExpenseDB(expense);
+  hideExpenseForm();renderExpenses();updateDashboard();saveState();showToast(`Saved · ${vendor} · \$${amount.toFixed(2)}`);
 }
+
 function renderExpenses(){
   const list=document.getElementById('expense-list');
   if(!state.expenses.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div>`;return;}
-  list.innerHTML=state.expenses.slice().reverse().map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−$${e.amount.toFixed(2)}</div></div>`).join('');
+  list.innerHTML=state.expenses.map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−\$${e.amount.toFixed(2)}</div></div>`).join('');
 }
 
 // ── INCOME FORM ──
 function showIncomeForm(){document.getElementById('income-list-view').style.display='none';document.getElementById('income-form-view').style.display='block';document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];}
-function hideIncomeForm(){document.getElementById('income-list-view').style.display='block';document.getElementById('income-form-view').style.display='none';clearIncomeFile();['inc-amount','inc-client','inc-desc','inc-category','inc-invoice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function hideIncomeForm(){document.getElementById('income-list-view').style.display='block';document.getElementById('income-form-view').style.display='none';clearIncomeFile();['inc-amount','inc-client','inc-desc','inc-category','inc-invoice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});}
 function triggerIncomeFileInput(){document.getElementById('income-file-input').click();}
 function handleIncomeUpload(e){const file=e.target.files[0];if(!file)return;state.incomeFile=file;const r=new FileReader();r.onload=ev=>{document.getElementById('income-thumb-img').src=ev.target.result;document.getElementById('income-file-name').textContent=file.name;document.getElementById('income-preview').classList.add('visible');};r.readAsDataURL(file);}
 function clearIncomeFile(){state.incomeFile=null;document.getElementById('income-file-input').value='';document.getElementById('income-preview').classList.remove('visible');}
-function saveIncome(){
+
+async function saveIncome(){
   const amount=parseFloat(document.getElementById('inc-amount').value);
   const client=document.getElementById('inc-client').value.trim();
   const date=document.getElementById('inc-date').value;
@@ -1061,48 +1176,33 @@ function saveIncome(){
   const category=document.getElementById('inc-category').value;
   const desc=document.getElementById('inc-desc').value.trim();
   const invoiceRef=document.getElementById('inc-invoice').value.trim();
-  const attachName=state.incomeFile?`${date}_${client.replace(/\s+/g,'-')}_$${amount.toFixed(2)}_${(category||'Income').replace(/[\s&]+/g,'-')}.${state.incomeFile.name.split('.').pop()}`:null;
-  state.income.push({id:Date.now(),type:'income',amount,client,date,category,desc,invoiceRef,attachName});
-  hideIncomeForm();renderIncome();updateDashboard();saveState();showToast(`Saved · ${client} · $${amount.toFixed(2)}`);
+  const attachName=state.incomeFile?`${date}_${client.replace(/\s+/g,'-')}_\$${amount.toFixed(2)}_${(category||'Income').replace(/[\s&]+/g,'-')}.${state.incomeFile.name.split('.').pop()}`:null;
+  const inc={id:Date.now(),type:'income',amount,client,date,category,desc,invoiceRef,attachName};
+  state.income.unshift(inc);
+  await saveIncomeDB(inc);
+  hideIncomeForm();renderIncome();updateDashboard();saveState();showToast(`Saved · ${client} · \$${amount.toFixed(2)}`);
 }
+
 function renderIncome(){
   const list=document.getElementById('income-list');
   if(!state.income.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p>No income recorded yet.</p></div>`;return;}
-  list.innerHTML=state.income.slice().reverse().map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+$${i.amount.toFixed(2)}</div></div>`).join('');
+  list.innerHTML=state.income.map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+\$${i.amount.toFixed(2)}</div></div>`).join('');
 }
 
 // ── SEARCH & FILTER ──
 function filterExpenses(){
   const query=document.getElementById('exp-search').value.toLowerCase();
-  const filtered=state.expenses.filter(e=>
-    e.vendor.toLowerCase().includes(query)||
-    (e.category&&e.category.toLowerCase().includes(query))||
-    e.date.includes(query)||
-    (e.desc&&e.desc.toLowerCase().includes(query))
-  );
+  const filtered=state.expenses.filter(e=>e.vendor.toLowerCase().includes(query)||(e.category&&e.category.toLowerCase().includes(query))||e.date.includes(query)||(e.desc&&e.desc.toLowerCase().includes(query)));
   const list=document.getElementById('expense-list');
-  if(!filtered.length){
-    list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;
-    return;
-  }
-  list.innerHTML=filtered.slice().reverse().map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−$${e.amount.toFixed(2)}</div></div>`).join('');
+  if(!filtered.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;return;}
+  list.innerHTML=filtered.map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−\$${e.amount.toFixed(2)}</div></div>`).join('');
 }
-
 function filterIncome(){
   const query=document.getElementById('inc-search').value.toLowerCase();
-  const filtered=state.income.filter(i=>
-    i.client.toLowerCase().includes(query)||
-    (i.category&&i.category.toLowerCase().includes(query))||
-    i.date.includes(query)||
-    (i.invoiceRef&&i.invoiceRef.toLowerCase().includes(query))||
-    (i.desc&&i.desc.toLowerCase().includes(query))
-  );
+  const filtered=state.income.filter(i=>i.client.toLowerCase().includes(query)||(i.category&&i.category.toLowerCase().includes(query))||i.date.includes(query)||(i.invoiceRef&&i.invoiceRef.toLowerCase().includes(query))||(i.desc&&i.desc.toLowerCase().includes(query)));
   const list=document.getElementById('income-list');
-  if(!filtered.length){
-    list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;
-    return;
-  }
-  list.innerHTML=filtered.slice().reverse().map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+$${i.amount.toFixed(2)}</div></div>`).join('');
+  if(!filtered.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;return;}
+  list.innerHTML=filtered.map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+\$${i.amount.toFixed(2)}</div></div>`).join('');
 }
 
 // ── INVOICE ──
@@ -1110,14 +1210,12 @@ function showInvoiceForm(){
   document.getElementById('invoices-list-view').style.display='none';
   document.getElementById('invoices-form-view').style.display='block';
   document.getElementById('inv-date').value=new Date().toISOString().split('T')[0];
-  // Auto-generate next invoice number
-  const last=state.invoices.length?state.invoices[state.invoices.length-1].number:'INV-0215';
+  const last=state.invoices.length?state.invoices[0].number:'INV-0215';
   const num=parseInt(last.split('-')[1]||215)+1;
   document.getElementById('inv-number').value='INV-'+String(num).padStart(4,'0');
   updateInvoicePreview();
 }
 function hideInvoiceForm(){document.getElementById('invoices-list-view').style.display='block';document.getElementById('invoices-form-view').style.display='none';}
-
 function updateInvoicePreview(){
   const number=document.getElementById('inv-number').value||'INV-—';
   const date=document.getElementById('inv-date').value;
@@ -1130,10 +1228,7 @@ function updateInvoicePreview(){
   const services=document.getElementById('inv-services').value;
   const amount=parseFloat(document.getElementById('inv-amount').value)||0;
   const hasGst=document.getElementById('inv-gst').value==='yes';
-  const excl=hasGst?amount:amount;
-  const gstAmt=hasGst?amount*0.1:0;
-  const incl=excl+gstAmt;
-
+  const excl=amount; const gstAmt=hasGst?amount*0.1:0; const incl=excl+gstAmt;
   document.getElementById('prev-number').textContent=number;
   document.getElementById('prev-date').textContent=date?formatDate(date):'—';
   document.getElementById('prev-period').textContent=period;
@@ -1150,14 +1245,12 @@ function updateInvoicePreview(){
   document.getElementById('prev-gst-amt').textContent=fmt(gstAmt);
   document.getElementById('prev-total-incl').textContent=fmt(incl);
 }
-
-// Wire up all invoice inputs
 ['inv-number','inv-date','inv-period','inv-terms','inv-org','inv-contact','inv-email','inv-scope','inv-services'].forEach(id=>{
   const el=document.getElementById(id);
   if(el)el.addEventListener('input',updateInvoicePreview);
 });
 
-function saveInvoice(){
+async function saveInvoice(){
   const number=document.getElementById('inv-number').value.trim();
   const org=document.getElementById('inv-org').value.trim();
   const amount=parseFloat(document.getElementById('inv-amount').value);
@@ -1165,21 +1258,24 @@ function saveInvoice(){
   if(!number||!org||!amount||!date){showToast('Please fill in invoice number, org, date and amount');return;}
   const hasGst=document.getElementById('inv-gst').value==='yes';
   const gstAmt=hasGst?amount*0.1:0;
-  state.invoices.push({id:Date.now(),number,org,date,amount,gstAmt,total:amount+gstAmt,status:'outstanding',contact:document.getElementById('inv-contact').value,period:document.getElementById('inv-period').value,scope:document.getElementById('inv-scope').value,services:document.getElementById('inv-services').value});
+  const inv={id:Date.now(),number,org,date,amount,gstAmt,total:amount+gstAmt,status:'outstanding',contact:document.getElementById('inv-contact').value,period:document.getElementById('inv-period').value,scope:document.getElementById('inv-scope').value,services:document.getElementById('inv-services').value};
+  state.invoices.unshift(inv);
+  await saveInvoiceDB(inv);
   renderInvoices();hideInvoiceForm();
   showToast(`Invoice ${number} saved · ${org}`);
 }
 
 function renderInvoices(){
   const list=document.getElementById('invoice-list');
-  if(!state.invoices.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No invoices yet.</p></div>`;return;}
-  list.innerHTML=state.invoices.slice().reverse().map(inv=>{const isPaid=inv.status==='paid';const statusColor=isPaid?'var(--positive)':'var(--warning)';const statusBg=isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';return `<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">$${inv.total.toFixed(2)}</div><div style="display:flex;gap:8px;align-items:center;"><span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status||'outstanding'}</span><button class="btn btn-sm" style="padding:4px 8px;background:${statusBg};color:${statusColor};border:none;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;" data-invoice-id="${inv.id}" onclick="event.stopPropagation();markInvoicePaid(this.getAttribute('data-invoice-id'))">${isPaid?'✓ Paid':'Mark paid'}</button></div></div></div>`}).join('');}
+  if(!state.invoices.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><p>No invoices yet. Create your first one.</p></div>`;return;}
+  list.innerHTML=state.invoices.map(inv=>{const isPaid=inv.status==='paid';const statusColor=isPaid?'var(--positive)':'var(--warning)';const statusBg=isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';return `<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">\$${inv.total.toFixed(2)}</div><div style="display:flex;gap:8px;align-items:center;"><span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status||'outstanding'}</span><button class="btn btn-sm" style="padding:4px 8px;background:${statusBg};color:${statusColor};border:none;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;z-index:2;position:relative;" data-invoice-id="${inv.id}" onclick="event.stopPropagation();markInvoicePaid(this.getAttribute('data-invoice-id'))">${isPaid?'✓ Paid':'Mark paid'}</button></div></div></div>`}).join('');
+}
 
-function markInvoicePaid(invoiceId){
+async function markInvoicePaid(invoiceId){
   const inv=state.invoices.find(i=>String(i.id)===String(invoiceId));
   if(!inv)return;
   inv.status=inv.status==='paid'?'outstanding':'paid';
-  saveState();
+  await updateInvoiceStatusDB(inv.id, inv.status);
   renderInvoices();
   showToast(inv.status==='paid'?'✓ Marked as paid':'✓ Marked as outstanding');
 }
@@ -1198,91 +1294,20 @@ async function downloadInvoicePDF(){
   const hasGst=document.getElementById('inv-gst').value==='yes';
   const gstAmt=hasGst?amount*0.1:0;
   const total=amount+gstAmt;
-
-  // Generate clean HTML → print as PDF
   const filename=`LockwoodAdvisory_Invoice_${number}_${org.replace(/\s+/g,'')}.pdf`;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'DM Sans',sans-serif;font-size:13px;color:#0D2B3E;line-height:1.5;}
-  .header{background:#0D2B3E;padding:28px 36px;display:flex;justify-content:space-between;align-items:flex-start;}
-  .header-left{color:#F4F0EB;}
-  .badge{background:rgba(94,181,204,0.2);border:1px solid rgba(94,181,204,0.4);color:#5EB5CC;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:3px;display:inline-block;margin-bottom:10px;}
-  .company-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:4px;}
-  .company-detail{font-size:10px;opacity:.6;line-height:1.7;font-weight:300;}
-  .body{padding:28px 36px;}
-  .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:22px;}
-  .meta-section h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6A8FA8;margin-bottom:7px;}
-  .meta-section p{font-size:12px;line-height:1.8;font-weight:300;}
-  .meta-section strong{font-weight:500;}
-  .meta-section.right{text-align:right;}
-  .scope{font-size:11px;color:#6A8FA8;margin-bottom:12px;font-weight:300;}
-  .scope strong{font-weight:500;color:#0D2B3E;}
-  table{width:100%;border-collapse:collapse;margin-bottom:18px;}
-  th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6A8FA8;padding:7px 10px;text-align:left;border-bottom:2px solid rgba(13,43,62,0.1);}
-  th:last-child,td:last-child{text-align:right;}
-  td{padding:10px 10px;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;vertical-align:top;font-weight:300;}
-  .desc-detail{font-size:10.5px;color:#6A8FA8;margin-top:3px;line-height:1.6;}
-  .mono{font-family:'DM Mono',monospace;font-size:12px;font-weight:400;}
-  .totals{display:flex;justify-content:flex-end;margin-bottom:22px;}
-  .totals-inner{width:220px;}
-  .total-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;}
-  .total-row:last-child{border-bottom:none;font-weight:600;font-size:13px;padding-top:10px;}
-  .payment{background:rgba(46,139,168,0.06);border-radius:8px;padding:14px 18px;border:1px solid rgba(46,139,168,0.14);}
-  .payment h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2E8BA8;margin-bottom:8px;}
-  .payment p{font-size:11px;color:#2C5570;line-height:1.9;font-weight:300;}
-  .payment strong{font-weight:500;color:#0D2B3E;}
+  *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',sans-serif;font-size:13px;color:#0D2B3E;line-height:1.5;}.header{background:#0D2B3E;padding:28px 36px;display:flex;justify-content:space-between;align-items:flex-start;}.header-left{color:#F4F0EB;}.badge{background:rgba(94,181,204,0.2);border:1px solid rgba(94,181,204,0.4);color:#5EB5CC;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:3px;display:inline-block;margin-bottom:10px;}.company-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:4px;}.company-detail{font-size:10px;opacity:.6;line-height:1.7;font-weight:300;}.body{padding:28px 36px;}.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:22px;}.meta-section h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6A8FA8;margin-bottom:7px;}.meta-section p{font-size:12px;line-height:1.8;font-weight:300;}.meta-section strong{font-weight:500;}.meta-section.right{text-align:right;}.scope{font-size:11px;color:#6A8FA8;margin-bottom:12px;font-weight:300;}.scope strong{font-weight:500;color:#0D2B3E;}table{width:100%;border-collapse:collapse;margin-bottom:18px;}th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6A8FA8;padding:7px 10px;text-align:left;border-bottom:2px solid rgba(13,43,62,0.1);}th:last-child,td:last-child{text-align:right;}td{padding:10px 10px;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;vertical-align:top;font-weight:300;}.desc-detail{font-size:10.5px;color:#6A8FA8;margin-top:3px;line-height:1.6;}.mono{font-family:'DM Mono',monospace;font-size:12px;font-weight:400;}.totals{display:flex;justify-content:flex-end;margin-bottom:22px;}.totals-inner{width:220px;}.total-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;}.total-row:last-child{border-bottom:none;font-weight:600;font-size:13px;padding-top:10px;}.payment{background:rgba(46,139,168,0.06);border-radius:8px;padding:14px 18px;border:1px solid rgba(46,139,168,0.14);}.payment h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2E8BA8;margin-bottom:8px;}.payment p{font-size:11px;color:#2C5570;line-height:1.9;font-weight:300;}.payment strong{font-weight:500;color:#0D2B3E;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
 </head><body>
-<div class="header">
-  <div class="header-left">
-    <div class="badge">Tax Invoice</div>
-    <div class="company-name">Lockwood Advisory Pty Ltd</div>
-    <div class="company-detail">PO Box 809, South Fremantle WA 6162<br>nicole@lockwoodadvisory.com.au · ABN 76 979 340 565</div>
-  </div>
-</div>
-<div class="body">
-  <div class="meta-grid">
-    <div class="meta-section">
-      <h4>Billed to</h4>
-      <p><strong>${org}</strong><br>${contact}<br>${email}</p>
-    </div>
-    <div class="meta-section right">
-      <h4>Invoice details</h4>
-      <p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p>
-    </div>
-  </div>
-  <div class="scope"><strong>Contract Scope:</strong> ${scope||'—'}</div>
-  <table>
-    <thead><tr><th>Organisation</th><th>Description</th><th>Excl. GST</th><th>Incl. GST</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>${org}</td>
-        <td>
-          <div>Services rendered</div>
-          <div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>`· ${l.trim()}`).join('<br>'):'—'}</div>
-        </td>
-        <td class="mono">$${amount.toFixed(2)}</td>
-        <td class="mono">$${total.toFixed(2)}</td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="totals">
-    <div class="totals-inner">
-      <div class="total-row"><span>Total</span><span class="mono">$${amount.toFixed(2)}</span></div>
-      <div class="total-row"><span>GST (10%)</span><span class="mono">$${gstAmt.toFixed(2)}</span></div>
-      <div class="total-row"><span>Total (incl. GST)</span><span class="mono">$${total.toFixed(2)}</span></div>
-    </div>
-  </div>
-  <div class="payment">
-    <h4>Payment Details</h4>
-    <p><strong>Account Name:</strong> N and N Lockwood<br><strong>BSB:</strong> 086061<br><strong>Account #:</strong> 816239874<br><strong>Institution:</strong> National Australia Bank</p>
-  </div>
-</div>
+<div class="header"><div class="header-left"><div class="badge">Tax Invoice</div><div class="company-name">Lockwood Advisory Pty Ltd</div><div class="company-detail">PO Box 809, South Fremantle WA 6162<br>nicole@lockwoodadvisory.com.au · ABN 76 979 340 565</div></div></div>
+<div class="body"><div class="meta-grid"><div class="meta-section"><h4>Billed to</h4><p><strong>${org}</strong><br>${contact}<br>${email}</p></div><div class="meta-section right"><h4>Invoice details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
+<div class="scope"><strong>Contract Scope:</strong> ${scope||'—'}</div>
+<table><thead><tr><th>Organisation</th><th>Description</th><th>Excl. GST</th><th>Incl. GST</th></tr></thead><tbody><tr><td>${org}</td><td><div>Services rendered</div><div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>'· '+l.trim()).join('<br>'):'—'}</div></td><td class="mono">\$${amount.toFixed(2)}</td><td class="mono">\$${total.toFixed(2)}</td></tr></tbody></table>
+<div class="totals"><div class="totals-inner"><div class="total-row"><span>Total</span><span class="mono">\$${amount.toFixed(2)}</span></div><div class="total-row"><span>GST (10%)</span><span class="mono">\$${gstAmt.toFixed(2)}</span></div><div class="total-row"><span>Total (incl. GST)</span><span class="mono">\$${total.toFixed(2)}</span></div></div></div>
+<div class="payment"><h4>Payment Details</h4><p><strong>Account Name:</strong> N and N Lockwood<br><strong>BSB:</strong> 086061<br><strong>Account #:</strong> 816239874<br><strong>Institution:</strong> National Australia Bank</p></div></div>
 </body></html>`;
-
   const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
@@ -1294,390 +1319,82 @@ async function downloadInvoicePDF(){
 // ── EXPORT ──
 function exportPL(){
   const c=getCalcs();
-  
-  // Transaction details CSV
-  const txnRows=[['Type','Date','Description','Category','Amount','Business Use %','Receipt/Attachment'],...state.income.map(i=>['Income',i.date,i.client+(i.desc?' - '+i.desc:''),i.category,i.amount.toFixed(2),'100',i.attachName||'']),...state.expenses.map(e=>['Expense',e.date,e.vendor+(e.desc?' - '+e.desc:''),e.category,e.amount.toFixed(2),e.bizUse,e.receiptName||''])];
-  
-  // Summary & breakdown CSV
-  const summaryRows=[['FINANCIAL SUMMARY - FY 2025-26'],[],...[['Gross Income','$'+c.gross.toFixed(2)],['Total Expenses (deductible)','$'+c.expenses.toFixed(2)],['Taxable Income','$'+c.taxable.toFixed(2)],[]],['TAX BREAKDOWN'],['Income Tax @ marginal rate','$'+c.tax.toFixed(2)],['Medicare Levy (2%)','$'+c.medicare.toFixed(2)],['Super Contributions ('+state.superRate+'%)','$'+c.superAmt.toFixed(2)],[],...[['Total Obligations','$'+(c.tax+c.medicare+c.superAmt).toFixed(2)],['Net Income (Yours)','$'+c.yours.toFixed(2)]]];
-  
-  // Super contribution details CSV
-  const superRows=[['SUPER CONTRIBUTIONS SUMMARY'],[],...[['Total Gross Income','$'+c.gross.toFixed(2)],['Super Rate',state.superRate+'%'],['Total Contribution','$'+c.superAmt.toFixed(2)],['Concessional Cap (FY25-26)','$30,000.00'],['Remaining Cap','$'+Math.max(0,30000-c.superAmt).toFixed(2)],['Tax Deductible','Yes']]];
-  
-  // Create transaction CSV
-  const txnCSV=txnRows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const txnBlob=new Blob([txnCSV],{type:'text/csv'});
-  const txnURL=URL.createObjectURL(txnBlob);
-  const txnLink=document.createElement('a');
-  txnLink.href=txnURL;
-  txnLink.download='Lockwood_Transactions_FY2025-26.csv';
-  
-  // Create summary CSV
-  const summaryCSV=summaryRows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const summaryBlob=new Blob([summaryCSV],{type:'text/csv'});
-  const summaryURL=URL.createObjectURL(summaryBlob);
-  const summaryLink=document.createElement('a');
-  summaryLink.href=summaryURL;
-  summaryLink.download='Lockwood_Summary_FY2025-26.csv';
-  
-  // Create super CSV
-  const superCSV=superRows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const superBlob=new Blob([superCSV],{type:'text/csv'});
-  const superURL=URL.createObjectURL(superBlob);
-  const superLink=document.createElement('a');
-  superLink.href=superURL;
-  superLink.download='Lockwood_Super_FY2025-26.csv';
-  
-  // Download all three files
-  txnLink.click();
-  setTimeout(()=>summaryLink.click(),200);
-  setTimeout(()=>superLink.click(),400);
-  
-  URL.revokeObjectURL(txnURL);
-  URL.revokeObjectURL(summaryURL);
-  URL.revokeObjectURL(superURL);
-  
-  showToast('✓ ATO-ready package exported (3 files)');
+  const txnRows=[['Type','Date','Description','Category','Amount','Business Use %'],...state.income.map(i=>['Income',i.date,i.client+(i.desc?' - '+i.desc:''),i.category,i.amount.toFixed(2),'100']),...state.expenses.map(e=>['Expense',e.date,e.vendor+(e.desc?' - '+e.desc:''),e.category,e.amount.toFixed(2),e.bizUse])];
+  const summaryRows=[['FINANCIAL SUMMARY - FY 2025-26'],[],['Gross Income','$'+c.gross.toFixed(2)],['Total Expenses (deductible)','$'+c.expenses.toFixed(2)],['Taxable Income','$'+c.taxable.toFixed(2)],[],['TAX BREAKDOWN'],['Income Tax','$'+c.tax.toFixed(2)],['Medicare Levy (2%)','$'+c.medicare.toFixed(2)],['Super ('+state.superRate+'%)','$'+c.superAmt.toFixed(2)],[],['Total Obligations','$'+(c.tax+c.medicare+c.superAmt).toFixed(2)],['Net Income (Yours)','$'+c.yours.toFixed(2)]];
+  const toCSV=rows=>rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const dl=(csv,name)=>{const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);};
+  dl(toCSV(txnRows),'Lockwood_Transactions_FY2025-26.csv');
+  setTimeout(()=>dl(toCSV(summaryRows),'Lockwood_Summary_FY2025-26.csv'),200);
+  showToast('✓ ATO-ready CSVs exported');
 }
 
 function exportJSONBackup(){
-  const backup={
-    exportDate:new Date().toLocaleString('en-AU'),
-    data:state
-  };
-  const json=JSON.stringify(backup,null,2);
-  const blob=new Blob([json],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const link=document.createElement('a');
-  link.href=url;
-  link.download='Lockwood_Finance_Portal_Backup_'+new Date().toISOString().split('T')[0]+'.json';
-  link.click();
-  URL.revokeObjectURL(url);
+  const json=JSON.stringify({exportDate:new Date().toLocaleString('en-AU'),data:state},null,2);
+  const b=new Blob([json],{type:'application/json'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download='Lockwood_Backup_'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(u);
   showToast('✓ Full backup exported');
 }
 
-
-// ── QUOTES & INVOICES ──
-
-function showQuoteForm(){
-  document.getElementById('quotes-empty-view').style.display='none';
-  document.getElementById('quotes-form-view').style.display='block';
-  switchQuoteType('quote');
+// ── QUOTES ──
+let quoteType='quote',quoteLineItems=[],savedQuotes=[],currentEditId=null;
+function showQuoteForm(){document.getElementById('quotes-empty-view').style.display='none';document.getElementById('quotes-form-view').style.display='block';switchQuoteType('quote');}
+function switchToInvoices(){document.getElementById('quotes-empty-view').style.display='none';document.getElementById('quotes-form-view').style.display='block';switchQuoteType('invoice');}
+function switchQuoteType(type){quoteType=type;document.getElementById('quote-type-btn').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('invoice-type-btn').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('quote-form-title').textContent=type==='quote'?'Create Quote':'Create Invoice';document.getElementById('q-due-label').textContent=type==='quote'?'Valid until':'Due date';if(type==='quote')document.getElementById('q-doc-number').placeholder='QTE-001';if(type==='invoice')document.getElementById('q-doc-number').placeholder='INV-001';clearQuoteForm();loadSavedQuotes();}
+function clearQuoteForm(){document.getElementById('q-client-name').value='';document.getElementById('q-contact-person').value='';document.getElementById('q-contact-email').value='';document.getElementById('q-client-abn').value='';document.getElementById('q-doc-number').value=quoteType==='quote'?'QTE-001':'INV-001';document.getElementById('q-scope').value='';document.getElementById('q-terms').value='';document.getElementById('q-notes').value='';document.getElementById('q-monthly-toggle').checked=false;quoteLineItems=[];currentEditId=null;setQuoteDates();renderQuoteLineItems();updateQuotePreview();}
+function toggleMonthlyBreakdown(){updateQuotePreview();}
+function setQuoteDates(){const today=new Date().toISOString().split('T')[0];document.getElementById('q-issue-date').value=today;const due=new Date();due.setDate(due.getDate()+(quoteType==='quote'?14:30));document.getElementById('q-due-date').value=due.toISOString().split('T')[0];}
+function addQuoteLineItem(){quoteLineItems.push({id:Date.now(),desc:'',qty:1,rate:0});renderQuoteLineItems();updateQuotePreview();}
+function renderQuoteLineItems(){const container=document.getElementById('q-line-items-container');container.innerHTML=quoteLineItems.map(item=>`<div style="display:grid;grid-template-columns:1.5fr 0.6fr 0.8fr 50px;gap:8px;padding:8px;background:rgba(13,43,62,0.08);border-radius:6px;"><input type="text" class="input" placeholder="Description" value="${item.desc}" onchange="updateQLineItem(${item.id},'desc',this.value)" style="padding:7px 10px;font-size:12px;"><input type="number" class="input" placeholder="Qty" value="${item.qty}" onchange="updateQLineItem(${item.id},'qty',this.value)" style="padding:7px 10px;font-size:12px;text-align:center;"><input type="number" class="input" placeholder="Rate" value="${item.rate}" onchange="updateQLineItem(${item.id},'rate',this.value)" step="0.01" style="padding:7px 10px;font-size:12px;text-align:right;"><button class="btn btn-sm" style="background:rgba(122,40,32,0.2);color:#c62828;border:none;font-size:11px;padding:6px;height:32px;align-self:center;" onclick="delQLineItem(${item.id})">×</button></div>`).join('');}
+function updateQLineItem(id,field,value){const item=quoteLineItems.find(i=>i.id===id);if(!item)return;item[field]=field==='desc'?value:parseFloat(value)||0;updateQuotePreview();}
+function delQLineItem(id){quoteLineItems=quoteLineItems.filter(i=>i.id!==id);renderQuoteLineItems();updateQuotePreview();}
+function updateQuotePreview(){
+  const clientName=document.getElementById('q-client-name').value||'[Client]';
+  const contact=document.getElementById('q-contact-person').value||'—';
+  const email=document.getElementById('q-contact-email').value||'—';
+  const abn=document.getElementById('q-client-abn').value;
+  const docNum=document.getElementById('q-doc-number').value||'DOC-001';
+  const issueDate=document.getElementById('q-issue-date').value;
+  const dueDate=document.getElementById('q-due-date').value;
+  const notes=document.getElementById('q-notes').value;
+  const subtotal=quoteLineItems.reduce((s,i)=>s+(i.qty*i.rate),0);
+  const gst=subtotal*0.1; const total=subtotal+gst;
+  const typeLabel=quoteType==='quote'?'QUOTE':'INVOICE';
+  const dueLabel=quoteType==='quote'?'Valid until':'Due date';
+  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr style="border-bottom:1px solid rgba(13,43,62,0.1);"><td style="padding:8px;text-align:left;">${item.desc||'—'}</td><td style="padding:8px;text-align:center;width:50px;">${item.qty}</td><td style="padding:8px;text-align:right;width:80px;font-family:'DM Mono',monospace;">\$${item.rate.toFixed(2)}</td><td style="padding:8px;text-align:right;width:100px;font-family:'DM Mono',monospace;font-weight:500;">\$${(item.qty*item.rate).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="4" style="padding:8px;text-align:center;color:var(--text-tertiary);">Add services above</td></tr>';
+  const bankDetails=quoteType==='invoice'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(13,43,62,0.1);"><strong>PAYMENT DETAILS</strong><br>Account: N and N Lockwood<br>BSB: 086061 | Acc: 816239874<br>NAB</div>`:'';
+  document.getElementById('q-preview').innerHTML=`<strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);">Lockwood Advisory Pty Ltd</strong><br><strong style="color:var(--ocean-deep);">ABN 76 979 340 565</strong><div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;">nicole@lockwoodadvisory.com.au</div><div style="margin:12px 0;padding:12px 0;border-top:1px solid rgba(13,43,62,0.1);border-bottom:1px solid rgba(13,43,62,0.1);"><div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${typeLabel}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${typeLabel} #: <strong>${docNum}</strong><br>Issued: <strong>${formatDate(issueDate)}</strong><br>${dueLabel}: <strong>${formatDate(dueDate)}</strong></div></div><div style="margin:12px 0;"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ocean-mid);margin-bottom:4px;">Bill to:</div><strong>${clientName}</strong><br><span style="font-size:11px;">${contact}</span><br><span style="font-size:11px;color:var(--text-tertiary);">${email}</span>${abn?'<br><span style="font-size:10px;">ABN: '+abn+'</span>':''}</div><div style="margin:12px 0 0;"><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:rgba(13,43,62,0.08);border-bottom:1px solid rgba(13,43,62,0.1);"><th style="padding:8px;text-align:left;font-weight:600;">Description</th><th style="padding:8px;text-align:center;font-weight:600;width:50px;">Qty</th><th style="padding:8px;text-align:right;font-weight:600;width:80px;">Rate</th><th style="padding:8px;text-align:right;font-weight:600;width:100px;">Amount</th></tr></thead><tbody>${lineItemsHtml}</tbody></table></div><div style="margin:12px 0;padding:12px;background:rgba(46,139,168,0.08);border-radius:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;"><span>Subtotal:</span><span style="font-family:'DM Mono',monospace;">\$${subtotal.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;"><span>GST (10%):</span><span style="font-family:'DM Mono',monospace;">\$${gst.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding-top:8px;border-top:1px solid rgba(13,43,62,0.1);color:var(--ocean-mid);"><span>TOTAL:</span><span style="font-family:'DM Mono',monospace;">\$${total.toFixed(2)}</span></div></div>${notes?'<div style="margin:12px 0;padding:10px;background:rgba(46,139,168,0.06);border-radius:4px;font-size:10px;line-height:1.4;white-space:pre-wrap;">'+notes+'</div>':''}${bankDetails}<div style="margin-top:12px;font-size:9px;color:var(--text-tertiary);border-top:1px solid rgba(13,43,62,0.1);padding-top:8px;">ABN 76 979 340 565 · GST Registered<br>${quoteType==='invoice'?'Due within 30 days of invoice date':'Quote valid for 14 days'}</div>`;
 }
-
-function switchToInvoices(){
-  document.getElementById('quotes-empty-view').style.display='none';
-  document.getElementById('quotes-form-view').style.display='block';
-  switchQuoteType('invoice');
-}
-
-let quoteType = 'quote';
-let quoteLineItems = [];
-let savedQuotes = [];
-let currentEditId = null;
-
-function switchQuoteType(type) {
-  quoteType = type;
-  document.getElementById('quote-type-btn').style.background = type === 'quote' ? 'var(--glass-strong)' : 'transparent';
-  document.getElementById('invoice-type-btn').style.background = type === 'invoice' ? 'var(--glass-strong)' : 'transparent';
-  document.getElementById('quote-form-title').textContent = type === 'quote' ? 'Create Quote' : 'Create Invoice';
-  document.getElementById('q-due-label').textContent = type === 'quote' ? 'Valid until' : 'Due date';
-  if (type === 'quote') document.getElementById('q-doc-number').placeholder = 'QTE-001';
-  if (type === 'invoice') document.getElementById('q-doc-number').placeholder = 'INV-001';
-  clearQuoteForm();
-  loadSavedQuotes();
-}
-
-function clearQuoteForm() {
-  document.getElementById('q-client-name').value = '';
-  document.getElementById('q-contact-person').value = '';
-  document.getElementById('q-contact-email').value = '';
-  document.getElementById('q-client-abn').value = '';
-  document.getElementById('q-doc-number').value = quoteType === 'quote' ? 'QTE-001' : 'INV-001';
-  document.getElementById('q-scope').value = '';
-  document.getElementById('q-terms').value = '';
-  document.getElementById('q-notes').value = '';
-  document.getElementById('q-monthly-toggle').checked = false;
-  quoteLineItems = [];
-  currentEditId = null;
-  setQuoteDates();
-  renderQuoteLineItems();
-  updateQuotePreview();
-}
-
-function toggleMonthlyBreakdown() {
-  updateQuotePreview();
-}
-
-function setQuoteDates() {
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('q-issue-date').value = today;
-  const due = new Date();
-  due.setDate(due.getDate() + (quoteType === 'quote' ? 14 : 30));
-  document.getElementById('q-due-date').value = due.toISOString().split('T')[0];
-}
-
-function addQuoteLineItem() {
-  quoteLineItems.push({ id: Date.now(), desc: '', qty: 1, rate: 0 });
-  renderQuoteLineItems();
-  updateQuotePreview();
-}
-
-function renderQuoteLineItems() {
-  const container = document.getElementById('q-line-items-container');
-  container.innerHTML = quoteLineItems.map(item => `
-    <div style="display:grid;grid-template-columns:1.5fr 0.6fr 0.8fr 50px;gap:8px;padding:8px;background:rgba(13,43,62,0.08);border-radius:6px;">
-      <input type="text" class="input" placeholder="Description" value="${item.desc}" onchange="updateQLineItem(${item.id},'desc',this.value)" style="padding:7px 10px;font-size:12px;">
-      <input type="number" class="input" placeholder="Qty" value="${item.qty}" onchange="updateQLineItem(${item.id},'qty',this.value)" style="padding:7px 10px;font-size:12px;text-align:center;">
-      <input type="number" class="input" placeholder="Rate" value="${item.rate}" onchange="updateQLineItem(${item.id},'rate',this.value)" step="0.01" style="padding:7px 10px;font-size:12px;text-align:right;">
-      <button class="btn btn-sm" style="background:rgba(122,40,32,0.2);color:#c62828;border:none;font-size:11px;padding:6px;height:32px;align-self:center;" onclick="delQLineItem(${item.id})">×</button>
-    </div>
-  `).join('');
-}
-
-function updateQLineItem(id, field, value) {
-  const item = quoteLineItems.find(i => i.id === id);
-  if (!item) return;
-  item[field] = field === 'desc' ? value : parseFloat(value) || 0;
-  updateQuotePreview();
-}
-
-function delQLineItem(id) {
-  quoteLineItems = quoteLineItems.filter(i => i.id !== id);
-  renderQuoteLineItems();
-  updateQuotePreview();
-}
-
-function updateQuotePreview() {
-  const clientName = document.getElementById('q-client-name').value || '[Client]';
-  const contact = document.getElementById('q-contact-person').value || '—';
-  const email = document.getElementById('q-contact-email').value || '—';
-  const abn = document.getElementById('q-client-abn').value;
-  const docNum = document.getElementById('q-doc-number').value || 'DOC-001';
-  const issueDate = document.getElementById('q-issue-date').value;
-  const dueDate = document.getElementById('q-due-date').value;
-  const notes = document.getElementById('q-notes').value;
-
-  const subtotal = quoteLineItems.reduce((s, i) => s + (i.qty * i.rate), 0);
-  const gst = subtotal * 0.1;
-  const total = subtotal + gst;
-
-  const typeLabel = quoteType === 'quote' ? 'QUOTE' : 'INVOICE';
-  const dueLabel = quoteType === 'quote' ? 'Valid until' : 'Due date';
-
-  const lineItemsHtml = quoteLineItems.length ? quoteLineItems.map(item => `
-    <tr style="border-bottom:1px solid rgba(13,43,62,0.1);">
-      <td style="padding:8px;text-align:left;">${item.desc || '—'}</td>
-      <td style="padding:8px;text-align:center;width:50px;">${item.qty}</td>
-      <td style="padding:8px;text-align:right;width:80px;font-family:'DM Mono',monospace;">$${item.rate.toFixed(2)}</td>
-      <td style="padding:8px;text-align:right;width:100px;font-family:'DM Mono',monospace;font-weight:500;">$${(item.qty * item.rate).toFixed(2)}</td>
-    </tr>
-  `).join('') : '<tr><td colspan="4" style="padding:8px;text-align:center;color:var(--text-tertiary);">Add services above</td></tr>';
-
-  const bankDetails = quoteType === 'invoice' ? `
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(13,43,62,0.1);">
-      <strong>PAYMENT DETAILS</strong><br>
-      Account: N and N Lockwood<br>
-      BSB: 086061 | Acc: 816239874<br>
-      NAB
-    </div>
-  ` : '';
-
-  const html = `
-    <strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);">Lockwood Advisory Pty Ltd</strong><br>
-    <strong style="color:var(--ocean-deep);">ABN 76 979 340 565</strong><br>
-    <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;">nicole@lockwoodadvisory.com.au</div>
-    
-    <div style="margin:12px 0;padding:12px 0;border-top:1px solid rgba(13,43,62,0.1);border-bottom:1px solid rgba(13,43,62,0.1);">
-      <div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${typeLabel}</div>
-      <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">
-        ${typeLabel} #: <strong>${docNum}</strong><br>
-        Issued: <strong>${formatDate(issueDate)}</strong><br>
-        ${dueLabel}: <strong>${formatDate(dueDate)}</strong>
-      </div>
-    </div>
-    
-    <div style="margin:12px 0;">
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ocean-mid);margin-bottom:4px;">Bill to:</div>
-      <strong>${clientName}</strong><br>
-      <span style="font-size:11px;">${contact}</span><br>
-      <span style="font-size:11px;color:var(--text-tertiary);">${email}</span>
-      ${abn ? `<br><span style="font-size:10px;">ABN: ${abn}</span>` : ''}
-    </div>
-    
-    <div style="margin:12px 0 0;">
-      <table style="width:100%;border-collapse:collapse;font-size:11px;">
-        <thead>
-          <tr style="background:rgba(13,43,62,0.08);border-bottom:1px solid rgba(13,43,62,0.1);">
-            <th style="padding:8px;text-align:left;font-weight:600;">Description</th>
-            <th style="padding:8px;text-align:center;font-weight:600;width:50px;">Qty</th>
-            <th style="padding:8px;text-align:right;font-weight:600;width:80px;">Rate</th>
-            <th style="padding:8px;text-align:right;font-weight:600;width:100px;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${lineItemsHtml}
-        </tbody>
-      </table>
-    </div>
-    
-    <div style="margin:12px 0;padding:12px;background:rgba(46,139,168,0.08);border-radius:6px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;">
-        <span>Subtotal:</span>
-        <span style="font-family:'DM Mono',monospace;">$${subtotal.toFixed(2)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;">
-        <span>GST (10%):</span>
-        <span style="font-family:'DM Mono',monospace;">$${gst.toFixed(2)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding-top:8px;border-top:1px solid rgba(13,43,62,0.1);color:var(--ocean-mid);">
-        <span>TOTAL:</span>
-        <span style="font-family:'DM Mono',monospace;">$${total.toFixed(2)}</span>
-      </div>
-    </div>
-    
-    ${notes ? `<div style="margin:12px 0;padding:10px;background:rgba(46,139,168,0.06);border-radius:4px;font-size:10px;line-height:1.4;white-space:pre-wrap;">${notes}</div>` : ''}
-    
-    ${bankDetails}
-    
-    <div style="margin-top:12px;font-size:9px;color:var(--text-tertiary);border-top:1px solid rgba(13,43,62,0.1);padding-top:8px;">
-      ABN 76 979 340 565 · GST Registered<br>
-      ${quoteType === 'invoice' ? 'Due within 30 days of invoice date' : 'Quote valid for 14 days'}
-    </div>
-  `;
-
-  document.getElementById('q-preview').innerHTML = html;
-}
-
-function downloadQuotePDF() {
-  const element = document.getElementById('q-preview');
-  const docNum = document.getElementById('q-doc-number').value || 'DOC-001';
-  const clientName = document.getElementById('q-client-name').value || 'Client';
-  const filename = `Lockwood_${quoteType.toUpperCase()}_${docNum}_${clientName}.pdf`;
-
-  const opt = {
-    margin: 8,
-    filename: filename,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-  };
-
-  html2pdf().set(opt).from(element).save();
-  showToast(`✓ Downloaded ${quoteType === 'quote' ? 'quote' : 'invoice'}`);
-}
-
-function saveQuoteDraft() {
-  const docNum = document.getElementById('q-doc-number').value || 'DOC-001';
-  const draft = {
-    id: currentEditId || Date.now(),
-    type: quoteType,
-    clientName: document.getElementById('q-client-name').value,
-    contact: document.getElementById('q-contact-person').value,
-    email: document.getElementById('q-contact-email').value,
-    abn: document.getElementById('q-client-abn').value,
-    docNum: docNum,
-    issueDate: document.getElementById('q-issue-date').value,
-    dueDate: document.getElementById('q-due-date').value,
-    scope: document.getElementById('q-scope').value,
-    terms: document.getElementById('q-terms').value,
-    notes: document.getElementById('q-notes').value,
-    useMonthly: document.getElementById('q-monthly-toggle').checked,
-    lineItems: JSON.stringify(quoteLineItems),
-    savedAt: new Date().toLocaleString('en-AU')
-  };
-  
-  if (currentEditId) {
-    savedQuotes = savedQuotes.filter(d => d.id !== currentEditId);
-  }
-  
+function downloadQuotePDF(){const element=document.getElementById('q-preview');const docNum=document.getElementById('q-doc-number').value||'DOC-001';const clientName=document.getElementById('q-client-name').value||'Client';html2pdf().set({margin:8,filename:`Lockwood_${quoteType.toUpperCase()}_${docNum}_${clientName}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{orientation:'portrait',unit:'mm',format:'a4'}}).from(element).save();showToast('✓ Downloaded');}
+function saveQuoteDraft(){
+  const docNum=document.getElementById('q-doc-number').value||'DOC-001';
+  const draft={id:currentEditId||Date.now(),type:quoteType,clientName:document.getElementById('q-client-name').value,contact:document.getElementById('q-contact-person').value,email:document.getElementById('q-contact-email').value,abn:document.getElementById('q-client-abn').value,docNum,issueDate:document.getElementById('q-issue-date').value,dueDate:document.getElementById('q-due-date').value,scope:document.getElementById('q-scope').value,terms:document.getElementById('q-terms').value,notes:document.getElementById('q-notes').value,useMonthly:document.getElementById('q-monthly-toggle').checked,lineItems:JSON.stringify(quoteLineItems),savedAt:new Date().toLocaleString('en-AU')};
+  if(currentEditId)savedQuotes=savedQuotes.filter(d=>d.id!==currentEditId);
   savedQuotes.unshift(draft);
-  localStorage.setItem(`quoteDrafts_${quoteType}`, JSON.stringify(savedQuotes));
-  loadSavedQuotes();
-  showToast(`✓ ${currentEditId ? 'Updated' : 'Saved'}`);
-  currentEditId = null;
+  localStorage.setItem(`quoteDrafts_${quoteType}`,JSON.stringify(savedQuotes));
+  loadSavedQuotes();showToast('✓ Saved');currentEditId=null;
 }
-
-function loadSavedQuotes() {
-  const stored = localStorage.getItem(`quoteDrafts_${quoteType}`);
-  savedQuotes = stored ? JSON.parse(stored) : [];
-  renderSavedQuotes();
-}
-
-function renderSavedQuotes() {
-  const list = document.getElementById('q-saved-list');
-  if (savedQuotes.length === 0) {
-    list.innerHTML = '<p style="font-size:12px;color:var(--text-tertiary);">No saved documents</p>';
-    return;
-  }
-
-  list.innerHTML = savedQuotes.slice(0, 8).map(doc => `
-    <div style="padding:10px;background:rgba(46,139,168,0.08);border-radius:6px;border-left:4px solid var(--ocean-teal);display:flex;justify-content:space-between;align-items:center;gap:10px;">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;font-weight:600;color:var(--ocean-deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.type.toUpperCase()} #${doc.docNum} – ${doc.clientName}</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;">${doc.savedAt}</div>
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="btn btn-sm" style="padding:6px 10px;background:rgba(46,139,168,0.2);color:var(--ocean-teal);border:none;font-size:11px;cursor:pointer;" onclick="editQuoteDraft(${doc.id})">Edit</button>
-        <button class="btn btn-sm" style="padding:6px 10px;background:rgba(122,40,32,0.15);color:#c62828;border:none;font-size:11px;cursor:pointer;" onclick="deleteQuoteDraft(${doc.id})">×</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function editQuoteDraft(id) {
-  const draft = savedQuotes.find(d => d.id === id);
-  if (!draft) return;
-
-  currentEditId = id;
-  document.getElementById('q-client-name').value = draft.clientName;
-  document.getElementById('q-contact-person').value = draft.contact;
-  document.getElementById('q-contact-email').value = draft.email;
-  document.getElementById('q-client-abn').value = draft.abn;
-  document.getElementById('q-doc-number').value = draft.docNum;
-  document.getElementById('q-issue-date').value = draft.issueDate;
-  document.getElementById('q-due-date').value = draft.dueDate;
-  document.getElementById('q-scope').value = draft.scope || '';
-  document.getElementById('q-terms').value = draft.terms || '';
-  document.getElementById('q-notes').value = draft.notes || '';
-  document.getElementById('q-monthly-toggle').checked = draft.useMonthly || false;
-  quoteLineItems = JSON.parse(draft.lineItems);
-  renderQuoteLineItems();
-  updateQuotePreview();
-  showToast('✓ Loaded for editing');
-}
-
-function deleteQuoteDraft(id) {
-  if (!confirm('Delete this draft?')) return;
-  savedQuotes = savedQuotes.filter(d => d.id !== id);
-  localStorage.setItem(`quoteDrafts_${quoteType}`, JSON.stringify(savedQuotes));
-  loadSavedQuotes();
-  showToast('✓ Deleted');
-}
+function loadSavedQuotes(){const stored=localStorage.getItem(`quoteDrafts_${quoteType}`);savedQuotes=stored?JSON.parse(stored):[];renderSavedQuotes();}
+function renderSavedQuotes(){const list=document.getElementById('q-saved-list');if(!savedQuotes.length){list.innerHTML='<p style="font-size:12px;color:var(--text-tertiary);">No saved documents</p>';return;}list.innerHTML=savedQuotes.slice(0,8).map(doc=>`<div style="padding:10px;background:rgba(46,139,168,0.08);border-radius:6px;border-left:4px solid var(--ocean-teal);display:flex;justify-content:space-between;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:var(--ocean-deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.type.toUpperCase()} #${doc.docNum} – ${doc.clientName}</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;">${doc.savedAt}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-sm" style="padding:6px 10px;background:rgba(46,139,168,0.2);color:var(--ocean-teal);border:none;font-size:11px;cursor:pointer;" onclick="editQuoteDraft(${doc.id})">Edit</button><button class="btn btn-sm" style="padding:6px 10px;background:rgba(122,40,32,0.15);color:#c62828;border:none;font-size:11px;cursor:pointer;" onclick="deleteQuoteDraft(${doc.id})">×</button></div></div>`).join('');}
+function editQuoteDraft(id){const draft=savedQuotes.find(d=>d.id===id);if(!draft)return;currentEditId=id;document.getElementById('q-client-name').value=draft.clientName;document.getElementById('q-contact-person').value=draft.contact;document.getElementById('q-contact-email').value=draft.email;document.getElementById('q-client-abn').value=draft.abn;document.getElementById('q-doc-number').value=draft.docNum;document.getElementById('q-issue-date').value=draft.issueDate;document.getElementById('q-due-date').value=draft.dueDate;document.getElementById('q-scope').value=draft.scope||'';document.getElementById('q-terms').value=draft.terms||'';document.getElementById('q-notes').value=draft.notes||'';document.getElementById('q-monthly-toggle').checked=draft.useMonthly||false;quoteLineItems=JSON.parse(draft.lineItems);renderQuoteLineItems();updateQuotePreview();showToast('✓ Loaded for editing');}
+function deleteQuoteDraft(id){if(!confirm('Delete this draft?'))return;savedQuotes=savedQuotes.filter(d=>d.id!==id);localStorage.setItem(`quoteDrafts_${quoteType}`,JSON.stringify(savedQuotes));loadSavedQuotes();showToast('✓ Deleted');}
 
 // ── UTILS ──
-function formatDate(d){return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
-function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+function formatDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
 
 // ── MOBILE MENU ──
-function toggleMobileMenu(){
-  const sidebar=document.getElementById('sidebar');
-  const overlay=document.getElementById('mobile-menu-overlay');
-  sidebar.classList.toggle('mobile-open');
-  overlay.classList.toggle('active');
-}
-function closeMobileMenu(){
-  const sidebar=document.getElementById('sidebar');
-  const overlay=document.getElementById('mobile-menu-overlay');
-  sidebar.classList.remove('mobile-open');
-  overlay.classList.remove('active');
-}
+function toggleMobileMenu(){const sidebar=document.getElementById('sidebar');const overlay=document.getElementById('mobile-menu-overlay');sidebar.classList.toggle('mobile-open');overlay.classList.toggle('active');}
+function closeMobileMenu(){const sidebar=document.getElementById('sidebar');const overlay=document.getElementById('mobile-menu-overlay');sidebar.classList.remove('mobile-open');overlay.classList.remove('active');}
 
-// Init
-document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
-document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];
-setQuoteDates();addQuoteLineItem();addQuoteLineItem();updateQuotePreview();
-updateDashboard();updateMoneyMap();
+// ── BOOT — AUTH LISTENER ──
+sb.auth.onAuthStateChange((event, session) => {
+  if(session && session.user){
+    showApp(session.user);
+  } else {
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+});
 </script>
 </body>
 </html>
