@@ -1023,7 +1023,7 @@ function getCalcs(){
   const yours=Math.max(0,gross-expenses-tax-medicare-superAmt);
   return{gross,expenses,taxable,tax,medicare,superAmt,totalObligation:tax+medicare+superAmt,yours};
 }
-function fmt(v){return'$'+v.toFixed(2);}
+function fmt(v){return'$'+v.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtK(v){return'$'+Math.round(v).toLocaleString();}
 
 // ── DASHBOARD ──
@@ -1054,7 +1054,7 @@ function updateDashboard(){
   const all=[...state.expenses.map(e=>(({...e,_t:'expense'}))),...state.income.map(i=>(({...i,_t:'income'})))].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
   const rtxn=document.getElementById('recent-txns');
   if(!all.length)rtxn.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg><p>No transactions yet.</p></div>`;
-  else rtxn.innerHTML=all.map(t=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t._t==='expense'?'<path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/>':'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'}</svg></div><div class="txn-info"><div class="txn-name">${t._t==='expense'?t.vendor:t.client}</div><div class="txn-meta">${formatDate(t.date)} · ${t.category||'Uncategorised'}</div></div><div class="txn-amt ${t._t}">${t._t==='expense'?'−':'+'}\$${t.amount.toFixed(2)}</div></div>`).join('');
+  else rtxn.innerHTML=all.map(t=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t._t==='expense'?'<path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/>':'<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'}</svg></div><div class="txn-info"><div class="txn-name">${t._t==='expense'?t.vendor:t.client}</div><div class="txn-meta">${formatDate(t.date)} · ${t.category||'Uncategorised'}</div></div><div class="txn-amt ${t._t}">${t._t==='expense'?'−':'+'}\$${t.amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`).join('');
 }
 
 // ── SUPER ──
@@ -1118,8 +1118,8 @@ function updatePL(){
   const incCats={},expCats={};
   state.income.forEach(i=>{const cat=i.category||'Other';incCats[cat]=(incCats[cat]||0)+i.amount;});
   state.expenses.forEach(e=>{const cat=e.category||'Other';expCats[cat]=(expCats[cat]||0)+(e.amount*e.bizUse/100);});
-  document.getElementById('pl-income-rows').innerHTML=Object.keys(incCats).length?Object.entries(incCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val income">\$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No income recorded</span><span class="pl-val income">$0.00</span></div>`;
-  document.getElementById('pl-expense-rows').innerHTML=Object.keys(expCats).length?Object.entries(expCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val">\$${v.toFixed(2)}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No expenses recorded</span><span class="pl-val">$0.00</span></div>`;
+  document.getElementById('pl-income-rows').innerHTML=Object.keys(incCats).length?Object.entries(incCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val income">\$${v.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No income recorded</span><span class="pl-val income">$0.00</span></div>`;
+  document.getElementById('pl-expense-rows').innerHTML=Object.keys(expCats).length?Object.entries(expCats).map(([k,v])=>`<div class="pl-row"><span class="pl-row-cat">${k}</span><span class="pl-val">\$${v.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`).join(''):`<div class="pl-row"><span class="pl-row-cat">No expenses recorded</span><span class="pl-val">$0.00</span></div>`;
   document.getElementById('pl-total-income').textContent=fmt(c.gross);
   document.getElementById('pl-total-expenses').textContent=fmt(c.expenses);
   document.getElementById('pl-net-profit').textContent=fmt(c.gross-c.expenses);
@@ -1156,17 +1156,17 @@ async function saveExpense(){
   const category=document.getElementById('exp-category').value;
   const bizUse=parseInt(document.getElementById('exp-biz-use').value)||100;
   const desc=document.getElementById('exp-desc').value.trim();
-  const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_\$${amount.toFixed(2)}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
+  const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
   const expense={id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName};
   state.expenses.unshift(expense);
   await saveExpenseDB(expense);
-  hideExpenseForm();renderExpenses();updateDashboard();saveState();showToast(`Saved · ${vendor} · \$${amount.toFixed(2)}`);
+  hideExpenseForm();renderExpenses();updateDashboard();saveState();showToast(`Saved · ${vendor} · \$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}`);
 }
 
 function renderExpenses(){
   const list=document.getElementById('expense-list');
   if(!state.expenses.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div>`;return;}
-  list.innerHTML=state.expenses.map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−\$${e.amount.toFixed(2)}</div></div>`).join('');
+  list.innerHTML=state.expenses.map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−\$${e.amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`).join('');
 }
 
 // ── INCOME FORM ──
@@ -1184,17 +1184,17 @@ async function saveIncome(){
   const category=document.getElementById('inc-category').value;
   const desc=document.getElementById('inc-desc').value.trim();
   const invoiceRef=document.getElementById('inc-invoice').value.trim();
-  const attachName=state.incomeFile?`${date}_${client.replace(/\s+/g,'-')}_\$${amount.toFixed(2)}_${(category||'Income').replace(/[\s&]+/g,'-')}.${state.incomeFile.name.split('.').pop()}`:null;
+  const attachName=state.incomeFile?`${date}_${client.replace(/\s+/g,'-')}_\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}_${(category||'Income').replace(/[\s&]+/g,'-')}.${state.incomeFile.name.split('.').pop()}`:null;
   const inc={id:Date.now(),type:'income',amount,client,date,category,desc,invoiceRef,attachName};
   state.income.unshift(inc);
   await saveIncomeDB(inc);
-  hideIncomeForm();renderIncome();updateDashboard();saveState();showToast(`Saved · ${client} · \$${amount.toFixed(2)}`);
+  hideIncomeForm();renderIncome();updateDashboard();saveState();showToast(`Saved · ${client} · \$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}`);
 }
 
 function renderIncome(){
   const list=document.getElementById('income-list');
   if(!state.income.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p>No income recorded yet.</p></div>`;return;}
-  list.innerHTML=state.income.map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+\$${i.amount.toFixed(2)}</div></div>`).join('');
+  list.innerHTML=state.income.map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+\$${i.amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`).join('');
 }
 
 // ── SEARCH & FILTER ──
@@ -1203,14 +1203,14 @@ function filterExpenses(){
   const filtered=state.expenses.filter(e=>e.vendor.toLowerCase().includes(query)||(e.category&&e.category.toLowerCase().includes(query))||e.date.includes(query)||(e.desc&&e.desc.toLowerCase().includes(query)));
   const list=document.getElementById('expense-list');
   if(!filtered.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;return;}
-  list.innerHTML=filtered.map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−\$${e.amount.toFixed(2)}</div></div>`).join('');
+  list.innerHTML=filtered.map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−\$${e.amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`).join('');
 }
 function filterIncome(){
   const query=document.getElementById('inc-search').value.toLowerCase();
   const filtered=state.income.filter(i=>i.client.toLowerCase().includes(query)||(i.category&&i.category.toLowerCase().includes(query))||i.date.includes(query)||(i.invoiceRef&&i.invoiceRef.toLowerCase().includes(query))||(i.desc&&i.desc.toLowerCase().includes(query)));
   const list=document.getElementById('income-list');
   if(!filtered.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;return;}
-  list.innerHTML=filtered.map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+\$${i.amount.toFixed(2)}</div></div>`).join('');
+  list.innerHTML=filtered.map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+\$${i.amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`).join('');
 }
 
 // ── INVOICE ──
@@ -1276,7 +1276,7 @@ async function saveInvoice(){
 function renderInvoices(){
   const list=document.getElementById('invoice-list');
   if(!state.invoices.length){list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No invoices yet. Create your first one.</p></div>`;return;}
-  list.innerHTML=state.invoices.map(inv=>{const isPaid=inv.status==='paid';const statusColor=isPaid?'var(--positive)':'var(--warning)';const statusBg=isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';return `<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">\$${inv.total.toFixed(2)}</div><div style="display:flex;gap:8px;align-items:center;"><span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status||'outstanding'}</span><button class="btn btn-sm" style="padding:4px 8px;background:${statusBg};color:${statusColor};border:none;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;z-index:2;position:relative;" data-invoice-id="${inv.id}" onclick="event.stopPropagation();markInvoicePaid(this.getAttribute('data-invoice-id'))">${isPaid?'✓ Paid':'Mark paid'}</button></div></div></div>`}).join('');
+  list.innerHTML=state.invoices.map(inv=>{const isPaid=inv.status==='paid';const statusColor=isPaid?'var(--positive)':'var(--warning)';const statusBg=isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';return `<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">\$${inv.total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div style="display:flex;gap:8px;align-items:center;"><span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status||'outstanding'}</span><button class="btn btn-sm" style="padding:4px 8px;background:${statusBg};color:${statusColor};border:none;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;z-index:2;position:relative;" data-invoice-id="${inv.id}" onclick="event.stopPropagation();markInvoicePaid(this.getAttribute('data-invoice-id'))">${isPaid?'✓ Paid':'Mark paid'}</button></div></div></div>`}).join('');
 }
 
 async function markInvoicePaid(invoiceId){
@@ -1314,8 +1314,8 @@ async function downloadInvoicePDF(){
 <div class="body">
 <div class="meta-grid"><div class="meta-section"><h4>Billed To</h4><p><strong>${org}</strong><br>${contact}<br>${email}</p></div><div class="meta-section right"><h4>Invoice Details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
 ${scope?`<div class="scope"><strong>Contract Scope:</strong> ${scope}</div>`:''}
-<table><thead><tr><th>Organisation</th><th>Description</th><th style="text-align:right;">Excl. GST</th><th style="text-align:right;">Incl. GST</th></tr></thead><tbody><tr><td>${org}</td><td><div>Services rendered</div><div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>'· '+l.trim()).join('<br>'):'—'}</div></td><td class="mono" style="text-align:right;">\$${amount.toFixed(2)}</td><td class="mono" style="text-align:right;">\$${total.toFixed(2)}</td></tr></tbody></table>
-<div class="totals-wrap"><div class="total-row"><span>Subtotal</span><span class="mono">\$${amount.toFixed(2)}</span></div><div class="total-row"><span>GST (10%)</span><span class="mono">\$${gstAmt.toFixed(2)}</span></div><div class="total-row grand"><span>TOTAL (incl. GST)</span><span class="mono">\$${total.toFixed(2)}</span></div></div>
+<table><thead><tr><th>Organisation</th><th>Description</th><th style="text-align:right;">Excl. GST</th><th style="text-align:right;">Incl. GST</th></tr></thead><tbody><tr><td>${org}</td><td><div>Services rendered</div><div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>'· '+l.trim()).join('<br>'):'—'}</div></td><td class="mono" style="text-align:right;">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="mono" style="text-align:right;">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tbody></table>
+<div class="totals-wrap"><div class="total-row"><span>Subtotal</span><span class="mono">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row"><span>GST (10%)</span><span class="mono">\$${gstAmt.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row grand"><span>TOTAL (incl. GST)</span><span class="mono">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div>
 <div class="payment"><div class="payment-header">Payment Details</div><div class="payment-body"><strong>Account Name:</strong> N and N Lockwood<br><strong>BSB:</strong> 086061 &nbsp; <strong>Account #:</strong> 816239874<br><strong>Institution:</strong> National Australia Bank</div></div>
 </div>
 <div class="footer"><div class="footer-text">Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</div><div class="footer-text">Due within 30 days of invoice date</div></div>
@@ -1381,7 +1381,7 @@ function updateQuotePreview(){
   const gst=subtotal*0.1; const total=subtotal+gst;
   const typeLabel=quoteType==='quote'?'QUOTE':'INVOICE';
   const dueLabel=quoteType==='quote'?'Valid until':'Due date';
-  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr style="border-bottom:1px solid rgba(13,43,62,0.06);"><td style="padding:10px 12px;text-align:left;line-height:1.5;color:#0D2B3E;">${item.desc||'—'}</td><td style="padding:10px 12px;text-align:center;width:50px;color:#2C5570;">${item.qty}</td><td style="padding:10px 12px;text-align:right;width:90px;font-family:'DM Mono',monospace;color:#2C5570;">\$${item.rate.toFixed(2)}</td><td style="padding:10px 12px;text-align:right;width:100px;font-family:'DM Mono',monospace;font-weight:600;color:#0D2B3E;">\$${(item.qty*item.rate).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="4" style="padding:12px;text-align:center;color:#6A8FA8;">Add services above</td></tr>';
+  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr style="border-bottom:1px solid rgba(13,43,62,0.06);"><td style="padding:10px 12px;text-align:left;line-height:1.5;color:#0D2B3E;">${item.desc||'—'}</td><td style="padding:10px 12px;text-align:center;width:50px;color:#2C5570;">${item.qty}</td><td style="padding:10px 12px;text-align:right;width:90px;font-family:'DM Mono',monospace;color:#2C5570;">\$${item.rate.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td style="padding:10px 12px;text-align:right;width:100px;font-family:'DM Mono',monospace;font-weight:600;color:#0D2B3E;">\$${(item.qty*item.rate).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join(''):'<tr><td colspan="4" style="padding:12px;text-align:center;color:#6A8FA8;">Add services above</td></tr>';
   const bankDetails=quoteType==='invoice'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(13,43,62,0.1);"><strong>PAYMENT DETAILS</strong><br>Account: N and N Lockwood<br>BSB: 086061 | Acc: 816239874<br>NAB</div>`:'';
   document.getElementById('q-preview').innerHTML=`
     <!-- BRANDED HEADER BAR -->
@@ -1423,18 +1423,18 @@ function updateQuotePreview(){
         <tbody>${lineItemsHtml}</tbody>
       </table>
       <div style="padding:10px 12px;background:rgba(46,139,168,0.05);border-top:1px solid rgba(13,43,62,0.08);">
-        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:#2C5570;"><span>Subtotal:</span><span style="font-family:'DM Mono',monospace;">\$${subtotal.toFixed(2)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:#2C5570;"><span>GST (10%):</span><span style="font-family:'DM Mono',monospace;">\$${gst.toFixed(2)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;padding-top:8px;border-top:1px solid rgba(46,139,168,0.2);color:#0D2B3E;"><span>TOTAL:</span><span style="font-family:'DM Mono',monospace;">\$${total.toFixed(2)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:#2C5570;"><span>Subtotal:</span><span style="font-family:'DM Mono',monospace;">\$${subtotal.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:#2C5570;"><span>GST (10%):</span><span style="font-family:'DM Mono',monospace;">\$${gst.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;padding-top:8px;border-top:1px solid rgba(46,139,168,0.2);color:#0D2B3E;"><span>TOTAL:</span><span style="font-family:'DM Mono',monospace;">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
       </div>
     </div>
     <!-- MONTHLY BREAKDOWN -->
     ${useMonthly&&subtotal>0?`<div style="margin-bottom:24px;border:1px solid rgba(13,43,62,0.12);border-radius:6px;overflow:hidden;">
       <div style="background:#2E8BA8;padding:8px 12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#fff;">Monthly Payment Schedule</div>
       <div style="padding:12px;">
-        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:#2C5570;"><span>Monthly fee (excl. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(subtotal/12).toFixed(2)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:#2C5570;"><span>Monthly GST:</span><span style="font-family:'DM Mono',monospace;">\$${(gst/12).toFixed(2)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding-top:8px;border-top:1px solid rgba(46,139,168,0.2);color:#0D2B3E;"><span>Monthly invoice total (inc. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(total/12).toFixed(2)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:#2C5570;"><span>Monthly fee (excl. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(subtotal/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:#2C5570;"><span>Monthly GST:</span><span style="font-family:'DM Mono',monospace;">\$${(gst/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding-top:8px;border-top:1px solid rgba(46,139,168,0.2);color:#0D2B3E;"><span>Monthly invoice total (inc. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(total/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
       </div>
     </div>`:''}
     <!-- NOTES -->
@@ -1472,8 +1472,8 @@ function downloadQuotePDF(){
   const dueLabel=quoteType==='quote'?'Valid until':'Due date';
   const subtotal=quoteLineItems.reduce((s,i)=>s+(i.qty*i.rate),0);
   const gst=subtotal*0.1; const total=subtotal+gst;
-  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr><td>${item.desc||'—'}</td><td style="text-align:center;">${item.qty}</td><td style="text-align:right;">\$${item.rate.toFixed(2)}</td><td style="text-align:right;font-weight:600;">\$${(item.qty*item.rate).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#6A8FA8;">—</td></tr>';
-  const monthlyHtml=useMonthly&&subtotal>0?`<div class="section"><div class="section-header teal">Monthly Payment Schedule</div><div class="section-body"><div class="row"><span>Monthly fee (excl. GST):</span><span class="mono">\$${(subtotal/12).toFixed(2)}</span></div><div class="row"><span>Monthly GST:</span><span class="mono">\$${(gst/12).toFixed(2)}</span></div><div class="row total"><span>Monthly invoice total (inc. GST):</span><span class="mono">\$${(total/12).toFixed(2)}</span></div></div></div>`:'';
+  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr><td>${item.desc||'—'}</td><td style="text-align:center;">${item.qty}</td><td style="text-align:right;">\$${item.rate.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td style="text-align:right;font-weight:600;">\$${(item.qty*item.rate).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#6A8FA8;">—</td></tr>';
+  const monthlyHtml=useMonthly&&subtotal>0?`<div class="section"><div class="section-header teal">Monthly Payment Schedule</div><div class="section-body"><div class="row"><span>Monthly fee (excl. GST):</span><span class="mono">\$${(subtotal/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="row"><span>Monthly GST:</span><span class="mono">\$${(gst/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="row total"><span>Monthly invoice total (inc. GST):</span><span class="mono">\$${(total/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div></div>`:'';
   const scopeHtml=scope?`<div class="section"><div class="section-header dark">Scope of Services</div><div class="section-body pre">${scope}</div></div>`:'';
   const notesHtml=notes?`<div class="section"><div class="section-header teal">Notes</div><div class="section-body pre">${notes}</div></div>`:'';
   const termsHtml=terms?`<div class="section"><div class="section-header dark">Terms &amp; Conditions</div><div class="section-body pre">${terms}</div></div>`:'';
@@ -1525,7 +1525,7 @@ td:nth-child(4){text-align:right;}
 <div class="body">
 <div class="meta"><div class="meta-block"><h4>${typeLabel} Details</h4><p>${typeLabel} #: <strong>${docNum}</strong><br>Issued: <strong>${issueDate?new Date(issueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong><br>${dueLabel}: <strong>${dueDate?new Date(dueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong></p></div><div class="meta-block meta-right"><h4>Bill To</h4><p><strong>${clientName}</strong><br>${contact}<br><span style="color:#6A8FA8;">${email}</span>${abn?'<br><span style="color:#6A8FA8;">ABN: '+abn+'</span>':''}</p></div></div>
 ${scopeHtml}
-<div class="section"><div class="section-header dark">Services</div><table><thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${lineItemsHtml}</tbody></table><div class="totals"><div class="row"><span>Subtotal:</span><span class="mono">\$${subtotal.toFixed(2)}</span></div><div class="row"><span>GST (10%):</span><span class="mono">\$${gst.toFixed(2)}</span></div><div class="row total"><span>TOTAL:</span><span class="mono">\$${total.toFixed(2)}</span></div></div></div>
+<div class="section"><div class="section-header dark">Services</div><table><thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${lineItemsHtml}</tbody></table><div class="totals"><div class="row"><span>Subtotal:</span><span class="mono">\$${subtotal.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="row"><span>GST (10%):</span><span class="mono">\$${gst.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="row total"><span>TOTAL:</span><span class="mono">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div></div>
 ${monthlyHtml}${notesHtml}${termsHtml}${bankHtml}
 </div>
 </div>
