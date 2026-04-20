@@ -1376,9 +1376,67 @@ function updateQuotePreview(){
   const gst=subtotal*0.1; const total=subtotal+gst;
   const typeLabel=quoteType==='quote'?'QUOTE':'INVOICE';
   const dueLabel=quoteType==='quote'?'Valid until':'Due date';
-  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr style="border-bottom:1px solid rgba(13,43,62,0.1);"><td style="padding:8px;text-align:left;">${item.desc||'—'}</td><td style="padding:8px;text-align:center;width:50px;">${item.qty}</td><td style="padding:8px;text-align:right;width:80px;font-family:'DM Mono',monospace;">\$${item.rate.toFixed(2)}</td><td style="padding:8px;text-align:right;width:100px;font-family:'DM Mono',monospace;font-weight:500;">\$${(item.qty*item.rate).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="4" style="padding:8px;text-align:center;color:var(--text-tertiary);">Add services above</td></tr>';
+  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr style="border-bottom:1px solid rgba(13,43,62,0.07);"><td style="padding:11px 10px;text-align:left;line-height:1.5;">${item.desc||'—'}</td><td style="padding:11px 10px;text-align:center;width:50px;">${item.qty}</td><td style="padding:11px 10px;text-align:right;width:90px;font-family:'DM Mono',monospace;">\$${item.rate.toFixed(2)}</td><td style="padding:11px 10px;text-align:right;width:100px;font-family:'DM Mono',monospace;font-weight:600;">\$${(item.qty*item.rate).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="4" style="padding:12px 10px;text-align:center;color:var(--text-tertiary);">Add services above</td></tr>';
   const bankDetails=quoteType==='invoice'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(13,43,62,0.1);"><strong>PAYMENT DETAILS</strong><br>Account: N and N Lockwood<br>BSB: 086061 | Acc: 816239874<br>NAB</div>`:'';
-  document.getElementById('q-preview').innerHTML=`<strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);">Lockwood Advisory Pty Ltd</strong><br><strong style="color:var(--ocean-deep);">ABN 76 979 340 565</strong><div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;">nicole@lockwoodadvisory.com.au</div><div style="margin:12px 0;padding:12px 0;border-top:1px solid rgba(13,43,62,0.1);border-bottom:1px solid rgba(13,43,62,0.1);"><div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${typeLabel}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${typeLabel} #: <strong>${docNum}</strong><br>Issued: <strong>${formatDate(issueDate)}</strong><br>${dueLabel}: <strong>${formatDate(dueDate)}</strong></div></div><div style="margin:12px 0;"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ocean-mid);margin-bottom:4px;">Bill to:</div><strong>${clientName}</strong><br><span style="font-size:11px;">${contact}</span><br><span style="font-size:11px;color:var(--text-tertiary);">${email}</span>${abn?'<br><span style="font-size:10px;">ABN: '+abn+'</span>':''}</div><div style="margin:12px 0 0;"><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:rgba(13,43,62,0.08);border-bottom:1px solid rgba(13,43,62,0.1);"><th style="padding:8px;text-align:left;font-weight:600;">Description</th><th style="padding:8px;text-align:center;font-weight:600;width:50px;">Qty</th><th style="padding:8px;text-align:right;font-weight:600;width:80px;">Rate</th><th style="padding:8px;text-align:right;font-weight:600;width:100px;">Amount</th></tr></thead><tbody>${lineItemsHtml}</tbody></table></div><div style="margin:12px 0;padding:12px;background:rgba(46,139,168,0.08);border-radius:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;"><span>Subtotal:</span><span style="font-family:'DM Mono',monospace;">\$${subtotal.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;"><span>GST (10%):</span><span style="font-family:'DM Mono',monospace;">\$${gst.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding-top:8px;border-top:1px solid rgba(13,43,62,0.1);color:var(--ocean-mid);"><span>TOTAL:</span><span style="font-family:'DM Mono',monospace;">\$${total.toFixed(2)}</span></div></div>${useMonthly&&subtotal>0?`<div style="margin:12px 0;padding:10px;background:rgba(46,139,168,0.06);border-radius:6px;"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--ocean-mid);margin-bottom:8px;">Monthly Payment Schedule</div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span>Monthly fee (excl. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(subtotal/12).toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;"><span>Monthly GST:</span><span style="font-family:'DM Mono',monospace;">\$${(gst/12).toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;padding-top:6px;border-top:1px solid rgba(13,43,62,0.1);color:var(--ocean-mid);"><span>Monthly invoice total (inc. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(total/12).toFixed(2)}</span></div></div>`:''}${notes?'<div style="margin:12px 0;padding:10px;background:rgba(46,139,168,0.06);border-radius:4px;font-size:10px;line-height:1.4;white-space:pre-wrap;">'+notes+'</div>':''}${terms?`<div style="margin:12px 0;padding:10px;border-top:1px solid rgba(13,43,62,0.1);"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--ocean-mid);margin-bottom:6px;">Terms &amp; Conditions</div><div style="font-size:10px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;">${terms}</div></div>`:''}${bankDetails}<div style="margin-top:12px;font-size:9px;color:var(--text-tertiary);border-top:1px solid rgba(13,43,62,0.1);padding-top:8px;">ABN 76 979 340 565 · GST Registered<br>${quoteType==='invoice'?'Due within 30 days of invoice date':'Quote valid for 14 days'}</div>`;
+  document.getElementById('q-preview').innerHTML=`
+    <!-- HEADER: right-aligned company block -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid rgba(13,43,62,0.12);">
+      <div style="font-size:13px;font-weight:700;color:var(--ocean-deep);letter-spacing:0.02em;">${typeLabel}</div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ocean-deep);">Lockwood Advisory Pty Ltd</div>
+        <div style="font-size:10px;color:var(--text-secondary);margin-top:3px;">ABN 76 979 340 565</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;">nicole@lockwoodadvisory.com.au</div>
+      </div>
+    </div>
+    <!-- DOC DETAILS + BILL TO side by side -->
+    <div style="display:flex;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-tertiary);margin-bottom:5px;">${typeLabel} Details</div>
+        <div style="font-size:11px;color:var(--text-secondary);line-height:1.8;">${typeLabel} #: <strong style="color:var(--ocean-deep);">${docNum}</strong><br>Issued: <strong>${formatDate(issueDate)}</strong><br>${dueLabel}: <strong>${formatDate(dueDate)}</strong></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-tertiary);margin-bottom:5px;">Bill To</div>
+        <div style="font-size:11px;color:var(--text-secondary);line-height:1.8;"><strong style="color:var(--ocean-deep);">${clientName}</strong><br>${contact}<br><span style="color:var(--text-tertiary);">${email}</span>${abn?'<br>ABN: '+abn:''}</div>
+      </div>
+    </div>
+    <!-- LINE ITEMS TABLE -->
+    <div style="margin-bottom:4px;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:rgba(13,43,62,0.07);border-bottom:2px solid rgba(13,43,62,0.12);">
+          <th style="padding:9px 10px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;">Description</th>
+          <th style="padding:9px 10px;text-align:center;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;width:50px;">Qty</th>
+          <th style="padding:9px 10px;text-align:right;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;width:90px;">Rate</th>
+          <th style="padding:9px 10px;text-align:right;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;width:100px;">Amount</th>
+        </tr></thead>
+        <tbody>${lineItemsHtml}</tbody>
+      </table>
+    </div>
+    <!-- TOTALS -->
+    <div style="margin:0 0 24px;padding:12px 10px;background:rgba(46,139,168,0.06);border-radius:0 0 6px 6px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;color:var(--text-secondary);"><span>Subtotal:</span><span style="font-family:'DM Mono',monospace;">\$${subtotal.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:var(--text-secondary);"><span>GST (10%):</span><span style="font-family:'DM Mono',monospace;">\$${gst.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;padding-top:8px;border-top:1px solid rgba(13,43,62,0.12);color:var(--ocean-deep);"><span>TOTAL:</span><span style="font-family:'DM Mono',monospace;">\$${total.toFixed(2)}</span></div>
+    </div>
+    <!-- MONTHLY BREAKDOWN -->
+    ${useMonthly&&subtotal>0?`<div style="margin-bottom:24px;padding:14px;border:1px solid rgba(46,139,168,0.2);border-radius:6px;background:rgba(46,139,168,0.04);">
+      <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--ocean-teal);margin-bottom:10px;">Monthly Payment Schedule</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:var(--text-secondary);"><span>Monthly fee (excl. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(subtotal/12).toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:var(--text-secondary);"><span>Monthly GST:</span><span style="font-family:'DM Mono',monospace;">\$${(gst/12).toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding-top:8px;border-top:1px solid rgba(46,139,168,0.15);color:var(--ocean-deep);"><span>Monthly invoice total (inc. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(total/12).toFixed(2)}</span></div>
+    </div>`:''}
+    <!-- NOTES -->
+    ${notes?`<div style="margin-bottom:20px;padding:12px;background:rgba(46,139,168,0.05);border-radius:6px;font-size:10px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;">${notes}</div>`:''}
+    <!-- TERMS & CONDITIONS -->
+    ${terms?`<div style="margin-bottom:24px;padding-top:16px;border-top:1px solid rgba(13,43,62,0.1);">
+      <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-tertiary);margin-bottom:8px;">Terms &amp; Conditions</div>
+      <div style="font-size:10px;line-height:1.7;color:var(--text-secondary);white-space:pre-wrap;">${terms}</div>
+    </div>`:''}
+    ${bankDetails}
+    <!-- FOOTER -->
+    <div style="margin-top:32px;padding-top:10px;border-top:1px solid rgba(13,43,62,0.1);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:9px;color:var(--text-tertiary);">Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</div>
+      <div style="font-size:9px;color:var(--text-tertiary);">${quoteType==='invoice'?'Payment due within 30 days':'Quote valid for 14 days'}</div>
+    </div>`;
 }
 function downloadQuotePDF(){
   const element=document.getElementById('q-preview');
