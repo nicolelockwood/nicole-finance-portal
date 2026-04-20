@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finance Portal · Nicole Lockwood</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
 
@@ -693,16 +694,25 @@ textarea.input{resize:vertical;min-height:80px;}
 
 <!-- ═══ QUOTES & INVOICES GENERATOR ═══ -->
 <div id="page-quotes" class="page">
-  <div id="quotes-empty-view">
-    <div class="page-header"><div><div class="page-title">Quotes & Invoices</div><div class="page-subtitle">Professional documents in seconds</div></div><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="showQuoteForm()">+ New quote</button><button class="btn btn-glass btn-sm" onclick="switchToInvoices()">View invoices</button></div></div>
-    <div class="glass" style="padding:60px 40px;text-align:center;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <p style="color:var(--text-tertiary);font-size:14px;">No quotes yet. Create your first one.</p>
+  <!-- LIST VIEW — shown by default, shows all saved quotes/invoices -->
+  <div id="quotes-list-view">
+    <div class="page-header">
+      <div><div class="page-title">Quotes & Invoices</div><div class="page-subtitle">Professional documents in seconds</div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-glass btn-sm" onclick="showQuoteFormNew('quote')">+ New quote</button>
+        <button class="btn btn-primary btn-sm" onclick="showQuoteFormNew('invoice')">+ New invoice</button>
+      </div>
     </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;margin-bottom:16px;background:rgba(13,43,62,0.08);border-radius:10px;padding:4px;width:fit-content;">
+      <button id="ql-tab-quote" class="btn btn-sm" style="background:var(--glass-strong);border-radius:7px;font-size:12px;font-weight:500;" onclick="switchListTab('quote')">Quotes</button>
+      <button id="ql-tab-invoice" class="btn btn-sm" style="background:transparent;border:none;border-radius:7px;font-size:12px;font-weight:500;color:var(--text-tertiary);" onclick="switchListTab('invoice')">Invoices</button>
+    </div>
+    <div id="quotes-saved-list" style="display:flex;flex-direction:column;gap:10px;"></div>
   </div>
 
   <div id="quotes-form-view" style="display:none;">
-    <div class="page-header"><div><div class="page-title">Quotes & Invoices</div><div class="page-subtitle">Professional documents in seconds</div></div><div style="display:flex;gap:8px;"><button class="btn btn-glass btn-sm" data-type="quote" onclick="switchQuoteType('quote')" id="quote-type-btn" style="background:var(--glass-strong);">Quote</button><button class="btn btn-glass btn-sm" data-type="invoice" onclick="switchQuoteType('invoice')" id="invoice-type-btn">Invoice</button></div></div>
+    <div class="page-header"><div style="display:flex;align-items:center;gap:12px;"><button class="btn btn-glass btn-sm" onclick="backToQuotesList()" style="padding:6px 12px;">← Back</button><div><div class="page-title" id="quote-form-title">Create Quote</div><div class="page-subtitle">Professional documents in seconds</div></div></div><div style="display:flex;gap:8px;"><button class="btn btn-glass btn-sm" data-type="quote" onclick="switchQuoteType('quote')" id="quote-type-btn" style="background:var(--glass-strong);">Quote</button><button class="btn btn-glass btn-sm" data-type="invoice" onclick="switchQuoteType('invoice')" id="invoice-type-btn">Invoice</button></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
       <!-- Left: Form -->
       <div class="glass-strong">
@@ -745,11 +755,7 @@ textarea.input{resize:vertical;min-height:80px;}
             <button class="btn btn-glass" style="flex:1;justify-content:center;" onclick="saveQuoteDraft()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button>
           </div>
 
-          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:12px;"></div>
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:8px;">Saved Documents</div>
-          <div id="q-saved-list" style="display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;">
-            <p style="font-size:12px;color:var(--text-tertiary);">No saved documents yet</p>
-          </div>
+          <div id="q-saved-list" style="display:none;"></div>
         </div>
       </div>
 
@@ -917,9 +923,10 @@ async function loadAllData(){
   restoreMoneyMapAndSuper();
   document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];
-  setQuoteDates(); addQuoteLineItem(); addQuoteLineItem(); updateQuotePreview();
+  setQuoteDates(); addQuoteLineItem(); updateQuotePreview();
   updateDashboard(); updateMoneyMap();
   renderExpenses(); renderIncome(); renderInvoices();
+  renderQuoteListView();
   document.getElementById('last-saved-display').textContent = 'All data saved to cloud';
 }
 
@@ -1001,6 +1008,7 @@ function showPage(p){
   if(p==='pl')updatePL();
   if(p==='super')updateSuperPage();
   if(p==='moneymap')updateMoneyMap();
+  if(p==='quotes'){document.getElementById('quotes-list-view').style.display='block';document.getElementById('quotes-form-view').style.display='none';renderQuoteListView();}
 }
 
 // ── CALCS ──
@@ -1338,9 +1346,14 @@ function exportJSONBackup(){
 
 // ── QUOTES ──
 let quoteType='quote',quoteLineItems=[],savedQuotes=[],currentEditId=null;
-function showQuoteForm(){document.getElementById('quotes-empty-view').style.display='none';document.getElementById('quotes-form-view').style.display='block';switchQuoteType('quote');}
-function switchToInvoices(){document.getElementById('quotes-empty-view').style.display='none';document.getElementById('quotes-form-view').style.display='block';switchQuoteType('invoice');}
-function switchQuoteType(type){quoteType=type;document.getElementById('quote-type-btn').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('invoice-type-btn').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('quote-form-title').textContent=type==='quote'?'Create Quote':'Create Invoice';document.getElementById('q-due-label').textContent=type==='quote'?'Valid until':'Due date';if(type==='quote')document.getElementById('q-doc-number').placeholder='QTE-001';if(type==='invoice')document.getElementById('q-doc-number').placeholder='INV-001';clearQuoteForm();loadSavedQuotes();}
+let currentListTab='quote';
+function showQuoteFormNew(type){quoteType=type;clearQuoteForm();document.getElementById('quotes-list-view').style.display='none';document.getElementById('quotes-form-view').style.display='block';document.getElementById('quote-type-btn').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('invoice-type-btn').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('quote-form-title').textContent=type==='quote'?'Create Quote':'Create Invoice';}
+function backToQuotesList(){document.getElementById('quotes-form-view').style.display='none';document.getElementById('quotes-list-view').style.display='block';renderQuoteListView();}
+function switchListTab(type){currentListTab=type;document.getElementById('ql-tab-quote').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('ql-tab-quote').style.color=type==='quote'?'var(--text-primary)':'var(--text-tertiary)';document.getElementById('ql-tab-invoice').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('ql-tab-invoice').style.color=type==='invoice'?'var(--text-primary)':'var(--text-tertiary)';renderQuoteListView();}
+function renderQuoteListView(){const stored=localStorage.getItem(`quoteDrafts_${currentListTab}`);const docs=stored?JSON.parse(stored):[];const list=document.getElementById('quotes-saved-list');if(!docs.length){list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No ${currentListTab}s yet. Create your first one.</p></div>`;return;}list.innerHTML=docs.map(doc=>`<div class="glass" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;cursor:pointer;" onclick="editQuoteDraft(${doc.id})"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${doc.type.toUpperCase()} #${doc.docNum} — ${doc.clientName||'(no client)'}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;">Saved ${doc.savedAt}</div></div><div style="display:flex;gap:8px;flex-shrink:0;"><button class="btn btn-glass btn-sm" onclick="event.stopPropagation();editQuoteDraft(${doc.id})">Edit</button><button class="btn btn-sm" style="background:rgba(122,40,32,0.15);color:#c62828;border:none;font-size:11px;padding:6px 10px;border-radius:6px;" onclick="event.stopPropagation();deleteQuoteDraft(${doc.id})">Delete</button></div></div>`).join('');}
+function showQuoteForm(){showQuoteFormNew('quote');}
+function switchToInvoices(){showQuoteFormNew('invoice');}
+function switchQuoteType(type){quoteType=type;document.getElementById('quote-type-btn').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('invoice-type-btn').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('quote-form-title').textContent=type==='quote'?'Create Quote':'Create Invoice';document.getElementById('q-due-label').textContent=type==='quote'?'Valid until':'Due date';if(type==='quote')document.getElementById('q-doc-number').placeholder='QTE-001';if(type==='invoice')document.getElementById('q-doc-number').placeholder='INV-001';}
 function clearQuoteForm(){document.getElementById('q-client-name').value='';document.getElementById('q-contact-person').value='';document.getElementById('q-contact-email').value='';document.getElementById('q-client-abn').value='';document.getElementById('q-doc-number').value=quoteType==='quote'?'QTE-001':'INV-001';document.getElementById('q-scope').value='';document.getElementById('q-terms').value='';document.getElementById('q-notes').value='';document.getElementById('q-monthly-toggle').checked=false;quoteLineItems=[];currentEditId=null;setQuoteDates();renderQuoteLineItems();updateQuotePreview();}
 function toggleMonthlyBreakdown(){updateQuotePreview();}
 function setQuoteDates(){const today=new Date().toISOString().split('T')[0];document.getElementById('q-issue-date').value=today;const due=new Date();due.setDate(due.getDate()+(quoteType==='quote'?14:30));document.getElementById('q-due-date').value=due.toISOString().split('T')[0];}
@@ -1367,19 +1380,63 @@ function updateQuotePreview(){
   const bankDetails=quoteType==='invoice'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(13,43,62,0.1);"><strong>PAYMENT DETAILS</strong><br>Account: N and N Lockwood<br>BSB: 086061 | Acc: 816239874<br>NAB</div>`:'';
   document.getElementById('q-preview').innerHTML=`<strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);">Lockwood Advisory Pty Ltd</strong><br><strong style="color:var(--ocean-deep);">ABN 76 979 340 565</strong><div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;">nicole@lockwoodadvisory.com.au</div><div style="margin:12px 0;padding:12px 0;border-top:1px solid rgba(13,43,62,0.1);border-bottom:1px solid rgba(13,43,62,0.1);"><div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${typeLabel}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">${typeLabel} #: <strong>${docNum}</strong><br>Issued: <strong>${formatDate(issueDate)}</strong><br>${dueLabel}: <strong>${formatDate(dueDate)}</strong></div></div><div style="margin:12px 0;"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ocean-mid);margin-bottom:4px;">Bill to:</div><strong>${clientName}</strong><br><span style="font-size:11px;">${contact}</span><br><span style="font-size:11px;color:var(--text-tertiary);">${email}</span>${abn?'<br><span style="font-size:10px;">ABN: '+abn+'</span>':''}</div><div style="margin:12px 0 0;"><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:rgba(13,43,62,0.08);border-bottom:1px solid rgba(13,43,62,0.1);"><th style="padding:8px;text-align:left;font-weight:600;">Description</th><th style="padding:8px;text-align:center;font-weight:600;width:50px;">Qty</th><th style="padding:8px;text-align:right;font-weight:600;width:80px;">Rate</th><th style="padding:8px;text-align:right;font-weight:600;width:100px;">Amount</th></tr></thead><tbody>${lineItemsHtml}</tbody></table></div><div style="margin:12px 0;padding:12px;background:rgba(46,139,168,0.08);border-radius:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;"><span>Subtotal:</span><span style="font-family:'DM Mono',monospace;">\$${subtotal.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;"><span>GST (10%):</span><span style="font-family:'DM Mono',monospace;">\$${gst.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding-top:8px;border-top:1px solid rgba(13,43,62,0.1);color:var(--ocean-mid);"><span>TOTAL:</span><span style="font-family:'DM Mono',monospace;">\$${total.toFixed(2)}</span></div></div>${useMonthly&&subtotal>0?`<div style="margin:12px 0;padding:10px;background:rgba(46,139,168,0.06);border-radius:6px;"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--ocean-mid);margin-bottom:8px;">Monthly Payment Schedule</div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span>Monthly fee (excl. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(subtotal/12).toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;"><span>Monthly GST:</span><span style="font-family:'DM Mono',monospace;">\$${(gst/12).toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;padding-top:6px;border-top:1px solid rgba(13,43,62,0.1);color:var(--ocean-mid);"><span>Monthly invoice total (inc. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(total/12).toFixed(2)}</span></div></div>`:''}${notes?'<div style="margin:12px 0;padding:10px;background:rgba(46,139,168,0.06);border-radius:4px;font-size:10px;line-height:1.4;white-space:pre-wrap;">'+notes+'</div>':''}${terms?`<div style="margin:12px 0;padding:10px;border-top:1px solid rgba(13,43,62,0.1);"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--ocean-mid);margin-bottom:6px;">Terms &amp; Conditions</div><div style="font-size:10px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;">${terms}</div></div>`:''}${bankDetails}<div style="margin-top:12px;font-size:9px;color:var(--text-tertiary);border-top:1px solid rgba(13,43,62,0.1);padding-top:8px;">ABN 76 979 340 565 · GST Registered<br>${quoteType==='invoice'?'Due within 30 days of invoice date':'Quote valid for 14 days'}</div>`;
 }
-function downloadQuotePDF(){const element=document.getElementById('q-preview');const docNum=document.getElementById('q-doc-number').value||'DOC-001';const clientName=document.getElementById('q-client-name').value||'Client';html2pdf().set({margin:8,filename:`Lockwood_${quoteType.toUpperCase()}_${docNum}_${clientName}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{orientation:'portrait',unit:'mm',format:'a4'}}).from(element).save();showToast('✓ Downloaded');}
+function downloadQuotePDF(){
+  const element=document.getElementById('q-preview');
+  const docNum=document.getElementById('q-doc-number').value||'DOC-001';
+  const clientName=document.getElementById('q-client-name').value||'Client';
+  // Clone and style for PDF (white background, full width)
+  const clone=element.cloneNode(true);
+  clone.style.cssText='background:#fff;color:#0D2B3E;padding:24px;font-size:12px;line-height:1.6;width:100%;max-height:none;overflow:visible;font-family:Arial,sans-serif;';
+  clone.querySelectorAll('*').forEach(el=>{el.style.color=el.style.color||'#0D2B3E';});
+  html2pdf().set({margin:12,filename:`Lockwood_${quoteType.toUpperCase()}_${docNum}_${clientName}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,backgroundColor:'#ffffff'},jsPDF:{orientation:'portrait',unit:'mm',format:'a4'}}).from(clone).save();
+  showToast('✓ Downloading PDF...');
+}
 function saveQuoteDraft(){
+  currentListTab=quoteType;
   const docNum=document.getElementById('q-doc-number').value||'DOC-001';
   const draft={id:currentEditId||Date.now(),type:quoteType,clientName:document.getElementById('q-client-name').value,contact:document.getElementById('q-contact-person').value,email:document.getElementById('q-contact-email').value,abn:document.getElementById('q-client-abn').value,docNum,issueDate:document.getElementById('q-issue-date').value,dueDate:document.getElementById('q-due-date').value,scope:document.getElementById('q-scope').value,terms:document.getElementById('q-terms').value,notes:document.getElementById('q-notes').value,useMonthly:document.getElementById('q-monthly-toggle').checked,lineItems:JSON.stringify(quoteLineItems),savedAt:new Date().toLocaleString('en-AU')};
-  if(currentEditId)savedQuotes=savedQuotes.filter(d=>d.id!==currentEditId);
-  savedQuotes.unshift(draft);
-  localStorage.setItem(`quoteDrafts_${quoteType}`,JSON.stringify(savedQuotes));
-  loadSavedQuotes();showToast('✓ Saved');currentEditId=null;
+  const stored=localStorage.getItem(`quoteDrafts_${quoteType}`);
+  let docs=stored?JSON.parse(stored):[];
+  if(currentEditId)docs=docs.filter(d=>d.id!==currentEditId);
+  docs.unshift(draft);
+  localStorage.setItem(`quoteDrafts_${quoteType}`,JSON.stringify(docs));
+  showToast('✓ Saved');currentEditId=null;
+  backToQuotesList();
 }
-function loadSavedQuotes(){const stored=localStorage.getItem(`quoteDrafts_${quoteType}`);savedQuotes=stored?JSON.parse(stored):[];renderSavedQuotes();}
-function renderSavedQuotes(){const list=document.getElementById('q-saved-list');if(!savedQuotes.length){list.innerHTML='<p style="font-size:12px;color:var(--text-tertiary);">No saved documents</p>';return;}list.innerHTML=savedQuotes.slice(0,8).map(doc=>`<div style="padding:10px;background:rgba(46,139,168,0.08);border-radius:6px;border-left:4px solid var(--ocean-teal);display:flex;justify-content:space-between;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:var(--ocean-deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.type.toUpperCase()} #${doc.docNum} – ${doc.clientName}</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;">${doc.savedAt}</div></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-sm" style="padding:6px 10px;background:rgba(46,139,168,0.2);color:var(--ocean-teal);border:none;font-size:11px;cursor:pointer;" onclick="editQuoteDraft(${doc.id})">Edit</button><button class="btn btn-sm" style="padding:6px 10px;background:rgba(122,40,32,0.15);color:#c62828;border:none;font-size:11px;cursor:pointer;" onclick="deleteQuoteDraft(${doc.id})">×</button></div></div>`).join('');}
-function editQuoteDraft(id){const draft=savedQuotes.find(d=>d.id===id);if(!draft)return;currentEditId=id;document.getElementById('q-client-name').value=draft.clientName;document.getElementById('q-contact-person').value=draft.contact;document.getElementById('q-contact-email').value=draft.email;document.getElementById('q-client-abn').value=draft.abn;document.getElementById('q-doc-number').value=draft.docNum;document.getElementById('q-issue-date').value=draft.issueDate;document.getElementById('q-due-date').value=draft.dueDate;document.getElementById('q-scope').value=draft.scope||'';document.getElementById('q-terms').value=draft.terms||'';document.getElementById('q-notes').value=draft.notes||'';document.getElementById('q-monthly-toggle').checked=draft.useMonthly||false;quoteLineItems=JSON.parse(draft.lineItems);renderQuoteLineItems();updateQuotePreview();showToast('✓ Loaded for editing');}
-function deleteQuoteDraft(id){if(!confirm('Delete this draft?'))return;savedQuotes=savedQuotes.filter(d=>d.id!==id);localStorage.setItem(`quoteDrafts_${quoteType}`,JSON.stringify(savedQuotes));loadSavedQuotes();showToast('✓ Deleted');}
+function editQuoteDraft(id){
+  const stored=localStorage.getItem(`quoteDrafts_${currentListTab}`);
+  const docs=stored?JSON.parse(stored):[];
+  const draft=docs.find(d=>d.id===id);
+  if(!draft)return;
+  quoteType=draft.type;currentEditId=id;
+  document.getElementById('quotes-list-view').style.display='none';
+  document.getElementById('quotes-form-view').style.display='block';
+  document.getElementById('quote-type-btn').style.background=draft.type==='quote'?'var(--glass-strong)':'transparent';
+  document.getElementById('invoice-type-btn').style.background=draft.type==='invoice'?'var(--glass-strong)':'transparent';
+  document.getElementById('quote-form-title').textContent=draft.type==='quote'?'Edit Quote':'Edit Invoice';
+  document.getElementById('q-client-name').value=draft.clientName||'';
+  document.getElementById('q-contact-person').value=draft.contact||'';
+  document.getElementById('q-contact-email').value=draft.email||'';
+  document.getElementById('q-client-abn').value=draft.abn||'';
+  document.getElementById('q-doc-number').value=draft.docNum||'';
+  document.getElementById('q-issue-date').value=draft.issueDate||'';
+  document.getElementById('q-due-date').value=draft.dueDate||'';
+  document.getElementById('q-scope').value=draft.scope||'';
+  document.getElementById('q-terms').value=draft.terms||'';
+  document.getElementById('q-notes').value=draft.notes||'';
+  document.getElementById('q-monthly-toggle').checked=draft.useMonthly||false;
+  quoteLineItems=JSON.parse(draft.lineItems||'[]');
+  renderQuoteLineItems();updateQuotePreview();showToast('✓ Loaded for editing');
+}
+function deleteQuoteDraft(id){
+  if(!confirm('Delete this document?'))return;
+  const stored=localStorage.getItem(`quoteDrafts_${currentListTab}`);
+  let docs=stored?JSON.parse(stored):[];
+  docs=docs.filter(d=>d.id!==id);
+  localStorage.setItem(`quoteDrafts_${currentListTab}`,JSON.stringify(docs));
+  renderQuoteListView();showToast('✓ Deleted');
+}
+function loadSavedQuotes(){}
 
 // ── UTILS ──
 function formatDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
