@@ -283,7 +283,26 @@ textarea.input{resize:vertical;min-height:80px;}
 ::-webkit-scrollbar-thumb{background:rgba(94,181,204,0.2);border-radius:3px;}
 
 @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr);}.content-grid{grid-template-columns:1fr;}.map-grid{grid-template-columns:1fr 1fr;}.map-total-bar{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:768px){.sidebar{width:100%;height:56px;bottom:auto;flex-direction:row;align-items:center;padding:0 16px;}.sidebar-nav,.sidebar-bottom{display:none;}.sidebar-logo{border-bottom:none;padding:0;}.main{margin-left:0;margin-top:56px;padding:14px;max-width:100vw;}.stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.form-grid{grid-template-columns:1fr;}.map-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){
+  .sidebar{width:100%;height:56px;bottom:auto;flex-direction:row;align-items:center;padding:0 16px;position:fixed;top:0;left:0;right:0;z-index:100;}
+  .sidebar-nav,.sidebar-bottom{display:none;}
+  .sidebar-logo{border-bottom:none;padding:0;margin-right:auto;}
+  .main{margin-left:0;margin-top:56px;padding:14px;max-width:100vw;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.form-grid{grid-template-columns:1fr;}
+  .map-grid{grid-template-columns:1fr;}
+  .mobile-menu-btn{display:flex;}
+  .mobile-menu-overlay{display:block;}
+  .mobile-menu-overlay.active{opacity:1;pointer-events:all;}
+  .sidebar.mobile-open{height:auto;flex-direction:column;align-items:stretch;padding:16px;border-bottom:1px solid rgba(13,43,62,0.1);}
+  .sidebar.mobile-open .sidebar-nav{display:flex;flex-direction:column;gap:0;}
+  .sidebar.mobile-open .sidebar-bottom{display:block;margin-top:16px;padding-top:16px;border-top:1px solid rgba(13,43,62,0.1);}
+}
+.mobile-menu-btn{display:none;width:40px;height:40px;background:transparent;border:none;color:var(--ocean-teal);cursor:pointer;font-size:18px;align-items:center;justify-content:center;}
+.mobile-menu-overlay{display:none;position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(13,43,62,0.8);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:99;}
+.nav-section{margin-bottom:12px;}
+.nav-section:first-child{margin-top:8px;}
+.nav-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:6px;padding:0 12px;}
+
 </style>
 </head>
 <body>
@@ -291,7 +310,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <div class="app">
 
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">
       <div class="logo-icon">
@@ -300,6 +319,7 @@ textarea.input{resize:vertical;min-height:80px;}
       <div><div class="logo-name">Finance Portal</div><div class="logo-sub">Nicole Lockwood</div></div>
     </div>
   </div>
+  <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
   <nav class="sidebar-nav">
     <div class="nav-section">
       <div class="nav-label">Overview</div>
@@ -311,6 +331,7 @@ textarea.input{resize:vertical;min-height:80px;}
       <button class="nav-item" onclick="showPage('expenses')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg>Expenses</button>
       <button class="nav-item" onclick="showPage('income')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Income</button>
       <button class="nav-item" onclick="showPage('invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Invoices</button>
+      <button class="nav-item" onclick="showPage('quotes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M9 21V10M15 21V10M5 6h14M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/></svg>Quotes</button>
       <button class="nav-item" onclick="showPage('super')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>Super</button>
     </div>
     <div class="nav-section">
@@ -331,7 +352,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <!-- ═══ DASHBOARD ═══ -->
 <div id="page-dashboard" class="page active">
   <div class="page-header">
-    <div><div class="page-title">Dashboard</div><div class="page-subtitle">Financial year · 1 Jul 2025 – 30 Jun 2026</div></div>
+    <div><div class="page-title">Dashboard</div><div class="page-subtitle" id="last-saved-display">All data saved locally</div></div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-glass btn-sm" onclick="showPage('expenses');showExpenseForm()">+ Expense</button>
       <button class="btn btn-primary btn-sm" onclick="showPage('income');showIncomeForm()">+ Income</button>
@@ -394,21 +415,21 @@ textarea.input{resize:vertical;min-height:80px;}
         <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
         <div><div class="map-card-title">Income Streams</div><div class="map-card-sub">Annual targets</div></div>
       </div>
-      <div class="map-stream"><span class="map-stream-name">Board / Governance</span><input class="map-stream-input" type="number" id="ms-board" placeholder="0" oninput="updateMoneyMap()"></div>
-      <div class="map-stream"><span class="map-stream-name">Consulting</span><input class="map-stream-input" type="number" id="ms-consult" placeholder="0" oninput="updateMoneyMap()"></div>
-      <div class="map-stream"><span class="map-stream-name">Commission</span><input class="map-stream-input" type="number" id="ms-commission" placeholder="0" oninput="updateMoneyMap()"></div>
-      <div class="map-stream"><span class="map-stream-name">Mission / Speaking</span><input class="map-stream-input" type="number" id="ms-mission" placeholder="0" oninput="updateMoneyMap()"></div>
-      <div class="map-stream"><span class="map-stream-name">Investments</span><input class="map-stream-input" type="number" id="ms-invest" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Board / Governance</span><input class="map-stream-input" type="number" id="ms-board" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Consulting</span><input class="map-stream-input" type="number" id="ms-consult" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Commission</span><input class="map-stream-input" type="number" id="ms-commission" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Mission / Speaking</span><input class="map-stream-input" type="number" id="ms-mission" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Investments</span><input class="map-stream-input" type="number" id="ms-invest" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
     </div>
     <div class="map-card glass">
       <div class="map-card-hdr">
         <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
         <div><div class="map-card-title">Life Costs</div><div class="map-card-sub">What it costs to live</div></div>
       </div>
-      <div class="map-stream"><span class="map-stream-name">Monthly budget (now)</span><input class="map-stream-input" type="number" id="life-now" placeholder="0" oninput="updateMoneyMap()"></div>
-      <div class="map-stream"><span class="map-stream-name">Monthly budget (future)</span><input class="map-stream-input" type="number" id="life-future" placeholder="0" oninput="updateMoneyMap()"></div>
-      <div class="map-stream"><span class="map-stream-name">Safety buffer (target)</span><input class="map-stream-input" type="number" id="life-buffer" placeholder="0" oninput="updateMoneyMap()"></div>
-      <div class="map-stream"><span class="map-stream-name">Debts to clear</span><input class="map-stream-input" type="number" id="life-debt" placeholder="0" oninput="updateMoneyMap()"></div>
+      <div class="map-stream"><span class="map-stream-name">Monthly budget (now)</span><input class="map-stream-input" type="number" id="life-now" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Monthly budget (future)</span><input class="map-stream-input" type="number" id="life-future" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Safety buffer (target)</span><input class="map-stream-input" type="number" id="life-buffer" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Debts to clear</span><input class="map-stream-input" type="number" id="life-debt" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
     </div>
     <div class="map-card glass">
       <div class="map-card-hdr">
@@ -433,6 +454,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <div id="page-expenses" class="page">
   <div id="expenses-list-view">
     <div class="page-header"><div><div class="page-title">Expenses</div><div class="page-subtitle">All business expenditure</div></div><button class="btn btn-primary" onclick="showExpenseForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add expense</button></div>
+    <div class="glass" style="padding:14px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" class="input" id="exp-search" placeholder="Search vendor, category, date..." oninput="filterExpenses()" style="width:100%;"></div></div>
     <div class="glass"><div class="txn-list" id="expense-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div></div></div>
   </div>
   <div id="expenses-form-view" style="display:none;">
@@ -485,6 +507,7 @@ textarea.input{resize:vertical;min-height:80px;}
 <div id="page-income" class="page">
   <div id="income-list-view">
     <div class="page-header"><div><div class="page-title">Income</div><div class="page-subtitle">All business income</div></div><button class="btn btn-primary" onclick="showIncomeForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add income</button></div>
+    <div class="glass" style="padding:14px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" class="input" id="inc-search" placeholder="Search client, category, invoice..." oninput="filterIncome()" style="width:100%;"></div></div>
     <div class="glass"><div class="txn-list" id="income-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p>No income recorded yet.</p></div></div></div>
   </div>
   <div id="income-form-view" style="display:none;">
@@ -634,6 +657,77 @@ textarea.input{resize:vertical;min-height:80px;}
   </div>
 </div>
 
+<!-- ═══ QUOTES & INVOICES GENERATOR ═══ -->
+<div id="page-quotes" class="page">
+  <div id="quotes-empty-view">
+    <div class="page-header"><div><div class="page-title">Quotes & Invoices</div><div class="page-subtitle">Professional documents in seconds</div></div><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="showQuoteForm()">+ New quote</button><button class="btn btn-glass btn-sm" onclick="switchToInvoices()">View invoices</button></div></div>
+    <div class="glass" style="padding:60px 40px;text-align:center;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <p style="color:var(--text-tertiary);font-size:14px;">No quotes yet. Create your first one.</p>
+    </div>
+  </div>
+
+  <div id="quotes-form-view" style="display:none;">
+    <div class="page-header"><div><div class="page-title">Quotes & Invoices</div><div class="page-subtitle">Professional documents in seconds</div></div><div style="display:flex;gap:8px;"><button class="btn btn-glass btn-sm" data-type="quote" onclick="switchQuoteType('quote')" id="quote-type-btn" style="background:var(--glass-strong);">Quote</button><button class="btn btn-glass btn-sm" data-type="invoice" onclick="switchQuoteType('invoice')" id="invoice-type-btn">Invoice</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <!-- Left: Form -->
+      <div class="glass-strong">
+        <div class="card-header"><div class="card-title" id="quote-form-title">Create Quote</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:12px;max-height:800px;overflow-y:auto;">
+          
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-top:4px;margin-bottom:4px;">Client Details</div>
+          <div class="field"><label>Client name</label><input type="text" class="input" id="q-client-name" placeholder="e.g. Western Power" oninput="updateQuotePreview()"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Contact person</label><input type="text" class="input" id="q-contact-person" placeholder="e.g. Michael Barnes" oninput="updateQuotePreview()"></div>
+            <div class="field"><label>Email</label><input type="email" class="input" id="q-contact-email" placeholder="contact@company.com.au" oninput="updateQuotePreview()"></div>
+          </div>
+          <div class="field"><label>ABN (optional)</label><input type="text" class="input" id="q-client-abn" placeholder="12 345 678 901" oninput="updateQuotePreview()"></div>
+          
+          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:12px;"></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:4px;">Document Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Doc Number</label><input type="text" class="input" id="q-doc-number" placeholder="QTE-001" oninput="updateQuotePreview()"></div>
+            <div class="field"><label>Issue date</label><input type="date" class="input" id="q-issue-date" oninput="updateQuotePreview()"></div>
+          </div>
+          <div class="field"><label id="q-due-label">Valid until</label><input type="date" class="input" id="q-due-date" oninput="updateQuotePreview()"></div>
+          
+          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:12px;"></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:4px;">Scope of Services (Paste from agreement)</div>
+          <div class="field"><textarea class="input" id="q-scope" rows="3" placeholder="e.g. assistance and independent assurance to the Committee; attendance at all meetings..." oninput="updateQuotePreview()"></textarea></div>
+          
+          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:12px;"></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:8px;">Services / Line Items</div>
+          <div id="q-line-items-container" style="display:flex;flex-direction:column;gap:10px;max-height:180px;overflow-y:auto;"></div>
+          <button class="btn btn-glass btn-sm" style="width:100%;justify-content:center;" onclick="addQuoteLineItem()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add service</button>
+          
+          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:12px;"></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:4px;">Payment & Terms</div>
+          <div class="field"><label>Monthly breakdown (for recurring services)</label><div style="display:flex;gap:8px;align-items:center;"><input type="checkbox" id="q-monthly-toggle" onchange="toggleMonthlyBreakdown()"> <span style="font-size:12px;color:var(--text-tertiary);">Calculate equal monthly installments</span></div></div>
+          <div class="field"><label>Terms & Conditions / Special notes</label><textarea class="input" id="q-terms" rows="3" placeholder="e.g., Payment due within 30 days. 12-month engagement from 1 April 2026 to 31 March 2027." oninput="updateQuotePreview()"></textarea></div>
+          <div class="field"><label>Notes (optional)</label><textarea class="input" id="q-notes" rows="2" placeholder="e.g., Project timeline, deliverables, or additional information..." oninput="updateQuotePreview()"></textarea></div>
+          
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="downloadQuotePDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
+            <button class="btn btn-glass" style="flex:1;justify-content:center;" onclick="saveQuoteDraft()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button>
+          </div>
+
+          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:12px;"></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:8px;">Saved Documents</div>
+          <div id="q-saved-list" style="display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;">
+            <p style="font-size:12px;color:var(--text-tertiary);">No saved documents yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live Preview -->
+      <div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(244,240,235,0.5);margin-bottom:12px;">Live Preview</div>
+        <div class="glass" id="q-preview" style="padding:20px;font-size:12px;line-height:1.6;max-height:600px;overflow-y:auto;font-family:'DM Mono',monospace;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ SUPER ═══ -->
 <div id="page-super" class="page">
   <div class="page-header"><div><div class="page-title">Super Contributions</div><div class="page-subtitle">Tax-deductible for sole traders · FY2025–26 concessional cap $30,000</div></div></div>
@@ -643,7 +737,7 @@ textarea.input{resize:vertical;min-height:80px;}
         <div class="card-header"><div class="card-title">Super rate settings</div><div class="card-subtitle">Flows through all calculations</div></div>
         <div class="card-body">
           <div class="super-row"><span class="super-label">Contribution rate (% of gross income)</span><div style="display:flex;align-items:center;gap:6px;"><input class="super-input" type="number" id="super-rate-input" value="11.5" min="0" max="30" step="0.5" oninput="updateSuperRate()"><span style="font-size:11px;color:var(--text-tertiary);">%</span></div></div>
-          <div class="super-row"><span class="super-label">Super fund</span><input type="text" class="input" style="width:200px;" id="super-fund" placeholder="e.g. Australian Super"></div>
+          <div class="super-row"><span class="super-label">Super fund</span><input type="text" class="input" style="width:200px;" id="super-fund" placeholder="e.g. Australian Super" oninput="state.superFund=this.value;saveState();"></div>
           <div class="super-row"><span class="super-label">Concessional cap (FY2025–26)</span><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:400;">$30,000</span></div>
         </div>
       </div>
@@ -703,25 +797,84 @@ textarea.input{resize:vertical;min-height:80px;}
           <div class="summary-row total" style="padding:14px 20px;border-bottom:none;"><span>Actually yours</span><span class="row-val net" id="pl-yours">$0.00</span></div>
         </div>
       </div>
-      <div class="glass"><div class="card-body" style="text-align:center;"><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px;font-weight:300;">For your accountant</div><button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="exportPL()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export full P&L as CSV</button></div></div>
+      <div class="glass"><div class="card-body" style="text-align:center;"><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px;font-weight:300;">For your accountant</div><button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px;" onclick="exportPL()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export full P&L as CSV</button><button class="btn btn-glass" style="width:100%;justify-content:center;" onclick="exportJSONBackup()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export full backup (JSON)</button></div></div>
     </div>
   </div>
 </div>
 
 </main>
+<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
 </div>
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Saved</span></div>
 
 <script>
-const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5};
+const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5,lastSaved:null,moneyMap:{msBoard:0,msConsult:0,msCommission:0,msMission:0,msInvest:0,lifeNow:0,lifeFuture:0,lifeBuffer:0,lifeDebt:0},superFund:''};
 
-// ── NAV ──
+// ── PERSISTENCE ──
+function loadState(){
+  const stored=localStorage.getItem('nicoleLockwoodState');
+  if(stored){
+    try{
+      const loaded=JSON.parse(stored);
+      Object.assign(state,loaded);
+      state.lastSaved=loaded.lastSaved?new Date(loaded.lastSaved):null;
+    }catch(e){console.warn('Failed to load state',e);}
+  }
+}
+
+function saveState(){
+  state.lastSaved=new Date();
+  localStorage.setItem('nicoleLockwoodState',JSON.stringify(state));
+  updateLastSavedDisplay();
+  showToast('✓ Saved');
+}
+
+function updateLastSavedDisplay(){
+  const display=document.getElementById('last-saved-display');
+  if(!display)return;
+  if(!state.lastSaved){
+    display.textContent='All data saved locally';
+    return;
+  }
+  const now=new Date();
+  const diff=Math.floor((now-state.lastSaved)/1000);
+  let text='';
+  if(diff<5)text='Just now';
+  else if(diff<60)text=diff+'s ago';
+  else if(diff<3600)text=Math.floor(diff/60)+'m ago';
+  else if(diff<86400)text=Math.floor(diff/3600)+'h ago';
+  else text=Math.floor(diff/86400)+'d ago';
+  display.textContent='Last updated '+text+' • All data saved locally';
+  setTimeout(updateLastSavedDisplay,5000);
+}
+
+loadState();
+
+// Restore Money Map and Super Fund values
+function restoreMoneyMapAndSuper(){
+  if(state.moneyMap){
+    document.getElementById('ms-board').value=state.moneyMap.msBoard||0;
+    document.getElementById('ms-consult').value=state.moneyMap.msConsult||0;
+    document.getElementById('ms-commission').value=state.moneyMap.msCommission||0;
+    document.getElementById('ms-mission').value=state.moneyMap.msMission||0;
+    document.getElementById('ms-invest').value=state.moneyMap.msInvest||0;
+    document.getElementById('life-now').value=state.moneyMap.lifeNow||0;
+    document.getElementById('life-future').value=state.moneyMap.lifeFuture||0;
+    document.getElementById('life-buffer').value=state.moneyMap.lifeBuffer||0;
+    document.getElementById('life-debt').value=state.moneyMap.lifeDebt||0;
+  }
+  if(state.superFund){
+    document.getElementById('super-fund').value=state.superFund;
+  }
+}
+restoreMoneyMapAndSuper();
 function showPage(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(b=>{if(b.getAttribute('onclick')?.includes("'"+p+"'"))b.classList.add('active');});
+  closeMobileMenu();
   if(p==='dashboard')updateDashboard();
   if(p==='pl')updatePL();
   if(p==='super')updateSuperPage();
@@ -779,7 +932,7 @@ function updateSuperRate(){
   const v=parseFloat(document.getElementById('super-rate-input').value)||11.5;
   state.superRate=v;
   ['super-rate-disp','sum-super-rate-lbl','pl-super-rate'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v;});
-  updateSuperPage();updateDashboard();
+  updateSuperPage();updateDashboard();saveState();
 }
 function updateSuperPage(){
   const c=getCalcs();
@@ -790,6 +943,22 @@ function updateSuperPage(){
 }
 
 // ── MONEY MAP ──
+function updateMoneyMapAndSave(){
+  state.moneyMap={
+    msBoard:parseFloat(document.getElementById('ms-board').value)||0,
+    msConsult:parseFloat(document.getElementById('ms-consult').value)||0,
+    msCommission:parseFloat(document.getElementById('ms-commission').value)||0,
+    msMission:parseFloat(document.getElementById('ms-mission').value)||0,
+    msInvest:parseFloat(document.getElementById('ms-invest').value)||0,
+    lifeNow:parseFloat(document.getElementById('life-now').value)||0,
+    lifeFuture:parseFloat(document.getElementById('life-future').value)||0,
+    lifeBuffer:parseFloat(document.getElementById('life-buffer').value)||0,
+    lifeDebt:parseFloat(document.getElementById('life-debt').value)||0
+  };
+  saveState();
+  updateMoneyMap();
+}
+
 function updateMoneyMap(){
   const board=parseFloat(document.getElementById('ms-board').value)||0;
   const consult=parseFloat(document.getElementById('ms-consult').value)||0;
@@ -857,8 +1026,7 @@ async function scanReceipt(){
     if(parsed.description)document.getElementById('exp-desc').value=parsed.description;
     document.getElementById('ai-scan-title').textContent='✓ Fields filled — please review';
     document.getElementById('ai-scan-sub').textContent='Check and adjust before saving';
-  }catch(err){document.getElementById('ai-scan-title').textContent='Could not read receipt';document.getElementById('ai-scan-sub').textContent='Fill in fields manually';}
-  bar.classList.remove('scanning');btn.textContent='Re-scan';btn.disabled=false;
+  }catch(err){document.getElementById('ai-scan-title').textContent='AI scan — coming soon';document.getElementById('ai-scan-sub').textContent='Fill fields manually for now';console.error('Scan error:',err);}finally{bar.classList.remove('scanning');btn.textContent='Scan now';btn.disabled=false;}
 }
 function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
 function saveExpense(){
@@ -871,7 +1039,7 @@ function saveExpense(){
   const desc=document.getElementById('exp-desc').value.trim();
   const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_$${amount.toFixed(2)}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
   state.expenses.push({id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName});
-  hideExpenseForm();renderExpenses();updateDashboard();showToast(`Saved · ${vendor} · $${amount.toFixed(2)}`);
+  hideExpenseForm();renderExpenses();updateDashboard();saveState();showToast(`Saved · ${vendor} · $${amount.toFixed(2)}`);
 }
 function renderExpenses(){
   const list=document.getElementById('expense-list');
@@ -895,12 +1063,46 @@ function saveIncome(){
   const invoiceRef=document.getElementById('inc-invoice').value.trim();
   const attachName=state.incomeFile?`${date}_${client.replace(/\s+/g,'-')}_$${amount.toFixed(2)}_${(category||'Income').replace(/[\s&]+/g,'-')}.${state.incomeFile.name.split('.').pop()}`:null;
   state.income.push({id:Date.now(),type:'income',amount,client,date,category,desc,invoiceRef,attachName});
-  hideIncomeForm();renderIncome();updateDashboard();showToast(`Saved · ${client} · $${amount.toFixed(2)}`);
+  hideIncomeForm();renderIncome();updateDashboard();saveState();showToast(`Saved · ${client} · $${amount.toFixed(2)}`);
 }
 function renderIncome(){
   const list=document.getElementById('income-list');
   if(!state.income.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p>No income recorded yet.</p></div>`;return;}
   list.innerHTML=state.income.slice().reverse().map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+$${i.amount.toFixed(2)}</div></div>`).join('');
+}
+
+// ── SEARCH & FILTER ──
+function filterExpenses(){
+  const query=document.getElementById('exp-search').value.toLowerCase();
+  const filtered=state.expenses.filter(e=>
+    e.vendor.toLowerCase().includes(query)||
+    (e.category&&e.category.toLowerCase().includes(query))||
+    e.date.includes(query)||
+    (e.desc&&e.desc.toLowerCase().includes(query))
+  );
+  const list=document.getElementById('expense-list');
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;
+    return;
+  }
+  list.innerHTML=filtered.slice().reverse().map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−$${e.amount.toFixed(2)}</div></div>`).join('');
+}
+
+function filterIncome(){
+  const query=document.getElementById('inc-search').value.toLowerCase();
+  const filtered=state.income.filter(i=>
+    i.client.toLowerCase().includes(query)||
+    (i.category&&i.category.toLowerCase().includes(query))||
+    i.date.includes(query)||
+    (i.invoiceRef&&i.invoiceRef.toLowerCase().includes(query))||
+    (i.desc&&i.desc.toLowerCase().includes(query))
+  );
+  const list=document.getElementById('income-list');
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No results found.</p></div>`;
+    return;
+  }
+  list.innerHTML=filtered.slice().reverse().map(i=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="txn-info"><div class="txn-name">${i.client}</div><div class="txn-meta">${formatDate(i.date)} · ${i.category||'Uncategorised'}${i.invoiceRef?' · '+i.invoiceRef:''}</div>${i.attachName?`<div class="receipt-chip">${i.attachName}</div>`:''}</div><div class="txn-amt income">+$${i.amount.toFixed(2)}</div></div>`).join('');
 }
 
 // ── INVOICE ──
@@ -971,7 +1173,16 @@ function saveInvoice(){
 function renderInvoices(){
   const list=document.getElementById('invoice-list');
   if(!state.invoices.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No invoices yet.</p></div>`;return;}
-  list.innerHTML=state.invoices.slice().reverse().map(inv=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">$${inv.total.toFixed(2)}</div><span style="font-size:10px;background:rgba(26,107,66,0.1);color:var(--positive);padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status}</span></div></div>`).join('');
+  list.innerHTML=state.invoices.slice().reverse().map(inv=>{const isPaid=inv.status==='paid';const statusColor=isPaid?'var(--positive)':'var(--warning)';const statusBg=isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';return `<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">$${inv.total.toFixed(2)}</div><div style="display:flex;gap:8px;align-items:center;"><span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status||'outstanding'}</span><button class="btn btn-sm" style="padding:4px 8px;background:${statusBg};color:${statusColor};border:none;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;" data-invoice-id="${inv.id}" onclick="event.stopPropagation();markInvoicePaid(this.getAttribute('data-invoice-id'))">${isPaid?'✓ Paid':'Mark paid'}</button></div></div></div>`}).join('');}
+}
+
+function markInvoicePaid(invoiceId){
+  const inv=state.invoices.find(i=>String(i.id)===String(invoiceId));
+  if(!inv)return;
+  inv.status=inv.status==='paid'?'outstanding':'paid';
+  saveState();
+  renderInvoices();
+  showToast(inv.status==='paid'?'✓ Marked as paid':'✓ Marked as outstanding');
 }
 
 async function downloadInvoicePDF(){
@@ -1023,7 +1234,9 @@ async function downloadInvoicePDF(){
   .payment h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2E8BA8;margin-bottom:8px;}
   .payment p{font-size:11px;color:#2C5570;line-height:1.9;font-weight:300;}
   .payment strong{font-weight:500;color:#0D2B3E;}
-</style></head><body>
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head><body>
 <div class="header">
   <div class="header-left">
     <div class="badge">Tax Invoice</div>
@@ -1082,20 +1295,389 @@ async function downloadInvoicePDF(){
 // ── EXPORT ──
 function exportPL(){
   const c=getCalcs();
-  const rows=[['Type','Date','Description','Category','Amount','Business Use %','Receipt/Attachment'],...state.income.map(i=>['Income',i.date,i.client+(i.desc?' - '+i.desc:''),i.category,i.amount.toFixed(2),'100',i.attachName||'']),...state.expenses.map(e=>['Expense',e.date,e.vendor+(e.desc?' - '+e.desc:''),e.category,e.amount.toFixed(2),e.bizUse,e.receiptName||'']),[],...[['SUMMARY'],['Gross Income','','','',c.gross.toFixed(2)],['Total Expenses','','','',c.expenses.toFixed(2)],['Taxable Income','','','',c.taxable.toFixed(2)],['Income Tax','','','',c.tax.toFixed(2)],['Medicare Levy','','','',c.medicare.toFixed(2)],['Super ('+state.superRate+'%)','','','',c.superAmt.toFixed(2)],['Net (Yours)','','','',c.yours.toFixed(2)]].map(r=>[...r,...Array(7-r.length).fill('')])];
-  const csv=rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='LockwoodAdvisory_PL_FY2025-26.csv';a.click();URL.revokeObjectURL(url);
-  showToast('P&L exported');
+  
+  // Transaction details CSV
+  const txnRows=[['Type','Date','Description','Category','Amount','Business Use %','Receipt/Attachment'],...state.income.map(i=>['Income',i.date,i.client+(i.desc?' - '+i.desc:''),i.category,i.amount.toFixed(2),'100',i.attachName||'']),...state.expenses.map(e=>['Expense',e.date,e.vendor+(e.desc?' - '+e.desc:''),e.category,e.amount.toFixed(2),e.bizUse,e.receiptName||''])];
+  
+  // Summary & breakdown CSV
+  const summaryRows=[['FINANCIAL SUMMARY - FY 2025-26'],[],...[['Gross Income','$'+c.gross.toFixed(2)],['Total Expenses (deductible)','$'+c.expenses.toFixed(2)],['Taxable Income','$'+c.taxable.toFixed(2)],[]],['TAX BREAKDOWN'],['Income Tax @ marginal rate','$'+c.tax.toFixed(2)],['Medicare Levy (2%)','$'+c.medicare.toFixed(2)],['Super Contributions ('+state.superRate+'%)','$'+c.superAmt.toFixed(2)],[],...[['Total Obligations','$'+(c.tax+c.medicare+c.superAmt).toFixed(2)],['Net Income (Yours)','$'+c.yours.toFixed(2)]]];
+  
+  // Super contribution details CSV
+  const superRows=[['SUPER CONTRIBUTIONS SUMMARY'],[],...[['Total Gross Income','$'+c.gross.toFixed(2)],['Super Rate',state.superRate+'%'],['Total Contribution','$'+c.superAmt.toFixed(2)],['Concessional Cap (FY25-26)','$30,000.00'],['Remaining Cap','$'+Math.max(0,30000-c.superAmt).toFixed(2)],['Tax Deductible','Yes']]];
+  
+  // Create transaction CSV
+  const txnCSV=txnRows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const txnBlob=new Blob([txnCSV],{type:'text/csv'});
+  const txnURL=URL.createObjectURL(txnBlob);
+  const txnLink=document.createElement('a');
+  txnLink.href=txnURL;
+  txnLink.download='Lockwood_Transactions_FY2025-26.csv';
+  
+  // Create summary CSV
+  const summaryCSV=summaryRows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const summaryBlob=new Blob([summaryCSV],{type:'text/csv'});
+  const summaryURL=URL.createObjectURL(summaryBlob);
+  const summaryLink=document.createElement('a');
+  summaryLink.href=summaryURL;
+  summaryLink.download='Lockwood_Summary_FY2025-26.csv';
+  
+  // Create super CSV
+  const superCSV=superRows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const superBlob=new Blob([superCSV],{type:'text/csv'});
+  const superURL=URL.createObjectURL(superBlob);
+  const superLink=document.createElement('a');
+  superLink.href=superURL;
+  superLink.download='Lockwood_Super_FY2025-26.csv';
+  
+  // Download all three files
+  txnLink.click();
+  setTimeout(()=>summaryLink.click(),200);
+  setTimeout(()=>superLink.click(),400);
+  
+  URL.revokeObjectURL(txnURL);
+  URL.revokeObjectURL(summaryURL);
+  URL.revokeObjectURL(superURL);
+  
+  showToast('✓ ATO-ready package exported (3 files)');
+}
+
+function exportJSONBackup(){
+  const backup={
+    exportDate:new Date().toLocaleString('en-AU'),
+    data:state
+  };
+  const json=JSON.stringify(backup,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download='Lockwood_Finance_Portal_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ Full backup exported');
+}
+
+
+// ── QUOTES & INVOICES ──
+
+function showQuoteForm(){
+  document.getElementById('quotes-empty-view').style.display='none';
+  document.getElementById('quotes-form-view').style.display='block';
+  switchQuoteType('quote');
+}
+
+function switchToInvoices(){
+  document.getElementById('quotes-empty-view').style.display='none';
+  document.getElementById('quotes-form-view').style.display='block';
+  switchQuoteType('invoice');
+}
+
+let quoteType = 'quote';
+let quoteLineItems = [];
+let savedQuotes = [];
+let currentEditId = null;
+
+function switchQuoteType(type) {
+  quoteType = type;
+  document.getElementById('quote-type-btn').style.background = type === 'quote' ? 'var(--glass-strong)' : 'transparent';
+  document.getElementById('invoice-type-btn').style.background = type === 'invoice' ? 'var(--glass-strong)' : 'transparent';
+  document.getElementById('quote-form-title').textContent = type === 'quote' ? 'Create Quote' : 'Create Invoice';
+  document.getElementById('q-due-label').textContent = type === 'quote' ? 'Valid until' : 'Due date';
+  if (type === 'quote') document.getElementById('q-doc-number').placeholder = 'QTE-001';
+  if (type === 'invoice') document.getElementById('q-doc-number').placeholder = 'INV-001';
+  clearQuoteForm();
+  loadSavedQuotes();
+}
+
+function clearQuoteForm() {
+  document.getElementById('q-client-name').value = '';
+  document.getElementById('q-contact-person').value = '';
+  document.getElementById('q-contact-email').value = '';
+  document.getElementById('q-client-abn').value = '';
+  document.getElementById('q-doc-number').value = quoteType === 'quote' ? 'QTE-001' : 'INV-001';
+  document.getElementById('q-scope').value = '';
+  document.getElementById('q-terms').value = '';
+  document.getElementById('q-notes').value = '';
+  document.getElementById('q-monthly-toggle').checked = false;
+  quoteLineItems = [];
+  currentEditId = null;
+  setQuoteDates();
+  renderQuoteLineItems();
+  updateQuotePreview();
+}
+
+function toggleMonthlyBreakdown() {
+  updateQuotePreview();
+}
+
+function setQuoteDates() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('q-issue-date').value = today;
+  const due = new Date();
+  due.setDate(due.getDate() + (quoteType === 'quote' ? 14 : 30));
+  document.getElementById('q-due-date').value = due.toISOString().split('T')[0];
+}
+
+function addQuoteLineItem() {
+  quoteLineItems.push({ id: Date.now(), desc: '', qty: 1, rate: 0 });
+  renderQuoteLineItems();
+  updateQuotePreview();
+}
+
+function renderQuoteLineItems() {
+  const container = document.getElementById('q-line-items-container');
+  container.innerHTML = quoteLineItems.map(item => `
+    <div style="display:grid;grid-template-columns:1.5fr 0.6fr 0.8fr 50px;gap:8px;padding:8px;background:rgba(13,43,62,0.08);border-radius:6px;">
+      <input type="text" class="input" placeholder="Description" value="${item.desc}" onchange="updateQLineItem(${item.id},'desc',this.value)" style="padding:7px 10px;font-size:12px;">
+      <input type="number" class="input" placeholder="Qty" value="${item.qty}" onchange="updateQLineItem(${item.id},'qty',this.value)" style="padding:7px 10px;font-size:12px;text-align:center;">
+      <input type="number" class="input" placeholder="Rate" value="${item.rate}" onchange="updateQLineItem(${item.id},'rate',this.value)" step="0.01" style="padding:7px 10px;font-size:12px;text-align:right;">
+      <button class="btn btn-sm" style="background:rgba(122,40,32,0.2);color:#c62828;border:none;font-size:11px;padding:6px;height:32px;align-self:center;" onclick="delQLineItem(${item.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function updateQLineItem(id, field, value) {
+  const item = quoteLineItems.find(i => i.id === id);
+  if (!item) return;
+  item[field] = field === 'desc' ? value : parseFloat(value) || 0;
+  updateQuotePreview();
+}
+
+function delQLineItem(id) {
+  quoteLineItems = quoteLineItems.filter(i => i.id !== id);
+  renderQuoteLineItems();
+  updateQuotePreview();
+}
+
+function updateQuotePreview() {
+  const clientName = document.getElementById('q-client-name').value || '[Client]';
+  const contact = document.getElementById('q-contact-person').value || '—';
+  const email = document.getElementById('q-contact-email').value || '—';
+  const abn = document.getElementById('q-client-abn').value;
+  const docNum = document.getElementById('q-doc-number').value || 'DOC-001';
+  const issueDate = document.getElementById('q-issue-date').value;
+  const dueDate = document.getElementById('q-due-date').value;
+  const notes = document.getElementById('q-notes').value;
+
+  const subtotal = quoteLineItems.reduce((s, i) => s + (i.qty * i.rate), 0);
+  const gst = subtotal * 0.1;
+  const total = subtotal + gst;
+
+  const typeLabel = quoteType === 'quote' ? 'QUOTE' : 'INVOICE';
+  const dueLabel = quoteType === 'quote' ? 'Valid until' : 'Due date';
+
+  const lineItemsHtml = quoteLineItems.length ? quoteLineItems.map(item => `
+    <tr style="border-bottom:1px solid rgba(13,43,62,0.1);">
+      <td style="padding:8px;text-align:left;">${item.desc || '—'}</td>
+      <td style="padding:8px;text-align:center;width:50px;">${item.qty}</td>
+      <td style="padding:8px;text-align:right;width:80px;font-family:'DM Mono',monospace;">$${item.rate.toFixed(2)}</td>
+      <td style="padding:8px;text-align:right;width:100px;font-family:'DM Mono',monospace;font-weight:500;">$${(item.qty * item.rate).toFixed(2)}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="4" style="padding:8px;text-align:center;color:var(--text-tertiary);">Add services above</td></tr>';
+
+  const bankDetails = quoteType === 'invoice' ? `
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(13,43,62,0.1);">
+      <strong>PAYMENT DETAILS</strong><br>
+      Account: N and N Lockwood<br>
+      BSB: 086061 | Acc: 816239874<br>
+      NAB
+    </div>
+  ` : '';
+
+  const html = `
+    <strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);">Lockwood Advisory Pty Ltd</strong><br>
+    <strong style="color:var(--ocean-deep);">ABN 76 979 340 565</strong><br>
+    <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;">nicole@lockwoodadvisory.com.au</div>
+    
+    <div style="margin:12px 0;padding:12px 0;border-top:1px solid rgba(13,43,62,0.1);border-bottom:1px solid rgba(13,43,62,0.1);">
+      <div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${typeLabel}</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">
+        ${typeLabel} #: <strong>${docNum}</strong><br>
+        Issued: <strong>${formatDate(issueDate)}</strong><br>
+        ${dueLabel}: <strong>${formatDate(dueDate)}</strong>
+      </div>
+    </div>
+    
+    <div style="margin:12px 0;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ocean-mid);margin-bottom:4px;">Bill to:</div>
+      <strong>${clientName}</strong><br>
+      <span style="font-size:11px;">${contact}</span><br>
+      <span style="font-size:11px;color:var(--text-tertiary);">${email}</span>
+      ${abn ? `<br><span style="font-size:10px;">ABN: ${abn}</span>` : ''}
+    </div>
+    
+    <div style="margin:12px 0 0;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="background:rgba(13,43,62,0.08);border-bottom:1px solid rgba(13,43,62,0.1);">
+            <th style="padding:8px;text-align:left;font-weight:600;">Description</th>
+            <th style="padding:8px;text-align:center;font-weight:600;width:50px;">Qty</th>
+            <th style="padding:8px;text-align:right;font-weight:600;width:80px;">Rate</th>
+            <th style="padding:8px;text-align:right;font-weight:600;width:100px;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${lineItemsHtml}
+        </tbody>
+      </table>
+    </div>
+    
+    <div style="margin:12px 0;padding:12px;background:rgba(46,139,168,0.08);border-radius:6px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;">
+        <span>Subtotal:</span>
+        <span style="font-family:'DM Mono',monospace;">$${subtotal.toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;">
+        <span>GST (10%):</span>
+        <span style="font-family:'DM Mono',monospace;">$${gst.toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;padding-top:8px;border-top:1px solid rgba(13,43,62,0.1);color:var(--ocean-mid);">
+        <span>TOTAL:</span>
+        <span style="font-family:'DM Mono',monospace;">$${total.toFixed(2)}</span>
+      </div>
+    </div>
+    
+    ${notes ? `<div style="margin:12px 0;padding:10px;background:rgba(46,139,168,0.06);border-radius:4px;font-size:10px;line-height:1.4;white-space:pre-wrap;">${notes}</div>` : ''}
+    
+    ${bankDetails}
+    
+    <div style="margin-top:12px;font-size:9px;color:var(--text-tertiary);border-top:1px solid rgba(13,43,62,0.1);padding-top:8px;">
+      ABN 76 979 340 565 · GST Registered<br>
+      ${quoteType === 'invoice' ? 'Due within 30 days of invoice date' : 'Quote valid for 14 days'}
+    </div>
+  `;
+
+  document.getElementById('q-preview').innerHTML = html;
+}
+
+function downloadQuotePDF() {
+  const element = document.getElementById('q-preview');
+  const docNum = document.getElementById('q-doc-number').value || 'DOC-001';
+  const clientName = document.getElementById('q-client-name').value || 'Client';
+  const filename = `Lockwood_${quoteType.toUpperCase()}_${docNum}_${clientName}.pdf`;
+
+  const opt = {
+    margin: 8,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+  };
+
+  html2pdf().set(opt).from(element).save();
+  showToast(`✓ Downloaded ${quoteType === 'quote' ? 'quote' : 'invoice'}`);
+}
+
+function saveQuoteDraft() {
+  const docNum = document.getElementById('q-doc-number').value || 'DOC-001';
+  const draft = {
+    id: currentEditId || Date.now(),
+    type: quoteType,
+    clientName: document.getElementById('q-client-name').value,
+    contact: document.getElementById('q-contact-person').value,
+    email: document.getElementById('q-contact-email').value,
+    abn: document.getElementById('q-client-abn').value,
+    docNum: docNum,
+    issueDate: document.getElementById('q-issue-date').value,
+    dueDate: document.getElementById('q-due-date').value,
+    scope: document.getElementById('q-scope').value,
+    terms: document.getElementById('q-terms').value,
+    notes: document.getElementById('q-notes').value,
+    useMonthly: document.getElementById('q-monthly-toggle').checked,
+    lineItems: JSON.stringify(quoteLineItems),
+    savedAt: new Date().toLocaleString('en-AU')
+  };
+  
+  if (currentEditId) {
+    savedQuotes = savedQuotes.filter(d => d.id !== currentEditId);
+  }
+  
+  savedQuotes.unshift(draft);
+  localStorage.setItem(`quoteDrafts_${quoteType}`, JSON.stringify(savedQuotes));
+  loadSavedQuotes();
+  showToast(`✓ ${currentEditId ? 'Updated' : 'Saved'}`);
+  currentEditId = null;
+}
+
+function loadSavedQuotes() {
+  const stored = localStorage.getItem(`quoteDrafts_${quoteType}`);
+  savedQuotes = stored ? JSON.parse(stored) : [];
+  renderSavedQuotes();
+}
+
+function renderSavedQuotes() {
+  const list = document.getElementById('q-saved-list');
+  if (savedQuotes.length === 0) {
+    list.innerHTML = '<p style="font-size:12px;color:var(--text-tertiary);">No saved documents</p>';
+    return;
+  }
+
+  list.innerHTML = savedQuotes.slice(0, 8).map(doc => `
+    <div style="padding:10px;background:rgba(46,139,168,0.08);border-radius:6px;border-left:4px solid var(--ocean-teal);display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:var(--ocean-deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.type.toUpperCase()} #${doc.docNum} – ${doc.clientName}</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;">${doc.savedAt}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-sm" style="padding:6px 10px;background:rgba(46,139,168,0.2);color:var(--ocean-teal);border:none;font-size:11px;cursor:pointer;" onclick="editQuoteDraft(${doc.id})">Edit</button>
+        <button class="btn btn-sm" style="padding:6px 10px;background:rgba(122,40,32,0.15);color:#c62828;border:none;font-size:11px;cursor:pointer;" onclick="deleteQuoteDraft(${doc.id})">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function editQuoteDraft(id) {
+  const draft = savedQuotes.find(d => d.id === id);
+  if (!draft) return;
+
+  currentEditId = id;
+  document.getElementById('q-client-name').value = draft.clientName;
+  document.getElementById('q-contact-person').value = draft.contact;
+  document.getElementById('q-contact-email').value = draft.email;
+  document.getElementById('q-client-abn').value = draft.abn;
+  document.getElementById('q-doc-number').value = draft.docNum;
+  document.getElementById('q-issue-date').value = draft.issueDate;
+  document.getElementById('q-due-date').value = draft.dueDate;
+  document.getElementById('q-scope').value = draft.scope || '';
+  document.getElementById('q-terms').value = draft.terms || '';
+  document.getElementById('q-notes').value = draft.notes || '';
+  document.getElementById('q-monthly-toggle').checked = draft.useMonthly || false;
+  quoteLineItems = JSON.parse(draft.lineItems);
+  renderQuoteLineItems();
+  updateQuotePreview();
+  showToast('✓ Loaded for editing');
+}
+
+function deleteQuoteDraft(id) {
+  if (!confirm('Delete this draft?')) return;
+  savedQuotes = savedQuotes.filter(d => d.id !== id);
+  localStorage.setItem(`quoteDrafts_${quoteType}`, JSON.stringify(savedQuotes));
+  loadSavedQuotes();
+  showToast('✓ Deleted');
 }
 
 // ── UTILS ──
 function formatDate(d){return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
 function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
 
+// ── MOBILE MENU ──
+function toggleMobileMenu(){
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('mobile-menu-overlay');
+  sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('active');
+}
+function closeMobileMenu(){
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('mobile-menu-overlay');
+  sidebar.classList.remove('mobile-open');
+  overlay.classList.remove('active');
+}
+
 // Init
 document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
 document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];
+setQuoteDates();addQuoteLineItem();addQuoteLineItem();updateQuotePreview();
 updateDashboard();updateMoneyMap();
 </script>
 </body>
