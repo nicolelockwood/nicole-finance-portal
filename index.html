@@ -1457,15 +1457,88 @@ function updateQuotePreview(){
     </div>`;
 }
 function downloadQuotePDF(){
-  const element=document.getElementById('q-preview');
   const docNum=document.getElementById('q-doc-number').value||'DOC-001';
   const clientName=document.getElementById('q-client-name').value||'Client';
-  // Clone and style for PDF (white background, full width)
-  const clone=element.cloneNode(true);
-  clone.style.cssText='background:#fff;color:#0D2B3E;padding:24px;font-size:12px;line-height:1.6;width:100%;max-height:none;overflow:visible;font-family:Arial,sans-serif;';
-  clone.querySelectorAll('*').forEach(el=>{el.style.color=el.style.color||'#0D2B3E';});
-  html2pdf().set({margin:12,filename:`Lockwood_${quoteType.toUpperCase()}_${docNum}_${clientName}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,backgroundColor:'#ffffff'},jsPDF:{orientation:'portrait',unit:'mm',format:'a4'}}).from(clone).save();
-  showToast('✓ Downloading PDF...');
+  const contact=document.getElementById('q-contact-person').value||'';
+  const email=document.getElementById('q-contact-email').value||'';
+  const abn=document.getElementById('q-client-abn').value||'';
+  const issueDate=document.getElementById('q-issue-date').value;
+  const dueDate=document.getElementById('q-due-date').value;
+  const scope=document.getElementById('q-scope').value;
+  const terms=document.getElementById('q-terms').value;
+  const notes=document.getElementById('q-notes').value;
+  const useMonthly=document.getElementById('q-monthly-toggle').checked;
+  const typeLabel=quoteType==='quote'?'QUOTE':'INVOICE';
+  const dueLabel=quoteType==='quote'?'Valid until':'Due date';
+  const subtotal=quoteLineItems.reduce((s,i)=>s+(i.qty*i.rate),0);
+  const gst=subtotal*0.1; const total=subtotal+gst;
+  const lineItemsHtml=quoteLineItems.length?quoteLineItems.map(item=>`<tr><td>${item.desc||'—'}</td><td style="text-align:center;">${item.qty}</td><td style="text-align:right;">\$${item.rate.toFixed(2)}</td><td style="text-align:right;font-weight:600;">\$${(item.qty*item.rate).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#6A8FA8;">—</td></tr>';
+  const monthlyHtml=useMonthly&&subtotal>0?`<div class="section"><div class="section-header teal">Monthly Payment Schedule</div><div class="section-body"><div class="row"><span>Monthly fee (excl. GST):</span><span class="mono">\$${(subtotal/12).toFixed(2)}</span></div><div class="row"><span>Monthly GST:</span><span class="mono">\$${(gst/12).toFixed(2)}</span></div><div class="row total"><span>Monthly invoice total (inc. GST):</span><span class="mono">\$${(total/12).toFixed(2)}</span></div></div></div>`:'';
+  const scopeHtml=scope?`<div class="section"><div class="section-header dark">Scope of Services</div><div class="section-body pre">${scope}</div></div>`:'';
+  const notesHtml=notes?`<div class="section"><div class="section-header teal">Notes</div><div class="section-body pre">${notes}</div></div>`:'';
+  const termsHtml=terms?`<div class="section"><div class="section-header dark">Terms &amp; Conditions</div><div class="section-body pre">${terms}</div></div>`:'';
+  const bankHtml=quoteType==='invoice'?`<div class="section"><div class="section-header teal">Payment Details</div><div class="section-body">Account Name: N and N Lockwood<br>BSB: 086061 &nbsp; Account #: 816239874<br>Institution: National Australia Bank</div></div>`:'';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:210mm;font-family:'DM Sans',Arial,sans-serif;font-size:12px;color:#0D2B3E;line-height:1.5;background:#fff;}
+.header{background:#0D2B3E;padding:22px 32px;display:flex;justify-content:space-between;align-items:flex-end;}
+.doc-type{font-size:20px;font-weight:700;letter-spacing:0.06em;color:#F4F0EB;}
+.company-block{text-align:right;}
+.company-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#F4F0EB;}
+.company-sub{font-size:9px;color:rgba(244,240,235,0.6);margin-top:3px;}
+.accent{background:#2E8BA8;height:3px;}
+.body{padding:28px 32px;}
+.meta{display:flex;justify-content:space-between;margin-bottom:24px;}
+.meta-block h4{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#2E8BA8;margin-bottom:6px;}
+.meta-block p{font-size:11px;color:#2C5570;line-height:1.9;}
+.meta-block p strong{font-weight:600;color:#0D2B3E;}
+.meta-right{text-align:right;}
+.section{border:1px solid rgba(13,43,62,0.12);border-radius:6px;overflow:hidden;margin-bottom:18px;page-break-inside:avoid;}
+.section-header{padding:7px 14px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;}
+.section-header.dark{background:#0D2B3E;color:#F4F0EB;}
+.section-header.teal{background:#2E8BA8;color:#fff;}
+.section-body{padding:12px 14px;font-size:10.5px;color:#2C5570;line-height:1.7;}
+.section-body.pre{white-space:pre-wrap;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:rgba(13,43,62,0.06);border-bottom:1px solid rgba(13,43,62,0.1);}
+th{padding:7px 14px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2C5570;text-align:left;}
+th:nth-child(2){text-align:center;width:50px;}
+th:nth-child(3),th:nth-child(4){text-align:right;width:90px;}
+td{padding:10px 14px;border-bottom:1px solid rgba(13,43,62,0.06);font-size:11px;color:#0D2B3E;vertical-align:top;}
+td:nth-child(2){text-align:center;}
+td:nth-child(3){text-align:right;color:#2C5570;}
+td:nth-child(4){text-align:right;}
+.totals{padding:10px 14px;background:rgba(46,139,168,0.05);border-top:1px solid rgba(13,43,62,0.08);}
+.row{display:flex;justify-content:space-between;font-size:11px;color:#2C5570;margin-bottom:3px;}
+.row.total{border-top:1px solid rgba(46,139,168,0.2);margin-top:7px;padding-top:7px;font-size:13px;font-weight:700;color:#0D2B3E;}
+.mono{font-family:'DM Mono',monospace;}
+.footer{background:#0D2B3E;padding:9px 32px;display:flex;justify-content:space-between;align-items:center;position:fixed;bottom:0;left:0;right:0;}
+.footer span{font-size:8.5px;color:rgba(244,240,235,0.5);}
+.content-wrap{padding-bottom:40px;}
+@media print{.footer{position:fixed;bottom:0;}.section{page-break-inside:avoid;}}
+</style>
+</head><body>
+<div class="header"><div class="doc-type">${typeLabel}</div><div class="company-block"><div class="company-name">Lockwood Advisory Pty Ltd</div><div class="company-sub">ABN 76 979 340 565 &nbsp;·&nbsp; nicole@lockwoodadvisory.com.au</div></div></div>
+<div class="accent"></div>
+<div class="content-wrap">
+<div class="body">
+<div class="meta"><div class="meta-block"><h4>${typeLabel} Details</h4><p>${typeLabel} #: <strong>${docNum}</strong><br>Issued: <strong>${issueDate?new Date(issueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong><br>${dueLabel}: <strong>${dueDate?new Date(dueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong></p></div><div class="meta-block meta-right"><h4>Bill To</h4><p><strong>${clientName}</strong><br>${contact}<br><span style="color:#6A8FA8;">${email}</span>${abn?'<br><span style="color:#6A8FA8;">ABN: '+abn+'</span>':''}</p></div></div>
+${scopeHtml}
+<div class="section"><div class="section-header dark">Services</div><table><thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${lineItemsHtml}</tbody></table><div class="totals"><div class="row"><span>Subtotal:</span><span class="mono">\$${subtotal.toFixed(2)}</span></div><div class="row"><span>GST (10%):</span><span class="mono">\$${gst.toFixed(2)}</span></div><div class="row total"><span>TOTAL:</span><span class="mono">\$${total.toFixed(2)}</span></div></div></div>
+${monthlyHtml}${notesHtml}${termsHtml}${bankHtml}
+</div>
+</div>
+<div class="footer"><span>Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</span><span>${quoteType==='invoice'?'Payment due within 30 days':'Quote valid for 14 days'}</span></div>
+</body></html>`;
+  const filename=`Lockwood_${typeLabel}_${docNum}_${clientName.replace(/\s+/g,'')}.pdf`;
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.document.title=filename;
+  setTimeout(()=>{win.print();},600);
+  showToast(`${typeLabel} ${docNum} — print/save as PDF`);
 }
 function saveQuoteDraft(){
   currentListTab=quoteType;
