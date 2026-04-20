@@ -1456,17 +1456,27 @@ function updateQuotePreview(){
       <div style="font-size:9px;color:rgba(244,240,235,0.5);">${quoteType==='invoice'?'Payment due within 30 days':'Quote valid for 14 days'}</div>
     </div>`;
 }
+function sanitizeForPDF(str){
+  if(!str)return str;
+  return str
+    .replace(/\uFB00/g,'ff').replace(/\uFB01/g,'fi').replace(/\uFB02/g,'fl')
+    .replace(/\uFB03/g,'ffi').replace(/\uFB04/g,'ffl').replace(/\uFB05/g,'st')
+    .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+    .replace(/\u2013/g,'–').replace(/\u2014/g,'—').replace(/\u2026/g,'...')
+    .replace(/[\u200B\u200C\u200D\uFEFF]/g,'')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF\u0100-\u024F]/g,'');
+}
 function downloadQuotePDF(){
   const docNum=document.getElementById('q-doc-number').value||'DOC-001';
-  const clientName=document.getElementById('q-client-name').value||'Client';
-  const contact=document.getElementById('q-contact-person').value||'';
-  const email=document.getElementById('q-contact-email').value||'';
-  const abn=document.getElementById('q-client-abn').value||'';
+  const clientName=sanitizeForPDF(document.getElementById('q-client-name').value)||'Client';
+  const contact=sanitizeForPDF(document.getElementById('q-contact-person').value)||'';
+  const email=sanitizeForPDF(document.getElementById('q-contact-email').value)||'';
+  const abn=sanitizeForPDF(document.getElementById('q-client-abn').value)||'';
   const issueDate=document.getElementById('q-issue-date').value;
   const dueDate=document.getElementById('q-due-date').value;
-  const scope=document.getElementById('q-scope').value;
-  const terms=document.getElementById('q-terms').value;
-  const notes=document.getElementById('q-notes').value;
+  const scope=sanitizeForPDF(document.getElementById('q-scope').value);
+  const terms=sanitizeForPDF(document.getElementById('q-terms').value);
+  const notes=sanitizeForPDF(document.getElementById('q-notes').value);
   const useMonthly=document.getElementById('q-monthly-toggle').checked;
   const typeLabel=quoteType==='quote'?'QUOTE':'INVOICE';
   const dueLabel=quoteType==='quote'?'Valid until':'Due date';
@@ -1481,7 +1491,7 @@ function downloadQuotePDF(){
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:210mm;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:12px;color:#0D2B3E;line-height:1.5;background:#fff;}
+html,body{width:210mm;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-variant-ligatures:none;-webkit-font-feature-settings:"liga" 0,"kern" 0;font-feature-settings:"liga" 0,"kern" 0;font-size:12px;color:#0D2B3E;line-height:1.5;background:#fff;}
 .header{background:#0D2B3E;padding:22px 32px;display:flex;justify-content:space-between;align-items:flex-end;}
 .doc-type{font-size:20px;font-weight:700;letter-spacing:0.06em;color:#F4F0EB;}
 .company-block{text-align:right;}
