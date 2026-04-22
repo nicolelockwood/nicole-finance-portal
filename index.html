@@ -598,7 +598,7 @@ textarea.input{resize:vertical;min-height:80px;}
 
   <div id="invoices-form-view" style="display:none;">
     <button class="back-btn" onclick="hideInvoiceForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back to invoices</button>
-    <div class="page-header" style="margin-bottom:20px;"><div class="page-title">New invoice</div></div>
+    <div class="page-header" style="margin-bottom:20px;"><div class="page-title" id="inv-form-title">New invoice</div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
       <!-- Left: form -->
       <div class="glass-strong">
@@ -611,11 +611,18 @@ textarea.input{resize:vertical;min-height:80px;}
             <div class="field"><label>Payment terms</label><select class="input" id="inv-terms"><option>7 days</option><option selected>10 business days</option><option>14 days</option><option>30 days</option></select></div>
           </div>
           <div class="divider" style="margin:4px 0;"></div>
-          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Bill to</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;">Bill to</div>
+            <button class="btn btn-glass btn-sm" onclick="openClientsManager()" style="font-size:10px;padding:4px 10px;">Manage clients</button>
+          </div>
+          <select class="input" id="inv-client-select" onchange="applyClientToInvoice(this.value)" style="margin-bottom:10px;font-size:12px;">
+            <option value="">— Select a saved client —</option>
+          </select>
           <div class="form-grid">
-            <div class="field"><label>Organisation name</label><input type="text" class="input" id="inv-org" placeholder="e.g. Spacecubed"></div>
-            <div class="field"><label>Contact name</label><input type="text" class="input" id="inv-contact" placeholder="e.g. Nate Sturcke"></div>
-            <div class="field" style="grid-column:1/-1;"><label>Contact email</label><input type="email" class="input" id="inv-email" placeholder="e.g. nate@spacecubed.com"></div>
+            <div class="field"><label>Organisation name</label><input type="text" class="input" id="inv-org" placeholder="e.g. Spacecubed" oninput="updateInvoicePreview()"></div>
+            <div class="field"><label>Contact name</label><input type="text" class="input" id="inv-contact" placeholder="e.g. Nate Sturcke" oninput="updateInvoicePreview()"></div>
+            <div class="field" style="grid-column:1/-1;"><label>Contact email</label><input type="email" class="input" id="inv-email" placeholder="e.g. nate@spacecubed.com" oninput="updateInvoicePreview()"></div>
+            <div class="field" style="grid-column:1/-1;"><label>Billing address (optional)</label><input type="text" class="input" id="inv-address" placeholder="e.g. 363 Wellington St, Perth WA 6000" oninput="updateInvoicePreview()"></div>
           </div>
           <div class="divider" style="margin:4px 0;"></div>
           <div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Contract scope</div>
@@ -643,7 +650,7 @@ textarea.input{resize:vertical;min-height:80px;}
             <div class="inv-meta-grid">
               <div class="inv-meta-section">
                 <h4>Billed to</h4>
-                <p><strong id="prev-org">—</strong><br><span id="prev-contact">—</span><br><span id="prev-email" style="color:var(--text-tertiary);font-size:12px;">—</span></p>
+                <p><strong id="prev-org">—</strong><br><span id="prev-contact">—</span><br><span id="prev-email" style="color:var(--text-tertiary);font-size:12px;">—</span><span id="prev-address" style="color:var(--text-tertiary);font-size:12px;display:none;"></span></p>
               </div>
               <div class="inv-meta-section" style="text-align:right;">
                 <h4>Invoice details</h4>
@@ -683,9 +690,13 @@ textarea.input{resize:vertical;min-height:80px;}
             </div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:14px;">
-          <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveInvoice()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save invoice</button>
-          <button class="btn btn-glass" style="flex:1;justify-content:center;" onclick="downloadInvoicePDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-glass" style="flex:1;justify-content:center;min-width:110px;" onclick="saveInvoice('draft')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save draft</button>
+          <button class="btn btn-primary" style="flex:1;justify-content:center;min-width:110px;" onclick="saveInvoice('outstanding')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Finalise invoice</button>
+          <button class="btn btn-glass" style="flex:1;justify-content:center;min-width:110px;" onclick="downloadInvoicePDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
+        </div>
+        <div id="inv-delete-row" style="display:none;margin-top:8px;">
+          <button onclick="deleteInvoice()" style="width:100%;padding:8px;background:rgba(122,40,32,0.12);color:#c62828;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;">Delete this invoice</button>
         </div>
       </div>
     </div>
@@ -843,6 +854,28 @@ textarea.input{resize:vertical;min-height:80px;}
 </div>
 
 </main>
+
+<!-- ═══ CLIENTS MODAL ═══ -->
+<div id="clients-modal" style="display:none;position:fixed;inset:0;background:rgba(13,43,62,0.72);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div class="glass-strong" style="width:520px;max-width:100%;max-height:80vh;overflow-y:auto;border-radius:16px;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-size:16px;font-weight:600;color:var(--text-primary);">Saved Clients</div>
+      <button class="btn btn-glass btn-sm" onclick="closeClientsManager()">✕ Close</button>
+    </div>
+    <div id="clients-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+    <div class="glass" style="padding:16px;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:10px;">Add new client</div>
+      <div class="form-grid" style="gap:10px;">
+        <div class="field"><label>Organisation name *</label><input type="text" class="input" id="nc-org" placeholder="e.g. Western Power"></div>
+        <div class="field"><label>Contact name</label><input type="text" class="input" id="nc-contact" placeholder="e.g. Michael Barnes"></div>
+        <div class="field" style="grid-column:1/-1;"><label>Email</label><input type="email" class="input" id="nc-email" placeholder="contact@company.com.au"></div>
+        <div class="field" style="grid-column:1/-1;"><label>Billing address</label><input type="text" class="input" id="nc-address" placeholder="e.g. 363 Wellington St, Perth WA 6000"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" onclick="addClient()">+ Save client</button>
+    </div>
+  </div>
+</div>
+
 <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
 </div>
 
@@ -856,6 +889,9 @@ const sb = createClient('https://mkctnzgjywxwglnyokxq.supabase.co', 'eyJhbGciOiJ
 // ── STATE ──
 const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5,lastSaved:null,moneyMap:{msBoard:0,msConsult:0,msCommission:0,msMission:0,msInvest:0,lifeNow:0,lifeFuture:0,lifeBuffer:0,lifeDebt:0},superFund:''};
 let currentUser = null;
+let editingInvoiceId = null;
+function loadClients(){try{return JSON.parse(localStorage.getItem('nl_clients')||'[]');}catch{return[];}}
+function saveClients(c){localStorage.setItem('nl_clients',JSON.stringify(c));}
 
 // ── AUTH ──
 async function sendMagicLink(){
@@ -910,7 +946,7 @@ async function loadAllData(){
     ]);
     state.expenses = (expRes.data||[]).map(e=>({id:e.id,type:'expense',amount:e.amount,vendor:e.vendor,date:e.date,category:e.category,bizUse:e.biz_use,desc:e.description,receiptName:e.receipt_name}));
     state.income = (incRes.data||[]).map(i=>({id:i.id,type:'income',amount:i.amount,client:i.client,date:i.date,category:i.category,desc:i.description,invoiceRef:i.invoice_ref,attachName:i.attach_name}));
-    state.invoices = (invRes.data||[]).map(i=>({id:i.id,number:i.number,org:i.org,date:i.date,amount:i.amount,gstAmt:i.gst_amt,total:i.total,status:i.status,contact:i.contact,period:i.period,scope:i.scope,services:i.services}));
+    state.invoices = (invRes.data||[]).map(i=>({id:i.id,number:i.number,org:i.org,date:i.date,amount:i.amount,gstAmt:i.gst_amt,total:i.total,status:i.status,contact:i.contact,email:i.email||'',address:i.address||'',terms:i.terms||'10 business days',hasGst:i.has_gst!==false,period:i.period,scope:i.scope,services:i.services}));
     if(mmRes.data&&mmRes.data[0]){
       const mm = mmRes.data[0];
       state.moneyMap = {msBoard:mm.ms_board||0,msConsult:mm.ms_consult||0,msCommission:mm.ms_commission||0,msMission:mm.ms_mission||0,msInvest:mm.ms_invest||0,lifeNow:mm.life_now||0,lifeFuture:mm.life_future||0,lifeBuffer:mm.life_buffer||0,lifeDebt:mm.life_debt||0};
@@ -950,14 +986,24 @@ async function saveIncomeDB(inc){
   }
 }
 
+function buildInvoiceRow(inv,uid){
+  return {user_id:uid,number:inv.number,org:inv.org,date:inv.date,amount:inv.amount,gst_amt:inv.gstAmt,total:inv.total,status:inv.status,contact:inv.contact||'',email:inv.email||'',address:inv.address||'',terms:inv.terms||'10 business days',has_gst:inv.hasGst!==false,period:inv.period||'',scope:inv.scope||'',services:inv.services||''};
+}
 async function saveInvoiceDB(inv){
   if(!currentUser) return;
-  const row = {user_id:currentUser.id,number:inv.number,org:inv.org,date:inv.date,amount:inv.amount,gst_amt:inv.gstAmt,total:inv.total,status:inv.status,contact:inv.contact,period:inv.period,scope:inv.scope,services:inv.services};
-  const {data,error} = await sb.from('invoices').insert(row).select().single();
+  const {data,error} = await sb.from('invoices').insert(buildInvoiceRow(inv,currentUser.id)).select().single();
   if(data) inv.id = data.id;
   if(error) console.error('Save invoice error:',error);
 }
-
+async function updateInvoiceDB(inv){
+  if(!currentUser) return;
+  const {error} = await sb.from('invoices').update(buildInvoiceRow(inv,currentUser.id)).eq('id', inv.id).eq('user_id', currentUser.id);
+  if(error) console.error('Update invoice error:',error);
+}
+async function deleteInvoiceDB(id){
+  if(!currentUser) return;
+  await sb.from('invoices').delete().eq('id', id).eq('user_id', currentUser.id);
+}
 async function updateInvoiceStatusDB(id, status){
   if(!currentUser) return;
   await sb.from('invoices').update({status}).eq('id', id).eq('user_id', currentUser.id);
@@ -1215,12 +1261,45 @@ function filterIncome(){
 
 // ── INVOICE ──
 function showInvoiceForm(){
+  editingInvoiceId=null;
+  document.getElementById('inv-form-title').textContent='New invoice';
   document.getElementById('invoices-list-view').style.display='none';
   document.getElementById('invoices-form-view').style.display='block';
   document.getElementById('inv-date').value=new Date().toISOString().split('T')[0];
-  const last=state.invoices.length?state.invoices[0].number:'INV-0215';
-  const num=parseInt(last.split('-')[1]||215)+1;
+  const finals=state.invoices.filter(i=>i.status!=='draft');
+  const last=finals.length?finals[0].number:state.invoices.length?state.invoices[0].number:'INV-0215';
+  const num=parseInt(last.replace(/[^0-9]/g,'')||215)+1;
   document.getElementById('inv-number').value='INV-'+String(num).padStart(4,'0');
+  ['inv-period','inv-org','inv-contact','inv-email','inv-address','inv-scope','inv-services','inv-amount'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('inv-terms').value='10 business days';
+  document.getElementById('inv-gst').value='yes';
+  document.getElementById('inv-client-select').value='';
+  document.getElementById('inv-delete-row').style.display='none';
+  refreshClientDropdown();
+  updateInvoicePreview();
+}
+function editInvoice(id){
+  const inv=state.invoices.find(i=>String(i.id)===String(id));
+  if(!inv)return;
+  editingInvoiceId=inv.id;
+  document.getElementById('inv-form-title').textContent='Edit invoice';
+  document.getElementById('invoices-list-view').style.display='none';
+  document.getElementById('invoices-form-view').style.display='block';
+  document.getElementById('inv-number').value=inv.number||'';
+  document.getElementById('inv-date').value=inv.date||'';
+  document.getElementById('inv-period').value=inv.period||'';
+  document.getElementById('inv-terms').value=inv.terms||'10 business days';
+  document.getElementById('inv-org').value=inv.org||'';
+  document.getElementById('inv-contact').value=inv.contact||'';
+  document.getElementById('inv-email').value=inv.email||'';
+  document.getElementById('inv-address').value=inv.address||'';
+  document.getElementById('inv-scope').value=inv.scope||'';
+  document.getElementById('inv-services').value=inv.services||'';
+  document.getElementById('inv-amount').value=inv.amount||'';
+  document.getElementById('inv-gst').value=inv.hasGst===false?'no':'yes';
+  document.getElementById('inv-client-select').value='';
+  document.getElementById('inv-delete-row').style.display='block';
+  refreshClientDropdown();
   updateInvoicePreview();
 }
 function hideInvoiceForm(){document.getElementById('invoices-list-view').style.display='block';document.getElementById('invoices-form-view').style.display='none';}
@@ -1232,6 +1311,7 @@ function updateInvoicePreview(){
   const org=document.getElementById('inv-org').value||'—';
   const contact=document.getElementById('inv-contact').value||'—';
   const email=document.getElementById('inv-email').value||'—';
+  const address=document.getElementById('inv-address').value||'';
   const scope=document.getElementById('inv-scope').value||'—';
   const services=document.getElementById('inv-services').value;
   const amount=parseFloat(document.getElementById('inv-amount').value)||0;
@@ -1244,6 +1324,8 @@ function updateInvoicePreview(){
   document.getElementById('prev-org').textContent=org;
   document.getElementById('prev-contact').textContent=contact;
   document.getElementById('prev-email').textContent=email;
+  const addrEl=document.getElementById('prev-address');
+  if(addrEl){addrEl.textContent=address;addrEl.style.display=address?'block':'none';}
   document.getElementById('prev-scope').textContent=scope;
   document.getElementById('prev-org-cell').textContent=org;
   document.getElementById('prev-services-list').innerHTML=services?services.split('\n').filter(Boolean).map(l=>`<div>· ${l.trim()}</div>`).join(''):'';
@@ -1253,30 +1335,73 @@ function updateInvoicePreview(){
   document.getElementById('prev-gst-amt').textContent=fmt(gstAmt);
   document.getElementById('prev-total-incl').textContent=fmt(incl);
 }
-['inv-number','inv-date','inv-period','inv-terms','inv-org','inv-contact','inv-email','inv-scope','inv-services'].forEach(id=>{
+['inv-number','inv-date','inv-period','inv-terms','inv-org','inv-contact','inv-email','inv-address','inv-scope','inv-services'].forEach(id=>{
   const el=document.getElementById(id);
   if(el)el.addEventListener('input',updateInvoicePreview);
 });
 
-async function saveInvoice(){
+async function saveInvoice(status){
   const number=document.getElementById('inv-number').value.trim();
   const org=document.getElementById('inv-org').value.trim();
-  const amount=parseFloat(document.getElementById('inv-amount').value);
+  const amount=parseFloat(document.getElementById('inv-amount').value)||0;
   const date=document.getElementById('inv-date').value;
-  if(!number||!org||!amount||!date){showToast('Please fill in invoice number, org, date and amount');return;}
+  if(status!=='draft'&&(!number||!org||!amount||!date)){showToast('Please fill in number, organisation, date and amount');return;}
+  if(status==='draft'&&!number&&!org){showToast('Add at least a number or client to save draft');return;}
   const hasGst=document.getElementById('inv-gst').value==='yes';
   const gstAmt=hasGst?amount*0.1:0;
-  const inv={id:Date.now(),number,org,date,amount,gstAmt,total:amount+gstAmt,status:'outstanding',contact:document.getElementById('inv-contact').value,period:document.getElementById('inv-period').value,scope:document.getElementById('inv-scope').value,services:document.getElementById('inv-services').value};
-  state.invoices.unshift(inv);
-  await saveInvoiceDB(inv);
+  const invData={
+    number:number||(status==='draft'?'(draft)':''),
+    org:org||(status==='draft'?'(draft)':''),
+    date,amount,gstAmt,total:amount+gstAmt,status,hasGst,
+    contact:document.getElementById('inv-contact').value,
+    email:document.getElementById('inv-email').value,
+    address:document.getElementById('inv-address').value,
+    period:document.getElementById('inv-period').value,
+    terms:document.getElementById('inv-terms').value,
+    scope:document.getElementById('inv-scope').value,
+    services:document.getElementById('inv-services').value
+  };
+  if(editingInvoiceId){
+    const idx=state.invoices.findIndex(i=>String(i.id)===String(editingInvoiceId));
+    if(idx>=0){invData.id=editingInvoiceId;state.invoices[idx]={...state.invoices[idx],...invData};await updateInvoiceDB(state.invoices[idx]);}
+  } else {
+    invData.id=Date.now();
+    state.invoices.unshift(invData);
+    await saveInvoiceDB(invData);
+  }
   renderInvoices();hideInvoiceForm();
-  showToast(`Invoice ${number} saved · ${org}`);
+  showToast(status==='draft'?`Draft saved · ${invData.number}`:`Invoice ${invData.number} finalised ✓`);
+}
+async function deleteInvoice(){
+  if(!editingInvoiceId)return;
+  if(!confirm('Delete this invoice? This cannot be undone.'))return;
+  const idx=state.invoices.findIndex(i=>String(i.id)===String(editingInvoiceId));
+  if(idx>=0){const inv=state.invoices[idx];state.invoices.splice(idx,1);await deleteInvoiceDB(inv.id);}
+  renderInvoices();hideInvoiceForm();
+  showToast('Invoice deleted');
 }
 
 function renderInvoices(){
   const list=document.getElementById('invoice-list');
   if(!state.invoices.length){list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No invoices yet. Create your first one.</p></div>`;return;}
-  list.innerHTML=state.invoices.map(inv=>{const isPaid=inv.status==='paid';const statusColor=isPaid?'var(--positive)':'var(--warning)';const statusBg=isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';return `<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><div class="txn-amt income">\$${inv.total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div style="display:flex;gap:8px;align-items:center;"><span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:4px;font-weight:400;">${inv.status||'outstanding'}</span><button class="btn btn-sm" style="padding:4px 8px;background:${statusBg};color:${statusColor};border:none;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;z-index:2;position:relative;" data-invoice-id="${inv.id}" onclick="event.stopPropagation();markInvoicePaid(this.getAttribute('data-invoice-id'))">${isPaid?'✓ Paid':'Mark paid'}</button></div></div></div>`}).join('');
+  list.innerHTML=state.invoices.map(inv=>{
+    const isDraft=inv.status==='draft';
+    const isPaid=inv.status==='paid';
+    const statusColor=isDraft?'var(--text-tertiary)':isPaid?'var(--positive)':'var(--warning)';
+    const statusBg=isDraft?'rgba(13,43,62,0.08)':isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';
+    const statusLabel=isDraft?'Draft':isPaid?'Paid':'Outstanding';
+    return `<div class="txn-item" style="cursor:pointer;" onclick="editInvoice('${inv.id}')">
+      <div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="txn-info"><div class="txn-name">${inv.number} · ${inv.org}</div><div class="txn-meta">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <div class="txn-amt income">$${(inv.total||0).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:4px;font-weight:400;">${statusLabel}</span>
+          ${!isDraft?`<button class="btn btn-sm" style="padding:4px 8px;background:${statusBg};color:${statusColor};border:none;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;z-index:2;position:relative;" data-invoice-id="${inv.id}" onclick="event.stopPropagation();markInvoicePaid(this.getAttribute('data-invoice-id'))">${isPaid?'✓ Paid':'Mark paid'}</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 async function markInvoicePaid(invoiceId){
@@ -1285,7 +1410,58 @@ async function markInvoicePaid(invoiceId){
   inv.status=inv.status==='paid'?'outstanding':'paid';
   await updateInvoiceStatusDB(inv.id, inv.status);
   renderInvoices();
-  showToast(inv.status==='paid'?'✓ Marked as paid':'✓ Marked as outstanding');
+  showToast(inv.status==='paid'?'✓ Marked as Paid':'✓ Marked as Outstanding');
+}
+
+// ── CLIENT MANAGEMENT ──
+function openClientsManager(){
+  document.getElementById('clients-modal').style.display='flex';
+  renderClientsList();
+}
+function closeClientsManager(){
+  document.getElementById('clients-modal').style.display='none';
+  refreshClientDropdown();
+}
+function renderClientsList(){
+  const clients=loadClients();
+  const list=document.getElementById('clients-list');
+  if(!clients.length){list.innerHTML='<p style="color:var(--text-tertiary);font-size:13px;text-align:center;padding:16px 0;">No clients saved yet.</p>';return;}
+  list.innerHTML=clients.map(c=>`<div class="glass" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+    <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--text-primary);">${c.org}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">${c.contact||''}${c.email?' · '+c.email:''}</div>${c.address?`<div style="font-size:11px;color:var(--text-tertiary);">${c.address}</div>`:''}</div>
+    <button onclick="deleteClient('${c.id}')" style="background:rgba(122,40,32,0.12);color:#c62828;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;white-space:nowrap;">Remove</button>
+  </div>`).join('');
+}
+function addClient(){
+  const org=document.getElementById('nc-org').value.trim();
+  if(!org){showToast('Organisation name is required');return;}
+  const clients=loadClients();
+  clients.push({id:Date.now(),org,contact:document.getElementById('nc-contact').value.trim(),email:document.getElementById('nc-email').value.trim(),address:document.getElementById('nc-address').value.trim()});
+  saveClients(clients);
+  ['nc-org','nc-contact','nc-email','nc-address'].forEach(id=>{document.getElementById(id).value='';});
+  renderClientsList();
+  showToast('Client saved ✓');
+}
+function deleteClient(id){
+  saveClients(loadClients().filter(c=>String(c.id)!==String(id)));
+  renderClientsList();
+  showToast('Client removed');
+}
+function refreshClientDropdown(){
+  const sel=document.getElementById('inv-client-select');
+  if(!sel)return;
+  const clients=loadClients();
+  sel.innerHTML='<option value="">— Select a saved client —</option>'+clients.map(c=>`<option value="${c.id}">${c.org}${c.contact?' · '+c.contact:''}</option>`).join('');
+}
+function applyClientToInvoice(id){
+  if(!id)return;
+  const c=loadClients().find(c=>String(c.id)===String(id));
+  if(!c)return;
+  if(c.org)document.getElementById('inv-org').value=c.org;
+  if(c.contact)document.getElementById('inv-contact').value=c.contact;
+  if(c.email)document.getElementById('inv-email').value=c.email;
+  if(c.address)document.getElementById('inv-address').value=c.address;
+  updateInvoicePreview();
+  showToast(`Filled from: ${c.org}`);
 }
 
 async function downloadInvoicePDF(){
@@ -1296,6 +1472,7 @@ async function downloadInvoicePDF(){
   const terms=document.getElementById('inv-terms').value;
   const contact=document.getElementById('inv-contact').value;
   const email=document.getElementById('inv-email').value;
+  const address=document.getElementById('inv-address').value;
   const scope=document.getElementById('inv-scope').value;
   const services=document.getElementById('inv-services').value;
   const amount=parseFloat(document.getElementById('inv-amount').value)||0;
@@ -1312,7 +1489,7 @@ async function downloadInvoicePDF(){
 <div class="header"><div class="header-left"><div class="doc-type">Tax Invoice</div></div><div class="header-right"><div class="company-name">Lockwood Advisory Pty Ltd</div><div class="company-detail">ABN 76 979 340 565 · nicole@lockwoodadvisory.com.au</div></div></div>
 <div class="accent-bar"></div>
 <div class="body">
-<div class="meta-grid"><div class="meta-section"><h4>Billed To</h4><p><strong>${org}</strong><br>${contact}<br>${email}</p></div><div class="meta-section right"><h4>Invoice Details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
+<div class="meta-grid"><div class="meta-section"><h4>Billed To</h4><p><strong>${org}</strong><br>${contact}<br>${email}${address?'<br>'+address:''}</p></div><div class="meta-section right"><h4>Invoice Details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
 ${scope?`<div class="scope"><strong>Contract Scope:</strong> ${scope}</div>`:''}
 <table><thead><tr><th>Organisation</th><th>Description</th><th style="text-align:right;">Excl. GST</th><th style="text-align:right;">Incl. GST</th></tr></thead><tbody><tr><td>${org}</td><td><div>Services rendered</div><div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>'· '+l.trim()).join('<br>'):'—'}</div></td><td class="mono" style="text-align:right;">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="mono" style="text-align:right;">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tbody></table>
 <div class="totals-wrap"><div class="total-row"><span>Subtotal</span><span class="mono">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row"><span>GST (10%)</span><span class="mono">\$${gstAmt.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row grand"><span>TOTAL (incl. GST)</span><span class="mono">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div>
