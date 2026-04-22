@@ -313,7 +313,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -382,6 +382,7 @@ const APP_VERSION = '1.1.0';
       <button class="nav-item" onclick="showPage('income')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Income</button>
       <button class="nav-item" onclick="showPage('invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Invoices</button>
       <button class="nav-item" onclick="showPage('quotes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M9 21V10M15 21V10M5 6h14M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/></svg>Quotes</button>
+      <button class="nav-item" onclick="showPage('clients')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</button>
       <button class="nav-item" onclick="showPage('super')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>Super</button>
     </div>
     <div class="nav-section">
@@ -609,7 +610,10 @@ const APP_VERSION = '1.1.0';
   <div id="invoices-list-view">
     <div class="page-header">
       <div><div class="page-title">Invoices</div><div class="page-subtitle">Lockwood Advisory Pty Ltd</div></div>
-      <button class="btn btn-primary" onclick="showInvoiceForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New invoice</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-glass btn-sm" onclick="showPage('quotes');setTimeout(()=>showQuoteFormNew('quote'),50)">+ New quote</button>
+        <button class="btn btn-primary" onclick="showInvoiceForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>+ New invoice</button>
+      </div>
     </div>
     <div class="glass"><div class="txn-list" id="invoice-list"><div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No invoices yet. Create your first one.</p></div></div></div>
   </div>
@@ -896,6 +900,32 @@ const APP_VERSION = '1.1.0';
 </div>
 
 <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+
+<!-- ═══ CLIENTS PAGE (injected into main) ═══ -->
+<div id="page-clients" class="page" style="display:none;">
+  <div class="page-header">
+    <div><div class="page-title">Clients</div><div class="page-subtitle">Saved client details for quick invoice autofill</div></div>
+    <button class="btn btn-primary" onclick="document.getElementById('clients-add-form').style.display='block';document.getElementById('nc2-org').focus()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add client</button>
+  </div>
+  <div id="clients-add-form" style="display:none;margin-bottom:16px;">
+    <div class="glass-strong">
+      <div class="card-header"><div class="card-title">New client</div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-grid">
+          <div class="field"><label>Organisation name *</label><input type="text" class="input" id="nc2-org" placeholder="e.g. Western Power"></div>
+          <div class="field"><label>Contact name</label><input type="text" class="input" id="nc2-contact" placeholder="e.g. Michael Barnes"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Email</label><input type="email" class="input" id="nc2-email" placeholder="contact@company.com.au"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Billing address</label><input type="text" class="input" id="nc2-address" placeholder="e.g. 363 Wellington St, Perth WA 6000"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="addClientFromPage()">Save client</button>
+          <button class="btn btn-glass" style="flex:1;justify-content:center;" onclick="document.getElementById('clients-add-form').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="clients-page-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+</div>
 </div>
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Saved</span></div>
@@ -1074,6 +1104,7 @@ function showPage(p){
   if(p==='super')updateSuperPage();
   if(p==='moneymap')updateMoneyMap();
   if(p==='quotes'){document.getElementById('quotes-list-view').style.display='block';document.getElementById('quotes-form-view').style.display='none';renderQuoteListView();}
+  if(p==='clients'){renderClientsPage();}
 }
 
 // ── CALCS ──
@@ -1432,7 +1463,48 @@ async function markInvoicePaid(invoiceId){
   showToast(inv.status==='paid'?'✓ Marked as Paid':'✓ Marked as Outstanding');
 }
 
-// ── CLIENT MANAGEMENT ──
+// ── CLIENTS PAGE ──
+function renderClientsPage(){
+  const clients=loadClients();
+  const list=document.getElementById('clients-page-list');
+  if(!list)return;
+  if(!clients.length){
+    list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No clients yet. Add your first one above.</p></div>`;
+    return;
+  }
+  list.innerHTML=clients.map(c=>`
+    <div class="glass" style="padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">${c.org}</div>
+        ${c.contact?`<div style="font-size:12px;color:var(--text-secondary);">${c.contact}</div>`:''}
+        ${c.email?`<div style="font-size:12px;color:var(--text-tertiary);">${c.email}</div>`:''}
+        ${c.address?`<div style="font-size:12px;color:var(--text-tertiary);">${c.address}</div>`:''}
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-glass btn-sm" onclick="showPage('invoices');setTimeout(()=>{showInvoiceForm();applyClientToInvoice('${c.id}');},80)">New invoice</button>
+        <button onclick="deleteClientFromPage('${c.id}')" style="background:rgba(122,40,32,0.12);color:#c62828;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;">Remove</button>
+      </div>
+    </div>`).join('');
+}
+function addClientFromPage(){
+  const org=document.getElementById('nc2-org').value.trim();
+  if(!org){showToast('Organisation name is required');return;}
+  const clients=loadClients();
+  clients.push({id:Date.now(),org,contact:document.getElementById('nc2-contact').value.trim(),email:document.getElementById('nc2-email').value.trim(),address:document.getElementById('nc2-address').value.trim()});
+  saveClients(clients);
+  ['nc2-org','nc2-contact','nc2-email','nc2-address'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('clients-add-form').style.display='none';
+  renderClientsPage();
+  showToast('Client saved ✓');
+}
+function deleteClientFromPage(id){
+  if(!confirm('Remove this client?'))return;
+  saveClients(loadClients().filter(c=>String(c.id)!==String(id)));
+  renderClientsPage();
+  showToast('Client removed');
+}
+
+// ── CLIENT MANAGEMENT (modal) ──
 function openClientsManager(){
   document.getElementById('clients-modal').style.display='flex';
   renderClientsList();
@@ -1550,7 +1622,31 @@ let currentListTab='quote';
 function showQuoteFormNew(type){quoteType=type;clearQuoteForm();document.getElementById('quotes-list-view').style.display='none';document.getElementById('quotes-form-view').style.display='block';document.getElementById('quote-type-btn').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('invoice-type-btn').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('quote-form-title').textContent=type==='quote'?'Create Quote':'Create Invoice';}
 function backToQuotesList(){document.getElementById('quotes-form-view').style.display='none';document.getElementById('quotes-list-view').style.display='block';renderQuoteListView();}
 function switchListTab(type){currentListTab=type;document.getElementById('ql-tab-quote').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('ql-tab-quote').style.color=type==='quote'?'var(--text-primary)':'var(--text-tertiary)';document.getElementById('ql-tab-invoice').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('ql-tab-invoice').style.color=type==='invoice'?'var(--text-primary)':'var(--text-tertiary)';renderQuoteListView();}
-function renderQuoteListView(){const stored=localStorage.getItem(`quoteDrafts_${currentListTab}`);const docs=stored?JSON.parse(stored):[];const list=document.getElementById('quotes-saved-list');if(!docs.length){list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No ${currentListTab}s yet. Create your first one.</p></div>`;return;}list.innerHTML=docs.map(doc=>`<div class="glass" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;cursor:pointer;" onclick="editQuoteDraft(${doc.id})"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${doc.type.toUpperCase()} #${doc.docNum} — ${doc.clientName||'(no client)'}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;">Saved ${doc.savedAt}</div></div><div style="display:flex;gap:8px;flex-shrink:0;"><button class="btn btn-glass btn-sm" onclick="event.stopPropagation();editQuoteDraft(${doc.id})">Edit</button><button class="btn btn-sm" style="background:rgba(122,40,32,0.15);color:#c62828;border:none;font-size:11px;padding:6px 10px;border-radius:6px;" onclick="event.stopPropagation();deleteQuoteDraft(${doc.id})">Delete</button></div></div>`).join('');}
+function renderQuoteListView(){
+  const list=document.getElementById('quotes-saved-list');
+  if(currentListTab==='invoice'){
+    // Show Supabase invoices (same data as Invoices page)
+    if(!state.invoices.length){list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No invoices yet. Create one from the Invoices page.</p></div>`;return;}
+    list.innerHTML=state.invoices.map(inv=>{
+      const isDraft=inv.status==='draft';const isPaid=inv.status==='paid';
+      const statusColor=isDraft?'var(--text-tertiary)':isPaid?'var(--positive)':'var(--warning)';
+      const statusBg=isDraft?'rgba(13,43,62,0.08)':isPaid?'rgba(30,102,69,0.1)':'rgba(94,61,92,0.1)';
+      const statusLabel=isDraft?'Draft':isPaid?'Paid':'Outstanding';
+      return `<div class="glass" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;cursor:pointer;" onclick="showPage('invoices');setTimeout(()=>editInvoice('${inv.id}'),50)">
+        <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">${inv.number} — ${inv.org}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;">${formatDate(inv.date)}${inv.period?' · '+inv.period:''}</div></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <span style="font-size:12px;font-weight:600;color:var(--ocean-deep);">$${(inv.total||0).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+          <span style="font-size:10px;background:${statusBg};color:${statusColor};padding:2px 8px;border-radius:4px;">${statusLabel}</span>
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+  // Quotes — from localStorage
+  const stored=localStorage.getItem('quoteDrafts_quote');const docs=stored?JSON.parse(stored):[];
+  if(!docs.length){list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No quotes yet. Create your first one.</p></div>`;return;}
+  list.innerHTML=docs.map(doc=>`<div class="glass" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;cursor:pointer;" onclick="editQuoteDraft(${doc.id})"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--ocean-deep);">QUOTE #${doc.docNum} — ${doc.clientName||'(no client)'}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;">Saved ${doc.savedAt}</div></div><div style="display:flex;gap:8px;flex-shrink:0;"><button class="btn btn-glass btn-sm" onclick="event.stopPropagation();editQuoteDraft(${doc.id})">Edit</button><button class="btn btn-sm" style="background:rgba(122,40,32,0.15);color:#c62828;border:none;font-size:11px;padding:6px 10px;border-radius:6px;" onclick="event.stopPropagation();deleteQuoteDraft(${doc.id})">Delete</button></div></div>`).join('');
+}
 function showQuoteForm(){showQuoteFormNew('quote');}
 function switchToInvoices(){showQuoteFormNew('invoice');}
 function switchQuoteType(type){quoteType=type;document.getElementById('quote-type-btn').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('invoice-type-btn').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('quote-form-title').textContent=type==='quote'?'Create Quote':'Create Invoice';document.getElementById('q-due-label').textContent=type==='quote'?'Valid until':'Due date';if(type==='quote')document.getElementById('q-doc-number').placeholder='QTE-001';if(type==='invoice')document.getElementById('q-doc-number').placeholder='INV-001';}
