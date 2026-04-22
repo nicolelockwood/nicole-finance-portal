@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Finance Portal · Nicole Lockwood</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -306,6 +309,21 @@ textarea.input{resize:vertical;min-height:80px;}
 .nav-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:6px;padding:0 12px;}
 
 </style>
+<script>
+// ── AUTO-UPDATE CHECK ──
+// Fetches version.json on every load. If the version has changed since last visit,
+// silently reloads so Nicole always has the latest without needing to hard refresh.
+const APP_VERSION = '1.1.0';
+(async function checkForUpdate(){
+  try{
+    const res = await fetch('version.json?t=' + Date.now());
+    const data = await res.json();
+    if(data.version && data.version !== APP_VERSION){
+      location.reload(true);
+    }
+  } catch(e){}
+})();
+</script>
 </head>
 <body>
 <div id="login-screen" style="display:none;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;">
