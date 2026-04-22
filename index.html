@@ -1471,10 +1471,10 @@ async function downloadInvoicePDF(){
   const date=document.getElementById('inv-date').value;
   const period=document.getElementById('inv-period').value;
   const terms=document.getElementById('inv-terms').value;
-  const contact=document.getElementById('inv-contact').value;
-  const email=document.getElementById('inv-email').value;
-  const address=document.getElementById('inv-address').value;
-  const scope=document.getElementById('inv-scope').value;
+  const contact=document.getElementById('inv-contact')?.value||'';
+  const email=document.getElementById('inv-email')?.value||'';
+  const address=document.getElementById('inv-address')?.value||'';
+  const scope=document.getElementById('inv-scope')?.value||'';
   const services=document.getElementById('inv-services').value;
   const amount=parseFloat(document.getElementById('inv-amount').value)||0;
   const hasGst=document.getElementById('inv-gst').value==='yes';
@@ -1490,7 +1490,7 @@ async function downloadInvoicePDF(){
 <div class="header"><div class="header-left"><div class="doc-type">Tax Invoice</div></div><div class="header-right"><div class="company-name">Lockwood Advisory Pty Ltd</div><div class="company-detail" style="color:rgba(244,240,235,0.85);font-size:10px;margin-bottom:2px;">Nicole Lockwood</div><div class="company-detail">PO Box 809, South Fremantle WA 6162<br>ABN 76 979 340 565 · nicole@lockwoodadvisory.com.au</div></div></div>
 <div class="accent-bar"></div>
 <div class="body">
-<div class="meta-grid"><div class="meta-section"><h4>Billed To</h4><p><strong>${org}</strong><br>${contact}<br>${email}${address?'<br>'+address:''}</p></div><div class="meta-section right"><h4>Invoice Details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
+<div class="meta-grid"><div class="meta-section"><h4>Billed To</h4><div style="font-size:12px;line-height:1.85;"><strong>${org}</strong>${contact?'<div>'+contact+'</div>':''}${email?'<div style="color:#6A8FA8;">'+email+'</div>':''}${address?'<div style="color:#6A8FA8;">'+address+'</div>':''}</div></div><div class="meta-section right"><h4>Invoice Details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
 ${scope?`<div class="scope"><strong>Contract Scope:</strong> ${scope}</div>`:''}
 <table><thead><tr><th>Organisation</th><th>Description</th><th style="text-align:right;">Excl. GST</th><th style="text-align:right;">Incl. GST</th></tr></thead><tbody><tr><td>${org}</td><td><div>Services rendered</div><div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>'· '+l.trim()).join('<br>'):'—'}</div></td><td class="mono" style="text-align:right;">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="mono" style="text-align:right;">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tbody></table>
 <div class="totals-wrap"><div class="total-row"><span>Subtotal</span><span class="mono">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row"><span>GST (10%)</span><span class="mono">\$${gstAmt.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row grand"><span>TOTAL (incl. GST)</span><span class="mono">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div>
