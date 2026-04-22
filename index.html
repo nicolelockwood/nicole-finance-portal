@@ -643,6 +643,7 @@ textarea.input{resize:vertical;min-height:80px;}
             <div class="inv-header-left">
               <div class="inv-badge">Tax Invoice</div>
               <div class="inv-company">Lockwood Advisory Pty Ltd</div>
+              <div style="font-size:12px;color:rgba(244,240,235,0.7);font-weight:400;margin-bottom:4px;">Nicole Lockwood</div>
               <div class="inv-company-detail">PO Box 809, South Fremantle WA 6162<br>nicole@lockwoodadvisory.com.au<br>ABN 76 979 340 565</div>
             </div>
           </div>
@@ -1486,7 +1487,7 @@ async function downloadInvoicePDF(){
   *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',sans-serif;font-size:13px;color:#0D2B3E;line-height:1.5;}.header{background:#0D2B3E;padding:24px 36px;display:flex;justify-content:space-between;align-items:flex-end;}.header-left{color:#F4F0EB;}.header-right{text-align:right;color:#F4F0EB;}.doc-type{font-size:18px;font-weight:700;letter-spacing:0.06em;color:#F4F0EB;}.company-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#F4F0EB;}.company-detail{font-size:9.5px;color:rgba(244,240,235,0.6);margin-top:3px;line-height:1.6;}.accent-bar{background:#2E8BA8;height:3px;}.body{padding:28px 36px;}.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}.meta-section h4{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2E8BA8;margin-bottom:7px;}.meta-section p{font-size:12px;line-height:1.9;}.meta-section strong{font-weight:600;}.meta-section.right{text-align:right;}.scope{font-size:11px;color:#6A8FA8;margin-bottom:16px;}.scope strong{font-weight:500;color:#0D2B3E;}table{width:100%;border-collapse:collapse;margin-bottom:0;}thead tr{background:#0D2B3E;}th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#F4F0EB;padding:9px 10px;text-align:left;}th:last-child,td:last-child{text-align:right;}td{padding:11px 10px;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;vertical-align:top;}.desc-detail{font-size:10.5px;color:#6A8FA8;margin-top:3px;line-height:1.6;}.mono{font-family:'DM Mono',monospace;font-size:12px;}.totals-wrap{background:rgba(46,139,168,0.07);border:1px solid rgba(46,139,168,0.15);border-top:none;border-radius:0 0 6px 6px;padding:10px 10px;margin-bottom:22px;}.total-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:#2C5570;}.total-row.grand{border-top:1px solid rgba(46,139,168,0.2);margin-top:8px;padding-top:8px;font-weight:700;font-size:13px;color:#0D2B3E;}.payment{border:1px solid #2E8BA8;border-radius:6px;overflow:hidden;margin-bottom:22px;}.payment-header{background:#2E8BA8;padding:8px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#fff;}.payment-body{padding:12px 14px;font-size:11px;color:#2C5570;line-height:1.9;}.payment-body strong{font-weight:600;color:#0D2B3E;}.footer{background:#0D2B3E;padding:10px 36px;display:flex;justify-content:space-between;align-items:center;}.footer-text{font-size:9px;color:rgba(244,240,235,0.5);}
 </style>
 </head><body>
-<div class="header"><div class="header-left"><div class="doc-type">Tax Invoice</div></div><div class="header-right"><div class="company-name">Lockwood Advisory Pty Ltd</div><div class="company-detail">ABN 76 979 340 565 · nicole@lockwoodadvisory.com.au</div></div></div>
+<div class="header"><div class="header-left"><div class="doc-type">Tax Invoice</div></div><div class="header-right"><div class="company-name">Lockwood Advisory Pty Ltd</div><div class="company-detail" style="color:rgba(244,240,235,0.85);font-size:10px;margin-bottom:2px;">Nicole Lockwood</div><div class="company-detail">PO Box 809, South Fremantle WA 6162<br>ABN 76 979 340 565 · nicole@lockwoodadvisory.com.au</div></div></div>
 <div class="accent-bar"></div>
 <div class="body">
 <div class="meta-grid"><div class="meta-section"><h4>Billed To</h4><p><strong>${org}</strong><br>${contact}<br>${email}${address?'<br>'+address:''}</p></div><div class="meta-section right"><h4>Invoice Details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
@@ -1495,7 +1496,7 @@ ${scope?`<div class="scope"><strong>Contract Scope:</strong> ${scope}</div>`:''}
 <div class="totals-wrap"><div class="total-row"><span>Subtotal</span><span class="mono">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row"><span>GST (10%)</span><span class="mono">\$${gstAmt.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row grand"><span>TOTAL (incl. GST)</span><span class="mono">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div>
 <div class="payment"><div class="payment-header">Payment Details</div><div class="payment-body"><strong>Account Name:</strong> N and N Lockwood<br><strong>BSB:</strong> 086061 &nbsp; <strong>Account #:</strong> 816239874<br><strong>Institution:</strong> National Australia Bank</div></div>
 </div>
-<div class="footer"><div class="footer-text">Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</div><div class="footer-text">Due within 30 days of invoice date</div></div>
+<div class="footer"><div class="footer-text">Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</div><div class="footer-text">Payment due: ${terms}</div></div>
 </body></html>`;
   const win=window.open('','_blank');
   win.document.write(html);
@@ -1716,7 +1717,7 @@ ${scopeHtml}
 ${monthlyHtml}${notesHtml}${termsHtml}${bankHtml}
 </div>
 </div>
-<div class="footer"><span>Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</span><span>${quoteType==='invoice'?'Payment due within 30 days':'Quote valid for 14 days'}</span></div>
+<div class="footer"><span>Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</span><span>${quoteType==='invoice'?'Payment due: '+dueDate:'Quote valid until: '+dueDate}</span></div>
 </body></html>`;
   const filename=`Lockwood_${typeLabel}_${docNum}_${clientName.replace(/\s+/g,'')}.pdf`;
   const win=window.open('','_blank');
