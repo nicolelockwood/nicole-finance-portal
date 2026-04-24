@@ -313,7 +313,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.5.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -509,11 +509,11 @@ const APP_VERSION = '1.4.0';
   <div id="expenses-list-view">
     <div class="page-header"><div><div class="page-title">Expenses</div><div class="page-subtitle">All business expenditure</div></div><div style="display:flex;gap:8px;align-items:center;"><button id="q1-import-btn" class="btn btn-glass btn-sm" onclick="importQ1Expenses()" style="background:rgba(46,139,168,0.15);color:var(--teal);border:1px solid rgba(46,139,168,0.3);font-size:12px;">📥 Import Q1 2026</button><button class="btn btn-primary" onclick="showExpenseForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add expense</button></div></div>
     <div class="glass" style="padding:14px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" class="input" id="exp-search" placeholder="Search vendor, category, date..." oninput="filterExpenses()" style="width:100%;"></div></div>
-    <div class="glass"><div class="txn-list" id="expense-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div></div></div>
+    <div class="glass" style="max-width:860px;"><div class="txn-list" id="expense-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div></div></div>
   </div>
   <div id="expenses-form-view" style="display:none;">
     <button class="back-btn" onclick="hideExpenseForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back to expenses</button>
-    <div class="page-header" style="margin-bottom:20px;"><div class="page-title">Add expense</div></div>
+    <div class="page-header" style="margin-bottom:20px;"><div class="page-title" id="expense-form-title">Add expense</div><div id="expense-form-actions" style="display:none;"><button class="btn btn-sm" style="background:rgba(122,40,32,0.15);color:#c62828;border:none;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;" onclick="deleteExpense()">Delete expense</button></div></div>
     <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;">
       <div class="glass-strong">
         <div class="card-header"><div class="card-title">Expense details</div></div>
@@ -522,7 +522,7 @@ const APP_VERSION = '1.4.0';
             <div class="field"><label>Total amount</label><div class="input-pfx"><span class="pfx">$</span><input type="number" class="input" id="exp-amount" placeholder="0.00" step="0.01"></div></div>
             <div class="field"><label>Date</label><input type="date" class="input" id="exp-date"></div>
             <div class="field"><label>Vendor / Supplier</label><input type="text" class="input" id="exp-vendor" placeholder="e.g. Adobe, Officeworks"></div>
-            <div class="field"><label>Category</label><select class="input" id="exp-category"><option value="">Select category</option><option>Software & subscriptions</option><option>Office supplies</option><option>Professional development</option><option>Marketing & advertising</option><option>Travel & transport</option><option>Meals & entertainment</option><option>Equipment</option><option>Contractor payments</option><option>Bank & finance fees</option><option>Other</option></select></div>
+            <div class="field"><label>Category</label><select class="input" id="exp-category"><option value="">Select category</option><option>Meals & Entertainment</option><option>Motor Vehicle</option><option>Travel & Parking</option><option>Professional Services</option><option>Professional Development</option><option>Software & Subscriptions</option><option>Office & Administration</option><option>Marketing & Advertising</option><option>Equipment</option><option>Contractor Payments</option><option>Bank & Finance Fees</option><option>Other</option></select></div>
             <div class="field"><label>Business use %</label><div class="input-pfx"><input type="number" class="input" id="exp-biz-use" value="100" min="0" max="100"><span class="pfx" style="left:auto;right:12px;">%</span></div></div>
             <div class="field"><label>GST</label><select class="input" id="exp-gst"><option>No GST</option><option>GST included (10%)</option></select></div>
           </div>
@@ -550,7 +550,7 @@ const APP_VERSION = '1.4.0';
             </div>
           </div>
         </div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveExpense()">Save expense</button>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" id="expense-save-btn" onclick="saveExpense()">Save expense</button>
         <button class="btn btn-glass" style="width:100%;justify-content:center;" onclick="hideExpenseForm()">Cancel</button>
       </div>
     </div>
@@ -932,6 +932,7 @@ const sb = createClient('https://mkctnzgjywxwglnyokxq.supabase.co', 'eyJhbGciOiJ
 const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5,lastSaved:null,moneyMap:{msBoard:0,msConsult:0,msCommission:0,msMission:0,msInvest:0,lifeNow:0,lifeFuture:0,lifeBuffer:0,lifeDebt:0},superFund:''};
 let currentUser = null;
 let editingInvoiceId = null;
+let editingExpenseId = null;
 function loadClients(){try{return JSON.parse(localStorage.getItem('nl_clients')||'[]');}catch{return[];}}
 function saveClients(c){localStorage.setItem('nl_clients',JSON.stringify(c));}
 
@@ -1155,7 +1156,8 @@ function showPage(p){
 }
 
 // ── CALCS ──
-function calcTax(i){if(i<=0)return 0;if(i<=18200)return 0;if(i<=45000)return(i-18200)*.19;if(i<=135000)return 5092+(i-45000)*.325;if(i<=190000)return 29467+(i-135000)*.37;return 50067+(i-190000)*.45;}
+// 2025–26 Australian income tax rates (Stage 3 cuts applied)
+function calcTax(i){if(i<=0)return 0;if(i<=18200)return 0;if(i<=45000)return(i-18200)*.16;if(i<=135000)return 4288+(i-45000)*.30;if(i<=190000)return 31288+(i-135000)*.37;return 51638+(i-190000)*.45;}
 function getCalcs(){
   const gross=state.income.reduce((s,i)=>s+i.amount,0);
   const expenses=state.expenses.reduce((s,e)=>s+(e.amount*e.bizUse/100),0);
@@ -1274,8 +1276,53 @@ function updatePL(){
 }
 
 // ── EXPENSE FORM ──
-function showExpenseForm(){document.getElementById('expenses-list-view').style.display='none';document.getElementById('expenses-form-view').style.display='block';document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];}
-function hideExpenseForm(){document.getElementById('expenses-list-view').style.display='block';document.getElementById('expenses-form-view').style.display='none';clearReceipt();['exp-amount','exp-vendor','exp-desc','exp-category'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});document.getElementById('exp-biz-use').value='100';}
+function showExpenseForm(){
+  editingExpenseId=null;
+  document.getElementById('expense-form-title').textContent='Add expense';
+  document.getElementById('expense-form-actions').style.display='none';
+  document.getElementById('expense-save-btn').textContent='Save expense';
+  document.getElementById('expenses-list-view').style.display='none';
+  document.getElementById('expenses-form-view').style.display='block';
+  document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
+  ['exp-amount','exp-vendor','exp-desc','exp-category'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('exp-biz-use').value='100';
+}
+function hideExpenseForm(){
+  editingExpenseId=null;
+  document.getElementById('expenses-list-view').style.display='block';
+  document.getElementById('expenses-form-view').style.display='none';
+  clearReceipt();
+  ['exp-amount','exp-vendor','exp-desc','exp-category'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('exp-biz-use').value='100';
+}
+function editExpense(id){
+  const e=state.expenses.find(x=>String(x.id)===String(id));
+  if(!e)return;
+  editingExpenseId=id;
+  document.getElementById('expense-form-title').textContent='Edit expense';
+  document.getElementById('expense-form-actions').style.display='flex';
+  document.getElementById('expense-save-btn').textContent='Save changes';
+  document.getElementById('exp-amount').value=e.amount;
+  document.getElementById('exp-vendor').value=e.vendor||'';
+  document.getElementById('exp-date').value=e.date||'';
+  document.getElementById('exp-category').value=e.category||'';
+  document.getElementById('exp-biz-use').value=e.bizUse||100;
+  document.getElementById('exp-desc').value=e.desc||'';
+  document.getElementById('expenses-list-view').style.display='none';
+  document.getElementById('expenses-form-view').style.display='block';
+}
+async function deleteExpense(){
+  if(!editingExpenseId)return;
+  if(!confirm('Delete this expense? This cannot be undone.'))return;
+  const idx=state.expenses.findIndex(e=>String(e.id)===String(editingExpenseId));
+  if(idx>=0){
+    const exp=state.expenses[idx];
+    state.expenses.splice(idx,1);
+    if(currentUser&&exp.id&&typeof exp.id==='string'){await sb.from('expenses').delete().eq('id',exp.id).eq('user_id',currentUser.id);}
+  }
+  hideExpenseForm();renderExpenses();updateDashboard();
+  showToast('Expense deleted');
+}
 function triggerFileInput(){document.getElementById('receipt-file-input').click();}
 function handleReceiptUpload(e){const file=e.target.files[0];if(!file)return;state.receiptFile=file;const r=new FileReader();r.onload=ev=>{document.getElementById('receipt-thumb-img').src=ev.target.result;document.getElementById('receipt-file-name').textContent=file.name;document.getElementById('receipt-file-size').textContent=(file.size/1024).toFixed(1)+' KB';document.getElementById('receipt-preview').classList.add('visible');document.getElementById('receipt-drop-zone').classList.add('has-file');document.getElementById('ai-scan-bar').classList.add('visible');document.getElementById('ai-scan-btn').textContent='Scan now';};r.readAsDataURL(file);}
 function clearReceipt(){state.receiptFile=null;document.getElementById('receipt-file-input').value='';document.getElementById('receipt-preview').classList.remove('visible');document.getElementById('receipt-drop-zone').classList.remove('has-file');document.getElementById('ai-scan-bar').classList.remove('visible');}
@@ -1300,16 +1347,30 @@ async function saveExpense(){
   const bizUse=parseInt(document.getElementById('exp-biz-use').value)||100;
   const desc=document.getElementById('exp-desc').value.trim();
   const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
-  const expense={id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName};
-  state.expenses.unshift(expense);
-  await saveExpenseDB(expense);
-  hideExpenseForm();renderExpenses();updateDashboard();saveState();showToast(`Saved · ${vendor} · \$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}`);
+  if(editingExpenseId){
+    // Update existing
+    const idx=state.expenses.findIndex(e=>String(e.id)===String(editingExpenseId));
+    if(idx>=0){
+      state.expenses[idx]={...state.expenses[idx],amount,vendor,date,category,bizUse,desc};
+      if(currentUser&&typeof state.expenses[idx].id==='string'){
+        await sb.from('expenses').update({amount,vendor,date,category,biz_use:bizUse,description:desc}).eq('id',state.expenses[idx].id).eq('user_id',currentUser.id);
+      }
+    }
+    showToast(`Updated · ${vendor}`);
+  } else {
+    // New expense
+    const expense={id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName};
+    state.expenses.unshift(expense);
+    await saveExpenseDB(expense);
+    showToast(`Saved · ${vendor} · \$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}`);
+  }
+  hideExpenseForm();renderExpenses();updateDashboard();saveState();
 }
 
 function renderExpenses(){
   const list=document.getElementById('expense-list');
   if(!state.expenses.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div>`;return;}
-  list.innerHTML=state.expenses.map(e=>`<div class="txn-item"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.receiptName?`<div class="receipt-chip">${e.receiptName}</div>`:''}</div><div class="txn-amt expense">−\$${e.amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`).join('');
+  list.innerHTML=state.expenses.map(e=>`<div class="txn-item" style="cursor:pointer;" onclick="editExpense('${e.id}')"><div class="photo-icon sm" style="flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg></div><div class="txn-info"><div class="txn-name">${e.vendor}</div><div class="txn-meta">${formatDate(e.date)} · ${e.category||'Uncategorised'}${e.bizUse&&e.bizUse<100?' · '+e.bizUse+'% biz':''}</div>${e.desc?`<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;font-style:italic;">${e.desc}</div>`:''}</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;"><div class="txn-amt expense">−\$${e.amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><button class="btn btn-glass btn-sm" style="padding:4px 10px;font-size:11px;" onclick="event.stopPropagation();editExpense('${e.id}')">Edit</button></div></div>`).join('');
 }
 
 // ── INCOME FORM ──
