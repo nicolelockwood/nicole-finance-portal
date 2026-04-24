@@ -313,7 +313,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.6.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -522,7 +522,7 @@ const APP_VERSION = '1.5.0';
             <div class="field"><label>Total amount</label><div class="input-pfx"><span class="pfx">$</span><input type="number" class="input" id="exp-amount" placeholder="0.00" step="0.01"></div></div>
             <div class="field"><label>Date</label><input type="date" class="input" id="exp-date"></div>
             <div class="field"><label>Vendor / Supplier</label><input type="text" class="input" id="exp-vendor" placeholder="e.g. Adobe, Officeworks"></div>
-            <div class="field"><label>Category</label><select class="input" id="exp-category"><option value="">Select category</option><option>Meals & Entertainment</option><option>Motor Vehicle</option><option>Travel & Parking</option><option>Professional Services</option><option>Professional Development</option><option>Software & Subscriptions</option><option>Office & Administration</option><option>Marketing & Advertising</option><option>Equipment</option><option>Contractor Payments</option><option>Bank & Finance Fees</option><option>Other</option></select></div>
+            <div class="field"><label>Category</label><select class="input" id="exp-category" onchange="handleCategoryChange(this.value)"><option value="">Select category</option><option>Client Meetings</option><option>Entertainment</option><option>Meals & Entertainment</option><option>Motor Vehicle</option><option>Travel & Parking</option><option>Professional Services</option><option>Professional Development</option><option>Software & Subscriptions</option><option>Office & Administration</option><option>Marketing & Advertising</option><option>Equipment</option><option>Contractor Payments</option><option>Bank & Finance Fees</option><option>Other</option></select><div id="entertainment-warning" style="display:none;margin-top:6px;font-size:11px;color:#9B6A00;background:rgba(155,106,0,0.08);border:1px solid rgba(155,106,0,0.2);border-radius:6px;padding:6px 10px;line-height:1.5;">⚠️ Entertainment is generally <strong>not tax deductible</strong> (meals, alcohol at client functions). Business use % will be set to 0%. Check with your accountant.</div></div>
             <div class="field"><label>Business use %</label><div class="input-pfx"><input type="number" class="input" id="exp-biz-use" value="100" min="0" max="100"><span class="pfx" style="left:auto;right:12px;">%</span></div></div>
             <div class="field"><label>GST</label><select class="input" id="exp-gst"><option>No GST</option><option>GST included (10%)</option></select></div>
           </div>
@@ -1305,7 +1305,7 @@ function editExpense(id){
   document.getElementById('exp-amount').value=e.amount;
   document.getElementById('exp-vendor').value=e.vendor||'';
   document.getElementById('exp-date').value=e.date||'';
-  document.getElementById('exp-category').value=e.category||'';
+  document.getElementById('exp-category').value=e.category||'';handleCategoryChange(e.category||'');
   document.getElementById('exp-biz-use').value=e.bizUse||100;
   document.getElementById('exp-desc').value=e.desc||'';
   document.getElementById('expenses-list-view').style.display='none';
@@ -1322,6 +1322,12 @@ async function deleteExpense(){
   }
   hideExpenseForm();renderExpenses();updateDashboard();
   showToast('Expense deleted');
+}
+function handleCategoryChange(val){
+  const isEntertainment=val==='Entertainment';
+  document.getElementById('entertainment-warning').style.display=isEntertainment?'block':'none';
+  if(isEntertainment)document.getElementById('exp-biz-use').value='0';
+  else if(document.getElementById('exp-biz-use').value==='0')document.getElementById('exp-biz-use').value='100';
 }
 function triggerFileInput(){document.getElementById('receipt-file-input').click();}
 function handleReceiptUpload(e){const file=e.target.files[0];if(!file)return;state.receiptFile=file;const r=new FileReader();r.onload=ev=>{document.getElementById('receipt-thumb-img').src=ev.target.result;document.getElementById('receipt-file-name').textContent=file.name;document.getElementById('receipt-file-size').textContent=(file.size/1024).toFixed(1)+' KB';document.getElementById('receipt-preview').classList.add('visible');document.getElementById('receipt-drop-zone').classList.add('has-file');document.getElementById('ai-scan-bar').classList.add('visible');document.getElementById('ai-scan-btn').textContent='Scan now';};r.readAsDataURL(file);}
