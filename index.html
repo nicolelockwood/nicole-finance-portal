@@ -313,7 +313,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.8.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -617,7 +617,7 @@ const APP_VERSION = '1.7.0';
 
   <div id="invoices-form-view" style="display:none;">
     <button class="back-btn" onclick="hideInvoiceForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>Back to invoices</button>
-    <div class="page-header" style="margin-bottom:20px;"><div class="page-title" id="inv-form-title">New invoice</div></div>
+    <div class="page-header" style="margin-bottom:20px;"><div class="page-title" id="inv-form-title">New invoice</div><div id="inv-header-delete" style="display:none;"><button onclick="deleteInvoice()" class="btn btn-sm" style="background:rgba(122,40,32,0.15);color:#c62828;border:none;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;">Delete invoice</button></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
       <!-- Left: form -->
       <div class="glass-strong">
@@ -1441,6 +1441,7 @@ function showInvoiceForm(){
   document.getElementById('inv-gst').value='yes';
   document.getElementById('inv-client-select').value='';
   document.getElementById('inv-delete-row').style.display='none';
+  document.getElementById('inv-header-delete').style.display='none';
   refreshClientDropdown();
   updateInvoicePreview();
 }
@@ -1465,10 +1466,11 @@ function editInvoice(id){
   document.getElementById('inv-gst').value=inv.hasGst===false?'no':'yes';
   document.getElementById('inv-client-select').value='';
   document.getElementById('inv-delete-row').style.display='block';
+  document.getElementById('inv-header-delete').style.display='flex';
   refreshClientDropdown();
   updateInvoicePreview();
 }
-function hideInvoiceForm(){document.getElementById('invoices-list-view').style.display='block';document.getElementById('invoices-form-view').style.display='none';}
+function hideInvoiceForm(){document.getElementById('invoices-list-view').style.display='block';document.getElementById('invoices-form-view').style.display='none';document.getElementById('inv-header-delete').style.display='none';}
 function updateInvoicePreview(){
   const number=document.getElementById('inv-number').value||'INV-—';
   const date=document.getElementById('inv-date').value;
