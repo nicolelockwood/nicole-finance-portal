@@ -313,7 +313,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.9.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -1152,6 +1152,9 @@ function showPage(p){
   if(p==='super')updateSuperPage();
   if(p==='moneymap')updateMoneyMap();
   if(p==='quotes'){document.getElementById('quotes-list-view').style.display='block';document.getElementById('quotes-form-view').style.display='none';renderQuoteListView();}
+  if(p==='invoices'){document.getElementById('invoices-list-view').style.display='block';document.getElementById('invoices-form-view').style.display='none';if(document.getElementById('inv-header-delete'))document.getElementById('inv-header-delete').style.display='none';editingInvoiceId=null;renderInvoices();}
+  if(p==='expenses'){document.getElementById('expenses-list-view').style.display='block';document.getElementById('expenses-form-view').style.display='none';editingExpenseId=null;}
+  if(p==='income'){document.getElementById('income-list-view').style.display='block';document.getElementById('income-form-view').style.display='none';}
   if(p==='clients'){renderClientsPage();}
 }
 
