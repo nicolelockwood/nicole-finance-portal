@@ -313,7 +313,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.7.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -987,7 +987,7 @@ async function loadAllData(){
       sb.from('money_map').select('*').eq('user_id', uid).limit(1),
       sb.from('settings').select('*').eq('user_id', uid).limit(1),
     ]);
-    state.expenses = (expRes.data||[]).map(e=>({id:e.id,type:'expense',amount:e.amount,vendor:e.vendor,date:e.date,category:e.category,bizUse:e.biz_use,desc:e.description,receiptName:e.receipt_name}));
+    state.expenses = (expRes.data||[]).map(e=>({id:e.id,type:'expense',amount:e.amount,vendor:e.vendor,date:e.date,category:e.category,bizUse:e.biz_use,desc:e.description,receiptName:e.receipt_name,hasGst:e.has_gst!==false}));
     state.income = (incRes.data||[]).map(i=>({id:i.id,type:'income',amount:i.amount,client:i.client,date:i.date,category:i.category,desc:i.description,invoiceRef:i.invoice_ref,attachName:i.attach_name}));
     state.invoices = (invRes.data||[]).map(i=>({id:i.id,number:i.number,org:i.org,date:i.date,amount:i.amount,gstAmt:i.gst_amt,total:i.total,status:i.status,contact:i.contact,email:i.email||'',address:i.address||'',terms:i.terms||'10 business days',hasGst:i.has_gst!==false,period:i.period,scope:i.scope,services:i.services}));
     if(mmRes.data&&mmRes.data[0]){
@@ -1053,7 +1053,7 @@ async function importQ1Expenses(){
     const {data,error}=await sb.from('expenses').insert(row).select().single();
     if(error){console.error('Import error:',row.vendor,error);fail++;}
     else{
-      const exp={id:data.id,type:'expense',amount:row.amount,vendor:row.vendor,date:row.date,category:row.category,bizUse:row.biz_use,desc:row.description,receiptName:null};
+      const exp={id:data.id,type:'expense',amount:row.amount,vendor:row.vendor,date:row.date,category:row.category,bizUse:row.biz_use,desc:row.description,receiptName:null,hasGst:row.has_gst!==false};
       state.expenses.push(exp);ok++;
     }
   }
@@ -1065,7 +1065,7 @@ async function importQ1Expenses(){
 
 async function saveExpenseDB(expense){
   if(!currentUser) return;
-  const row = {user_id:currentUser.id,amount:expense.amount,vendor:expense.vendor,date:expense.date,category:expense.category,biz_use:expense.bizUse,description:expense.desc,receipt_name:expense.receiptName};
+  const row = {user_id:currentUser.id,amount:expense.amount,vendor:expense.vendor,date:expense.date,category:expense.category,biz_use:expense.bizUse,description:expense.desc,receipt_name:expense.receiptName,has_gst:expense.hasGst!==false};
   if(typeof expense.id === 'number'){
     const {data,error} = await sb.from('expenses').insert(row).select().single();
     if(data) expense.id = data.id;
@@ -1306,6 +1306,7 @@ function editExpense(id){
   document.getElementById('exp-vendor').value=e.vendor||'';
   document.getElementById('exp-date').value=e.date||'';
   document.getElementById('exp-category').value=e.category||'';handleCategoryChange(e.category||'');
+  document.getElementById('exp-gst').value=e.hasGst===false?'No GST':'GST included (10%)';
   document.getElementById('exp-biz-use').value=e.bizUse||100;
   document.getElementById('exp-desc').value=e.desc||'';
   document.getElementById('expenses-list-view').style.display='none';
@@ -1352,20 +1353,21 @@ async function saveExpense(){
   const category=document.getElementById('exp-category').value;
   const bizUse=parseInt(document.getElementById('exp-biz-use').value)||100;
   const desc=document.getElementById('exp-desc').value.trim();
+  const hasGst=document.getElementById('exp-gst').value!=='No GST';
   const receiptName=state.receiptFile?`${date}_${vendor.replace(/\s+/g,'-')}_\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}_${(category||'Expense').replace(/[\s&]+/g,'-')}.${state.receiptFile.name.split('.').pop()}`:null;
   if(editingExpenseId){
     // Update existing
     const idx=state.expenses.findIndex(e=>String(e.id)===String(editingExpenseId));
     if(idx>=0){
-      state.expenses[idx]={...state.expenses[idx],amount,vendor,date,category,bizUse,desc};
+      state.expenses[idx]={...state.expenses[idx],amount,vendor,date,category,bizUse,desc,hasGst};
       if(currentUser&&typeof state.expenses[idx].id==='string'){
-        await sb.from('expenses').update({amount,vendor,date,category,biz_use:bizUse,description:desc}).eq('id',state.expenses[idx].id).eq('user_id',currentUser.id);
+        await sb.from('expenses').update({amount,vendor,date,category,biz_use:bizUse,description:desc,has_gst:hasGst}).eq('id',state.expenses[idx].id).eq('user_id',currentUser.id);
       }
     }
     showToast(`Updated · ${vendor}`);
   } else {
     // New expense
-    const expense={id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName};
+    const expense={id:Date.now(),type:'expense',amount,vendor,date,category,bizUse,desc,receiptName,hasGst};
     state.expenses.unshift(expense);
     await saveExpenseDB(expense);
     showToast(`Saved · ${vendor} · \$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}`);
@@ -1714,7 +1716,8 @@ ${scope?`<div class="scope"><strong>Contract Scope:</strong> ${scope}</div>`:''}
 // ── EXPORT ──
 function exportPL(){
   const c=getCalcs();
-  const txnRows=[['Type','Date','Description','Category','Amount','Business Use %'],...state.income.map(i=>['Income',i.date,i.client+(i.desc?' - '+i.desc:''),i.category,i.amount.toFixed(2),'100']),...state.expenses.map(e=>['Expense',e.date,e.vendor+(e.desc?' - '+e.desc:''),e.category,e.amount.toFixed(2),e.bizUse])];
+  const gstAmt=e=>e.hasGst===false?'0.00':(e.amount/11).toFixed(2);
+  const txnRows=[['Type','Date','Description','Category','Total (incl GST)','GST Amount','Business Use %','Deductible Amount'],...state.income.map(i=>['Income',i.date,i.client+(i.desc?' - '+i.desc:''),i.category,i.amount.toFixed(2),'N/A','100',i.amount.toFixed(2)]),...state.expenses.map(e=>['Expense',e.date,e.vendor+(e.desc?' - '+e.desc:''),e.category,e.amount.toFixed(2),gstAmt(e),e.bizUse,(e.amount*(e.bizUse||100)/100).toFixed(2)])];
   const summaryRows=[['FINANCIAL SUMMARY - FY 2025-26'],[],['Gross Income','$'+c.gross.toFixed(2)],['Total Expenses (deductible)','$'+c.expenses.toFixed(2)],['Taxable Income','$'+c.taxable.toFixed(2)],[],['TAX BREAKDOWN'],['Income Tax','$'+c.tax.toFixed(2)],['Medicare Levy (2%)','$'+c.medicare.toFixed(2)],['Super ('+state.superRate+'%)','$'+c.superAmt.toFixed(2)],[],['Total Obligations','$'+(c.tax+c.medicare+c.superAmt).toFixed(2)],['Net Income (Yours)','$'+c.yours.toFixed(2)]];
   const toCSV=rows=>rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const dl=(csv,name)=>{const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);};
