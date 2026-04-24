@@ -313,7 +313,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -507,7 +507,7 @@ const APP_VERSION = '1.3.0';
 <!-- ═══ EXPENSES ═══ -->
 <div id="page-expenses" class="page">
   <div id="expenses-list-view">
-    <div class="page-header"><div><div class="page-title">Expenses</div><div class="page-subtitle">All business expenditure</div></div><button class="btn btn-primary" onclick="showExpenseForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add expense</button></div>
+    <div class="page-header"><div><div class="page-title">Expenses</div><div class="page-subtitle">All business expenditure</div></div><div style="display:flex;gap:8px;align-items:center;"><button id="q1-import-btn" class="btn btn-glass btn-sm" onclick="importQ1Expenses()" style="background:rgba(46,139,168,0.15);color:var(--teal);border:1px solid rgba(46,139,168,0.3);font-size:12px;">📥 Import Q1 2026</button><button class="btn btn-primary" onclick="showExpenseForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add expense</button></div></div>
     <div class="glass" style="padding:14px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" class="input" id="exp-search" placeholder="Search vendor, category, date..." oninput="filterExpenses()" style="width:100%;"></div></div>
     <div class="glass"><div class="txn-list" id="expense-list"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><p>No expenses yet.</p></div></div></div>
   </div>
@@ -1006,6 +1006,60 @@ async function loadAllData(){
   renderExpenses(); renderIncome(); renderInvoices();
   renderQuoteListView();
   document.getElementById('last-saved-display').textContent = 'All data saved to cloud';
+}
+
+// ── Q1 2026 BATCH IMPORT (temporary — remove after use) ──
+async function importQ1Expenses(){
+  if(!currentUser){showToast('Please log in first');return;}
+  const btn=document.getElementById('q1-import-btn');
+  if(!btn)return;
+  if(!confirm('Import 29 Q1 2026 expenses from your receipts? This will add them all to your Expenses list.')){return;}
+  btn.textContent='Importing…';btn.disabled=true;
+  const uid=currentUser.id;
+  const rows=[
+    {user_id:uid,date:'2026-01-06',vendor:'Cimbalino Cottesloe',category:'Meals & Entertainment',amount:12.54,biz_use:100,description:'Coffee — Long Macchiato + Prana Chai',receipt_name:null},
+    {user_id:uid,date:'2026-01-24',vendor:'Liberty O\'Connor',category:'Motor Vehicle',amount:54.84,biz_use:100,description:'Fuel — Premium 98, 30.05L @ $1.825/L',receipt_name:null},
+    {user_id:uid,date:'2026-01-27',vendor:'Bitdefender (2Checkout)',category:'Software & Subscriptions',amount:251.92,biz_use:100,description:'Bitdefender Premium Security Plus — 10 devices, 1 year (USD $158.44 — AUD estimate, confirm with bank)',receipt_name:null},
+    {user_id:uid,date:'2026-02-11',vendor:'Bistro No.24',category:'Meals & Entertainment',amount:35.00,biz_use:100,description:'Meal — Chicken Skewers, Chips & Aïoli, Soda',receipt_name:null},
+    {user_id:uid,date:'2026-02-12',vendor:'Liberty O\'Connor',category:'Motor Vehicle',amount:56.53,biz_use:100,description:'Fuel — Premium 98, 30.31L @ $1.865/L',receipt_name:null},
+    {user_id:uid,date:'2026-02-12',vendor:'Running with Thieves',category:'Meals & Entertainment',amount:44.74,biz_use:100,description:'Lunch — Caesar Salad, Papaya Salad + beef',receipt_name:null},
+    {user_id:uid,date:'2026-02-18',vendor:'The Meat & Wine Co',category:'Meals & Entertainment',amount:10.25,biz_use:100,description:'San Pellegrino Sparkling Water',receipt_name:null},
+    {user_id:uid,date:'2026-02-21',vendor:'Australia Post',category:'Office & Administration',amount:193.00,biz_use:100,description:'PO Box 809 rental — Small PO Box + PO Box Plus (to 31 Mar 2027)',receipt_name:null},
+    {user_id:uid,date:'2026-02-21',vendor:'AICD',category:'Professional Development',amount:750.00,biz_use:100,description:'AICD Membership — Jan 2026 to Jan 2027',receipt_name:null},
+    {user_id:uid,date:'2026-02-26',vendor:'La Veen Coffee',category:'Meals & Entertainment',amount:15.30,biz_use:100,description:'Hot Chocolate + Iced Chai Latte',receipt_name:null},
+    {user_id:uid,date:'2026-02-26',vendor:'Mister Minit',category:'Office & Administration',amount:26.95,biz_use:100,description:'Remote battery fitted',receipt_name:null},
+    {user_id:uid,date:'2026-02-27',vendor:'Gino\'s Cafe',category:'Meals & Entertainment',amount:35.80,biz_use:100,description:'Steak Burger + San Pellegrino 750ml',receipt_name:null},
+    {user_id:uid,date:'2026-02-27',vendor:'Hylin Cafe',category:'Meals & Entertainment',amount:11.40,biz_use:100,description:'Flat White + Matcha Latte (almond milk)',receipt_name:null},
+    {user_id:uid,date:'2026-03-03',vendor:'BP South Perth',category:'Motor Vehicle',amount:53.77,biz_use:100,description:'Fuel — L95, 31.10L @ $1.729/L',receipt_name:null},
+    {user_id:uid,date:'2026-03-07',vendor:'The Grind Reaper',category:'Meals & Entertainment',amount:12.73,biz_use:100,description:'Turmeric Latte x2 (soy, strong)',receipt_name:null},
+    {user_id:uid,date:'2026-03-10',vendor:'Hubbles Yard',category:'Meals & Entertainment',amount:11.00,biz_use:100,description:'MAC coffee + Green Tea',receipt_name:null},
+    {user_id:uid,date:'2026-03-13',vendor:'Pitcher Partners',category:'Professional Services',amount:440.00,biz_use:100,description:'BAS preparation — Sep 2025 & Dec 2025 quarters (INV-2978)',receipt_name:null},
+    {user_id:uid,date:'2026-03-18',vendor:'EasyPark',category:'Travel & Parking',amount:3.61,biz_use:100,description:'Parking — City of Subiaco + Town of Cambridge (ref 96154275)',receipt_name:null},
+    {user_id:uid,date:'2026-03-18',vendor:'Modu',category:'Meals & Entertainment',amount:65.92,biz_use:100,description:'Lunch — Beef Pad Kra Pow, Beef Rendang Noodle, Charsiew Pork Rice, sparkling water x2',receipt_name:null},
+    {user_id:uid,date:'2026-03-18',vendor:'La Veen Coffee',category:'Meals & Entertainment',amount:12.50,biz_use:100,description:'Wholeleaf Peppermint tea + Matcha Latte',receipt_name:null},
+    {user_id:uid,date:'2026-03-19',vendor:'The Grind Reaper',category:'Meals & Entertainment',amount:13.74,biz_use:100,description:'Turmeric Latte x2 (soy, extra shot, strong)',receipt_name:null},
+    {user_id:uid,date:'2026-03-19',vendor:'Caltex Nambeelup',category:'Motor Vehicle',amount:75.90,biz_use:100,description:'Fuel — Unleaded 91, 29.85L @ $2.497/L',receipt_name:null},
+    {user_id:uid,date:'2026-03-20',vendor:'7-Eleven Cockburn',category:'Motor Vehicle',amount:69.19,biz_use:100,description:'Fuel — Unleaded 91, 28.84L @ $2.399/L',receipt_name:null},
+    {user_id:uid,date:'2026-03-23',vendor:'Lawson Flats',category:'Meals & Entertainment',amount:75.00,biz_use:100,description:'Dinner — Rigatoni, Lobster Roll, wines (Parley Chilled Red, Denton Shed Pinot)',receipt_name:null},
+    {user_id:uid,date:'2026-03-23',vendor:'Copia',category:'Meals & Entertainment',amount:12.79,biz_use:100,description:'Coffee — EBT + Chai Latte (almond milk)',receipt_name:null},
+    {user_id:uid,date:'2026-03-25',vendor:'Il Lido Cottesloe',category:'Meals & Entertainment',amount:22.16,biz_use:100,description:'Coffee — Cappuccino + Chai Latte (almond milk), sparkling water',receipt_name:null},
+    {user_id:uid,date:'2026-03-25',vendor:'The Grind Reaper',category:'Meals & Entertainment',amount:12.73,biz_use:100,description:'Turmeric Latte x2 (soy, strong)',receipt_name:null},
+    {user_id:uid,date:'2026-03-26',vendor:'EasyPark',category:'Travel & Parking',amount:1.07,biz_use:100,description:'Parking — City of Subiaco, Rowland St (ref 96756536)',receipt_name:null},
+    {user_id:uid,date:'2026-03-31',vendor:'The Grind Reaper',category:'Meals & Entertainment',amount:12.73,biz_use:100,description:'Turmeric Latte x2 (soy, strong)',receipt_name:null},
+  ];
+  let ok=0,fail=0;
+  for(const row of rows){
+    const {data,error}=await sb.from('expenses').insert(row).select().single();
+    if(error){console.error('Import error:',row.vendor,error);fail++;}
+    else{
+      const exp={id:data.id,type:'expense',amount:row.amount,vendor:row.vendor,date:row.date,category:row.category,bizUse:row.biz_use,desc:row.description,receiptName:null};
+      state.expenses.push(exp);ok++;
+    }
+  }
+  state.expenses.sort((a,b)=>b.date.localeCompare(a.date));
+  renderExpenses();updateDashboard();
+  btn.style.display='none';
+  showToast(`✓ Imported ${ok} expenses${fail?` · ${fail} failed — check console`:''}`);
 }
 
 async function saveExpenseDB(expense){
