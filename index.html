@@ -314,7 +314,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.3.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -379,17 +379,21 @@ const APP_VERSION = '2.2.0';
       <button class="nav-item" onclick="showPage('moneymap')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Money Map</button>
     </div>
     <div class="nav-section">
-      <div class="nav-label">Transactions</div>
-      <button class="nav-item" onclick="showPage('expenses')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg>Expenses</button>
-      <button class="nav-item" onclick="showPage('income')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Income</button>
-      <button class="nav-item" onclick="showPage('invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Invoices</button>
-      <button class="nav-item" onclick="showPage('quotes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M9 21V10M15 21V10M5 6h14M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/></svg>Quotes</button>
+      <div class="nav-label">Clients &amp; Work</div>
       <button class="nav-item" onclick="showPage('clients')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</button>
+      <button class="nav-item" onclick="showPage('quotes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Quotes</button>
+      <button class="nav-item" onclick="showPage('contracts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>Contracts</button>
+      <button class="nav-item" onclick="showPage('invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Invoices</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Finance</div>
+      <button class="nav-item" onclick="showPage('income')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Income</button>
+      <button class="nav-item" onclick="showPage('expenses')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6m0 0H8m13 0-9 9-4-4-7 7"/></svg>Expenses</button>
       <button class="nav-item" onclick="showPage('super')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>Super</button>
     </div>
     <div class="nav-section">
       <div class="nav-label">Reports</div>
-      <button class="nav-item" onclick="showPage('pl')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Profit & Loss</button>
+      <button class="nav-item" onclick="showPage('pl')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Profit &amp; Loss</button>
     </div>
   </nav>
   <div class="sidebar-bottom">
@@ -754,7 +758,10 @@ const APP_VERSION = '2.2.0';
             <div class="field"><label>Contact person</label><input type="text" class="input" id="q-contact-person" placeholder="e.g. Michael Barnes" oninput="updateQuotePreview()"></div>
             <div class="field"><label>Email</label><input type="email" class="input" id="q-contact-email" placeholder="contact@company.com.au" oninput="updateQuotePreview()"></div>
           </div>
-          <div class="field"><label>ABN (optional)</label><input type="text" class="input" id="q-client-abn" placeholder="12 345 678 901" oninput="updateQuotePreview()"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Phone</label><input type="text" class="input" id="q-contact-phone" placeholder="e.g. 0408 946 414" oninput="updateQuotePreview()"></div>
+            <div class="field"><label>ABN (optional)</label><input type="text" class="input" id="q-client-abn" placeholder="12 345 678 901" oninput="updateQuotePreview()"></div>
+          </div>
           
           <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:12px;"></div>
           <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:4px;">Document Details</div>
@@ -899,7 +906,7 @@ const APP_VERSION = '2.2.0';
 <!-- ═══ CLIENTS PAGE (injected into main) ═══ -->
 <div id="page-clients" class="page">
   <div class="page-header">
-    <div><div class="page-title">Clients</div><div class="page-subtitle">Saved client details for quick invoice autofill</div></div>
+    <div><div class="page-title">Clients</div><div class="page-subtitle">Your client hub — quotes, contracts &amp; invoices in one place</div></div>
     <button class="btn btn-primary" onclick="document.getElementById('clients-add-form').style.display='block';document.getElementById('nc2-org').focus()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add client</button>
   </div>
   <div id="clients-add-form" style="display:none;margin-bottom:16px;">
@@ -909,7 +916,8 @@ const APP_VERSION = '2.2.0';
         <div class="form-grid">
           <div class="field"><label>Organisation name *</label><input type="text" class="input" id="nc2-org" placeholder="e.g. Western Power"></div>
           <div class="field"><label>Contact name</label><input type="text" class="input" id="nc2-contact" placeholder="e.g. Michael Barnes"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Email</label><input type="email" class="input" id="nc2-email" placeholder="contact@company.com.au"></div>
+          <div class="field"><label>Email</label><input type="email" class="input" id="nc2-email" placeholder="contact@company.com.au"></div>
+          <div class="field"><label>Phone</label><input type="text" class="input" id="nc2-phone" placeholder="e.g. 0408 946 414"></div>
           <div class="field" style="grid-column:1/-1;"><label>Billing address</label><input type="text" class="input" id="nc2-address" placeholder="e.g. 363 Wellington St, Perth WA 6000"></div>
         </div>
         <div style="display:flex;gap:8px;">
@@ -921,6 +929,74 @@ const APP_VERSION = '2.2.0';
   </div>
   <div id="clients-page-list" style="display:flex;flex-direction:column;gap:10px;"></div>
 </div>
+</div>
+
+
+<!-- ═══ CONTRACTS ═══ -->
+<div id="page-contracts" class="page">
+  <div id="contracts-list-view">
+    <div class="page-header">
+      <div><div class="page-title">Contracts</div><div class="page-subtitle">Agreements, retainers and engagement letters</div></div>
+      <button class="btn btn-primary" onclick="showContractForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New contract</button>
+    </div>
+    <div id="contracts-page-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+  <div id="contracts-form-view" style="display:none;">
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn btn-glass btn-sm" onclick="backToContractsList()" style="padding:6px 12px;">← Back</button>
+        <div><div class="page-title" id="contract-form-title">New Contract</div><div class="page-subtitle">Draft the agreement, then download as PDF</div></div>
+      </div>
+      <div id="contract-delete-btn" style="display:none;">
+        <button onclick="deleteCurrentContract()" style="background:rgba(122,40,32,0.12);color:#c62828;border:none;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:500;">Delete</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+      <div class="glass-strong">
+        <div class="card-header"><div class="card-title" id="contract-card-title">New Contract</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-top:4px;margin-bottom:4px;">Client Details</div>
+          <div class="field"><label>Client / Organisation name</label><input type="text" class="input" id="ct-client-name" placeholder="e.g. WABi Systems" oninput="updateContractPreview()"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Contact person</label><input type="text" class="input" id="ct-contact" placeholder="e.g. Karl Plunkett" oninput="updateContractPreview()"></div>
+            <div class="field"><label>Email</label><input type="email" class="input" id="ct-email" placeholder="contact@company.com.au" oninput="updateContractPreview()"></div>
+          </div>
+          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:4px;"></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:4px;">Contract Details</div>
+          <div class="field"><label>Contract title</label><input type="text" class="input" id="ct-title" placeholder="e.g. Strategic Advisory Engagement" oninput="updateContractPreview()"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Contract number</label><input type="text" class="input" id="ct-doc-number" placeholder="CON-001" oninput="updateContractPreview()"></div>
+            <div class="field"><label>Status</label>
+              <select class="input" id="ct-status" onchange="updateContractPreview()">
+                <option value="Draft">Draft</option>
+                <option value="Active">Active</option>
+                <option value="Expired">Expired</option>
+                <option value="Terminated">Terminated</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Effective date</label><input type="date" class="input" id="ct-effective-date" oninput="updateContractPreview()"></div>
+            <div class="field"><label>Expiry date</label><input type="date" class="input" id="ct-expiry-date" oninput="updateContractPreview()"></div>
+          </div>
+          <div style="border-top:1px solid rgba(13,43,62,0.1);padding-top:12px;margin-top:4px;"></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary);margin-bottom:4px;">Scope &amp; Terms</div>
+          <div class="field"><label>Scope of engagement</label><textarea class="input" id="ct-scope" rows="4" placeholder="Describe the services, deliverables and expectations..." oninput="updateContractPreview()"></textarea></div>
+          <div class="field"><label>Fee &amp; rate structure</label><textarea class="input" id="ct-fees" rows="2" placeholder="e.g. $500/hr ex GST, invoiced weekly on time and materials basis." oninput="updateContractPreview()"></textarea></div>
+          <div class="field"><label>Payment &amp; general terms</label><textarea class="input" id="ct-terms" rows="3" placeholder="e.g. Payment due within 14 days. Confidentiality obligations apply..." oninput="updateContractPreview()"></textarea></div>
+          <div class="field"><label>Notes (internal, not on PDF)</label><textarea class="input" id="ct-notes" rows="2" placeholder="Internal notes..." oninput="updateContractPreview()"></textarea></div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="downloadContractPDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
+            <button class="btn btn-glass" style="flex:1;justify-content:center;" onclick="saveContract()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(244,240,235,0.5);margin-bottom:12px;">Live Preview</div>
+        <div class="glass" id="ct-preview" style="padding:20px;font-size:12px;line-height:1.6;min-height:500px;overflow-y:auto;font-family:'DM Mono',monospace;display:flex;flex-direction:column;"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Saved</span></div>
@@ -1179,6 +1255,7 @@ function showPage(p){
   if(p==='expenses'){document.getElementById('expenses-list-view').style.display='block';document.getElementById('expenses-form-view').style.display='none';editingExpenseId=null;}
   if(p==='income'){document.getElementById('income-list-view').style.display='block';document.getElementById('income-form-view').style.display='none';}
   if(p==='clients'){renderClientsPage();}
+  if(p==='contracts'){renderContractsPage();}
 }
 
 // ── CALCS ──
@@ -1675,27 +1752,47 @@ function renderClientsPage(){
     list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No clients yet. Add your first one above.</p></div>`;
     return;
   }
-  list.innerHTML=clients.map(c=>`
-    <div class="glass" style="padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">${c.org}</div>
-        ${c.contact?`<div style="font-size:12px;color:var(--text-secondary);">${c.contact}</div>`:''}
-        ${c.email?`<div style="font-size:12px;color:var(--text-tertiary);">${c.email}</div>`:''}
-        ${c.address?`<div style="font-size:12px;color:var(--text-tertiary);">${c.address}</div>`:''}
+  list.innerHTML=clients.map(c=>{
+    const allQuotes=JSON.parse(localStorage.getItem('quoteDrafts_quote')||'[]');
+    const allContracts=JSON.parse(localStorage.getItem('nl_contracts')||'[]');
+    const clientQuotes=allQuotes.filter(q=>q.clientName&&q.clientName.toLowerCase()===c.org.toLowerCase());
+    const clientContracts=allContracts.filter(ct=>ct.clientName&&ct.clientName.toLowerCase()===c.org.toLowerCase());
+    const linkedInvoices=state.invoices?state.invoices.filter(i=>(i.clientName||'').toLowerCase()===c.org.toLowerCase()):[];
+    const docBadges=[
+      ...clientQuotes.map(q=>`<span style="font-size:10px;background:rgba(46,139,168,0.12);color:var(--ocean-teal);padding:2px 7px;border-radius:4px;">${q.docNum||'Quote'}</span>`),
+      ...clientContracts.map(ct=>`<span style="font-size:10px;background:rgba(30,102,69,0.10);color:var(--positive);padding:2px 7px;border-radius:4px;">${ct.docNum||'Contract'} · ${ct.status||'Draft'}</span>`),
+      ...linkedInvoices.map(i=>`<span style="font-size:10px;background:rgba(200,120,32,0.10);color:var(--amber);padding:2px 7px;border-radius:4px;">${i.invoiceNumber||'Invoice'}</span>`)
+    ].join(' ');
+    return `
+    <div class="glass" style="padding:18px 22px;gap:14px;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">${c.org}</div>
+          ${c.contact?`<div style="font-size:12px;color:var(--text-secondary);">${c.contact}</div>`:''}
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:2px;">
+            ${c.email?`<div style="font-size:12px;color:var(--text-tertiary);">${c.email}</div>`:''}
+            ${c.phone?`<div style="font-size:12px;color:var(--text-tertiary);">${c.phone}</div>`:''}
+            ${c.address?`<div style="font-size:12px;color:var(--text-tertiary);">${c.address}</div>`:''}
+          </div>
+          ${docBadges?`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">${docBadges}</div>`:''}
+        </div>
+        <button onclick="deleteClientFromPage('${c.id}')" style="background:rgba(122,40,32,0.12);color:#c62828;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex-shrink:0;">Remove</button>
       </div>
-      <div style="display:flex;gap:8px;flex-shrink:0;">
-        <button class="btn btn-glass btn-sm" onclick="showPage('invoices');setTimeout(()=>{showInvoiceForm();applyClientToInvoice('${c.id}');},80)">New invoice</button>
-        <button onclick="deleteClientFromPage('${c.id}')" style="background:rgba(122,40,32,0.12);color:#c62828;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;">Remove</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid rgba(13,43,62,0.08);padding-top:12px;">
+        <button class="btn btn-glass btn-sm" onclick="showPage('quotes');setTimeout(()=>{showQuoteFormNew('quote');document.getElementById('q-client-name').value='${c.org}';document.getElementById('q-contact-person').value='${c.contact||''}';document.getElementById('q-contact-email').value='${c.email||''}';document.getElementById('q-contact-phone').value='${c.phone||''}';updateQuotePreview();},80)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New quote</button>
+        <button class="btn btn-glass btn-sm" onclick="showPage('contracts');setTimeout(()=>{showContractForm();document.getElementById('ct-client-name').value='${c.org}';},80)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New contract</button>
+        <button class="btn btn-glass btn-sm" onclick="showPage('invoices');setTimeout(()=>{showInvoiceForm();applyClientToInvoice('${c.id}');},80)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New invoice</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function addClientFromPage(){
   const org=document.getElementById('nc2-org').value.trim();
   if(!org){showToast('Organisation name is required');return;}
   const clients=loadClients();
-  clients.push({id:Date.now(),org,contact:document.getElementById('nc2-contact').value.trim(),email:document.getElementById('nc2-email').value.trim(),address:document.getElementById('nc2-address').value.trim()});
+  clients.push({id:Date.now(),org,contact:document.getElementById('nc2-contact').value.trim(),email:document.getElementById('nc2-email').value.trim(),phone:document.getElementById('nc2-phone').value.trim(),address:document.getElementById('nc2-address').value.trim()});
   saveClients(clients);
-  ['nc2-org','nc2-contact','nc2-email','nc2-address'].forEach(id=>{document.getElementById(id).value='';});
+  ['nc2-org','nc2-contact','nc2-email','nc2-phone','nc2-address'].forEach(id=>{document.getElementById(id).value='';});
   document.getElementById('clients-add-form').style.display='none';
   renderClientsPage();
   showToast('Client saved ✓');
@@ -1836,7 +1933,7 @@ function renderQuoteListView(){
 function showQuoteForm(){showQuoteFormNew('quote');}
 function switchToInvoices(){showQuoteFormNew('invoice');}
 function switchQuoteType(type){quoteType=type;document.getElementById('quote-type-btn').style.background=type==='quote'?'var(--glass-strong)':'transparent';document.getElementById('invoice-type-btn').style.background=type==='invoice'?'var(--glass-strong)':'transparent';document.getElementById('quote-form-title').textContent=type==='quote'?'Create Quote':'Create Invoice';document.getElementById('q-due-label').textContent=type==='quote'?'Valid until':'Due date';if(type==='quote')document.getElementById('q-doc-number').placeholder='QTE-001';if(type==='invoice')document.getElementById('q-doc-number').placeholder='INV-001';}
-function clearQuoteForm(){document.getElementById('q-client-name').value='';document.getElementById('q-contact-person').value='';document.getElementById('q-contact-email').value='';document.getElementById('q-client-abn').value='';document.getElementById('q-doc-number').value=quoteType==='quote'?'QTE-001':'INV-001';document.getElementById('q-scope').value='';document.getElementById('q-terms').value='';document.getElementById('q-notes').value='';document.getElementById('q-monthly-toggle').checked=false;quoteLineItems=[];currentEditId=null;setQuoteDates();renderQuoteLineItems();updateQuotePreview();}
+function clearQuoteForm(){document.getElementById('q-client-name').value='';document.getElementById('q-contact-person').value='';document.getElementById('q-contact-email').value='';document.getElementById('q-contact-phone').value='';document.getElementById('q-client-abn').value='';document.getElementById('q-doc-number').value=quoteType==='quote'?'QTE-001':'INV-001';document.getElementById('q-scope').value='';document.getElementById('q-terms').value='';document.getElementById('q-notes').value='';document.getElementById('q-monthly-toggle').checked=false;quoteLineItems=[];currentEditId=null;setQuoteDates();renderQuoteLineItems();updateQuotePreview();}
 function toggleMonthlyBreakdown(){updateQuotePreview();}
 function setQuoteDates(){const today=new Date().toISOString().split('T')[0];document.getElementById('q-issue-date').value=today;const due=new Date();due.setDate(due.getDate()+(quoteType==='quote'?14:30));document.getElementById('q-due-date').value=due.toISOString().split('T')[0];}
 function addQuoteLineItem(){quoteLineItems.push({id:Date.now(),desc:'',qty:1,rate:0});renderQuoteLineItems();updateQuotePreview();}
@@ -1847,7 +1944,7 @@ function updateQuotePreview(){
   const clientName=document.getElementById('q-client-name').value||'[Client]';
   const contact=document.getElementById('q-contact-person').value||'—';
   const email=document.getElementById('q-contact-email').value||'—';
-  const abn=document.getElementById('q-client-abn').value;
+  const phone_q=document.getElementById('q-contact-phone').value;const abn=document.getElementById('q-client-abn').value;
   const docNum=document.getElementById('q-doc-number').value||'DOC-001';
   const issueDate=document.getElementById('q-issue-date').value;
   const dueDate=document.getElementById('q-due-date').value;
@@ -1880,7 +1977,7 @@ function updateQuotePreview(){
       </div>
       <div style="text-align:right;">
         <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#2E8BA8;margin-bottom:6px;">Bill To</div>
-        <div style="font-size:11px;color:#2C5570;line-height:1.9;"><strong style="color:#0D2B3E;">${clientName}</strong><br>${contact}<br><span style="color:#6A8FA8;">${email}</span>${abn?'<br><span style="color:#6A8FA8;">ABN: '+abn+'</span>':''}</div>
+        <div style="font-size:11px;color:#2C5570;line-height:1.9;"><strong style="color:#0D2B3E;">${clientName}</strong><br>${contact}<br><span style="color:#6A8FA8;">${email}</span>${phone_q?'<br>'+phone_q:''}${abn?'<br><span style="color:#6A8FA8;">ABN: '+abn+'</span>':''}</div>
       </div>
     </div>
     <!-- SCOPE OF SERVICES -->
@@ -1949,7 +2046,7 @@ function downloadQuotePDF(){
   const clientName=sanitizeForPDF(document.getElementById('q-client-name').value)||'Client';
   const contact=sanitizeForPDF(document.getElementById('q-contact-person').value)||'';
   const email=sanitizeForPDF(document.getElementById('q-contact-email').value)||'';
-  const abn=sanitizeForPDF(document.getElementById('q-client-abn').value)||'';
+  const phone_pdf=sanitizeForPDF(document.getElementById('q-contact-phone').value)||'';const abn=sanitizeForPDF(document.getElementById('q-client-abn').value)||'';
   const issueDate=document.getElementById('q-issue-date').value;
   const dueDate=document.getElementById('q-due-date').value;
   const scope=sanitizeForPDF(document.getElementById('q-scope').value);
@@ -2011,7 +2108,7 @@ td:nth-child(4){text-align:right;}
 <div class="accent"></div>
 <div class="content-wrap">
 <div class="body">
-<div class="meta"><div class="meta-block"><h4>${typeLabel} Details</h4><p>${typeLabel} #: <strong>${docNum}</strong><br>Issued: <strong>${issueDate?new Date(issueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong><br>${dueLabel}: <strong>${dueDate?new Date(dueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong></p></div><div class="meta-block meta-right"><h4>Bill To</h4><p><strong>${clientName}</strong><br>${contact}<br><span style="color:#6A8FA8;">${email}</span>${abn?'<br><span style="color:#6A8FA8;">ABN: '+abn+'</span>':''}</p></div></div>
+<div class="meta"><div class="meta-block"><h4>${typeLabel} Details</h4><p>${typeLabel} #: <strong>${docNum}</strong><br>Issued: <strong>${issueDate?new Date(issueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong><br>${dueLabel}: <strong>${dueDate?new Date(dueDate).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}</strong></p></div><div class="meta-block meta-right"><h4>Bill To</h4><p><strong>${clientName}</strong><br>${contact}<br><span style="color:#6A8FA8;">${email}</span>${phone_pdf?'<br>'+phone_pdf:''}${abn?'<br><span style="color:#6A8FA8;">ABN: '+abn+'</span>':''}</p></div></div>
 ${scopeHtml}
 <div class="section"><div class="section-header dark">Services</div><table><thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${lineItemsHtml}</tbody></table><div class="totals"><div class="row"><span>Subtotal:</span><span class="mono">\$${subtotal.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="row"><span>GST (10%):</span><span class="mono">\$${gst.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="row total"><span>TOTAL:</span><span class="mono">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div></div>
 ${monthlyHtml}${notesHtml}${termsHtml}${bankHtml}
@@ -2030,12 +2127,15 @@ ${monthlyHtml}${notesHtml}${termsHtml}${bankHtml}
 function saveQuoteDraft(){
   currentListTab=quoteType;
   const docNum=document.getElementById('q-doc-number').value||'DOC-001';
-  const draft={id:currentEditId||Date.now(),type:quoteType,clientName:document.getElementById('q-client-name').value,contact:document.getElementById('q-contact-person').value,email:document.getElementById('q-contact-email').value,abn:document.getElementById('q-client-abn').value,docNum,issueDate:document.getElementById('q-issue-date').value,dueDate:document.getElementById('q-due-date').value,scope:document.getElementById('q-scope').value,terms:document.getElementById('q-terms').value,notes:document.getElementById('q-notes').value,useMonthly:document.getElementById('q-monthly-toggle').checked,lineItems:JSON.stringify(quoteLineItems),savedAt:new Date().toLocaleString('en-AU')};
+  const draft={id:currentEditId||Date.now(),type:quoteType,clientName:document.getElementById('q-client-name').value,contact:document.getElementById('q-contact-person').value,email:document.getElementById('q-contact-email').value,phone:document.getElementById('q-contact-phone').value,abn:document.getElementById('q-client-abn').value,docNum,issueDate:document.getElementById('q-issue-date').value,dueDate:document.getElementById('q-due-date').value,scope:document.getElementById('q-scope').value,terms:document.getElementById('q-terms').value,notes:document.getElementById('q-notes').value,useMonthly:document.getElementById('q-monthly-toggle').checked,lineItems:JSON.stringify(quoteLineItems),savedAt:new Date().toLocaleString('en-AU')};
   const stored=localStorage.getItem(`quoteDrafts_${quoteType}`);
   let docs=stored?JSON.parse(stored):[];
   if(currentEditId)docs=docs.filter(d=>d.id!==currentEditId);
   docs.unshift(draft);
   localStorage.setItem(`quoteDrafts_${quoteType}`,JSON.stringify(docs));
+  // Auto-create client if name filled and not already saved
+  const qClientName=draft.clientName.trim();
+  if(qClientName){const existing=loadClients();const match=existing.find(c=>c.org.toLowerCase()===qClientName.toLowerCase());if(!match){existing.push({id:Date.now(),org:qClientName,contact:draft.contact||'',email:draft.email||'',phone:draft.phone||'',address:''});saveClients(existing);}}
   showToast('✓ Saved');currentEditId=null;
   backToQuotesList();
 }
@@ -2053,6 +2153,7 @@ function editQuoteDraft(id){
   document.getElementById('q-client-name').value=draft.clientName||'';
   document.getElementById('q-contact-person').value=draft.contact||'';
   document.getElementById('q-contact-email').value=draft.email||'';
+  document.getElementById('q-contact-phone').value=draft.phone||'';
   document.getElementById('q-client-abn').value=draft.abn||'';
   document.getElementById('q-doc-number').value=draft.docNum||'';
   document.getElementById('q-issue-date').value=draft.issueDate||'';
@@ -2090,6 +2191,202 @@ sb.auth.onAuthStateChange((event, session) => {
     document.getElementById('login-screen').style.display = 'flex';
   }
 });
+// ── CONTRACTS ──────────────────────────────────────────────────
+let currentContractId = null;
+
+function loadContracts(){try{return JSON.parse(localStorage.getItem('nl_contracts')||'[]');}catch{return[];}}
+function saveContractsStore(c){localStorage.setItem('nl_contracts',JSON.stringify(c));}
+
+function showContractForm(id){
+  currentContractId=id||null;
+  if(!id){clearContractForm();document.getElementById('contract-form-title').textContent='New Contract';document.getElementById('contract-card-title').textContent='New Contract';document.getElementById('contract-delete-btn').style.display='none';}
+  document.getElementById('contracts-list-view').style.display='none';
+  document.getElementById('contracts-form-view').style.display='block';
+  updateContractPreview();
+}
+function backToContractsList(){
+  document.getElementById('contracts-form-view').style.display='none';
+  document.getElementById('contracts-list-view').style.display='block';
+  renderContractsPage();
+}
+function clearContractForm(){
+  ['ct-client-name','ct-contact','ct-email','ct-title','ct-doc-number','ct-effective-date','ct-expiry-date','ct-scope','ct-fees','ct-terms','ct-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const statusEl=document.getElementById('ct-status');if(statusEl)statusEl.value='Draft';
+  currentContractId=null;
+  const today=new Date().toISOString().split('T')[0];
+  const exp=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
+  document.getElementById('ct-effective-date').value=today;
+  document.getElementById('ct-expiry-date').value=exp;
+  // Auto-number
+  const contracts=loadContracts();
+  const nextNum=contracts.length+1;
+  document.getElementById('ct-doc-number').value='CON-'+String(nextNum).padStart(3,'0');
+}
+function saveContract(){
+  const contract={
+    id:currentContractId||Date.now(),
+    clientName:document.getElementById('ct-client-name').value,
+    contact:document.getElementById('ct-contact').value,
+    email:document.getElementById('ct-email').value,
+    title:document.getElementById('ct-title').value,
+    docNum:document.getElementById('ct-doc-number').value||'CON-001',
+    status:document.getElementById('ct-status').value,
+    effectiveDate:document.getElementById('ct-effective-date').value,
+    expiryDate:document.getElementById('ct-expiry-date').value,
+    scope:document.getElementById('ct-scope').value,
+    fees:document.getElementById('ct-fees').value,
+    terms:document.getElementById('ct-terms').value,
+    notes:document.getElementById('ct-notes').value,
+    savedAt:new Date().toLocaleString('en-AU')
+  };
+  let contracts=loadContracts();
+  if(currentContractId)contracts=contracts.filter(c=>c.id!==currentContractId);
+  contracts.unshift(contract);
+  saveContractsStore(contracts);
+  currentContractId=contract.id;
+  document.getElementById('contract-delete-btn').style.display='block';
+  showToast('✓ Contract saved');
+  backToContractsList();
+}
+function editContract(id){
+  const contract=loadContracts().find(c=>c.id===id);
+  if(!contract)return;
+  currentContractId=id;
+  document.getElementById('ct-client-name').value=contract.clientName||'';
+  document.getElementById('ct-contact').value=contract.contact||'';
+  document.getElementById('ct-email').value=contract.email||'';
+  document.getElementById('ct-title').value=contract.title||'';
+  document.getElementById('ct-doc-number').value=contract.docNum||'';
+  document.getElementById('ct-status').value=contract.status||'Draft';
+  document.getElementById('ct-effective-date').value=contract.effectiveDate||'';
+  document.getElementById('ct-expiry-date').value=contract.expiryDate||'';
+  document.getElementById('ct-scope').value=contract.scope||'';
+  document.getElementById('ct-fees').value=contract.fees||'';
+  document.getElementById('ct-terms').value=contract.terms||'';
+  document.getElementById('ct-notes').value=contract.notes||'';
+  document.getElementById('contract-form-title').textContent='Edit Contract';
+  document.getElementById('contract-card-title').textContent='Edit Contract';
+  document.getElementById('contract-delete-btn').style.display='block';
+  document.getElementById('contracts-list-view').style.display='none';
+  document.getElementById('contracts-form-view').style.display='block';
+  updateContractPreview();
+}
+function deleteCurrentContract(){
+  if(!currentContractId||!confirm('Delete this contract?'))return;
+  saveContractsStore(loadContracts().filter(c=>c.id!==currentContractId));
+  showToast('✓ Deleted');
+  backToContractsList();
+}
+function renderContractsPage(){
+  const contracts=loadContracts();
+  const list=document.getElementById('contracts-page-list');
+  if(!list)return;
+  if(!contracts.length){
+    list.innerHTML=`<div style="text-align:center;padding:60px 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin:0 auto 16px;display:block;color:var(--text-tertiary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p style="color:var(--text-tertiary);font-size:14px;">No contracts yet. Create your first one above.</p></div>`;
+    return;
+  }
+  const statusColors={Draft:{bg:'rgba(106,143,168,0.15)',color:'var(--text-secondary)'},Active:{bg:'rgba(30,102,69,0.13)',color:'var(--positive)'},Expired:{bg:'rgba(200,120,32,0.13)',color:'var(--amber)'},Terminated:{bg:'rgba(122,40,32,0.12)',color:'#c62828'}};
+  list.innerHTML=contracts.map(c=>{
+    const sc=statusColors[c.status]||statusColors.Draft;
+    return `<div class="glass" style="padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;cursor:pointer;" onclick="editContract(${c.id})">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:14px;font-weight:600;color:var(--text-primary);">${c.clientName||'—'}</span>
+          <span style="font-size:10px;background:${sc.bg};color:${sc.color};padding:2px 7px;border-radius:4px;font-weight:500;">${c.status||'Draft'}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:2px;">${c.title||'Untitled contract'}</div>
+        <div style="font-size:11px;color:var(--text-tertiary);">${c.docNum} ${c.effectiveDate?'· From '+formatDate(c.effectiveDate):''} ${c.expiryDate?'→ '+formatDate(c.expiryDate):''}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-glass btn-sm" onclick="event.stopPropagation();editContract(${c.id})">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function updateContractPreview(){
+  const el=document.getElementById('ct-preview');if(!el)return;
+  const clientName=document.getElementById('ct-client-name').value||'Client Name';
+  const contact=document.getElementById('ct-contact').value;
+  const email=document.getElementById('ct-email').value;
+  const title=document.getElementById('ct-title').value||'Contract Title';
+  const docNum=document.getElementById('ct-doc-number').value||'CON-001';
+  const status=document.getElementById('ct-status').value||'Draft';
+  const effectiveDate=document.getElementById('ct-effective-date').value;
+  const expiryDate=document.getElementById('ct-expiry-date').value;
+  const scope=document.getElementById('ct-scope').value;
+  const fees=document.getElementById('ct-fees').value;
+  const terms=document.getElementById('ct-terms').value;
+  el.innerHTML=`
+    <div style="background:var(--ocean-deep);color:white;padding:14px 16px;border-radius:8px 8px 0 0;margin:-20px -20px 0;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:14px;font-weight:700;letter-spacing:.05em;">CONTRACT</span>
+      <div style="text-align:right;"><div style="font-size:10px;font-weight:600;">LOCKWOOD ADVISORY PTY LTD</div><div style="font-size:8px;opacity:.7;">ABN 76 979 340 565 · nicole@lockwoodadvisory.com.au</div></div>
+    </div>
+    <div style="height:3px;background:linear-gradient(to right,#1b8aaa,#5dd0ec);margin:0 -20px 14px;"></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+      <div><div style="font-size:9px;font-weight:700;color:var(--ocean-teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Contract</div><div style="font-size:11px;line-height:1.7;"><strong>${docNum}</strong><br>${effectiveDate?'From: '+formatDate(effectiveDate):''}<br>${expiryDate?'To: '+formatDate(expiryDate):''}<br><span style="background:rgba(46,139,168,0.1);color:var(--ocean-teal);padding:1px 6px;border-radius:3px;font-size:10px;">${status}</span></div></div>
+      <div style="text-align:right;"><div style="font-size:9px;font-weight:700;color:var(--ocean-teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Engagement Party</div><div style="font-size:11px;line-height:1.7;"><strong>${clientName}</strong><br>${contact}<br><span style="color:var(--ocean-teal);">${email}</span></div></div>
+    </div>
+    ${title?`<div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(13,43,62,0.1);">${title}</div>`:''}
+    ${scope?`<div style="margin-bottom:10px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary);margin-bottom:5px;background:var(--ocean-deep);color:white;padding:3px 8px;border-radius:3px;display:inline-block;">Scope of Engagement</div><div style="font-size:11px;line-height:1.6;color:var(--text-primary);margin-top:6px;white-space:pre-line;">${scope}</div></div>`:''}
+    ${fees?`<div style="margin-bottom:10px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--ocean-deep);color:white;padding:3px 8px;border-radius:3px;display:inline-block;margin-bottom:5px;">Fees &amp; Rates</div><div style="font-size:11px;line-height:1.6;color:var(--text-primary);margin-top:6px;">${fees}</div></div>`:''}
+    ${terms?`<div style="margin-bottom:10px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--ocean-deep);color:white;padding:3px 8px;border-radius:3px;display:inline-block;margin-bottom:5px;">Terms &amp; Conditions</div><div style="font-size:11px;line-height:1.6;color:var(--text-primary);margin-top:6px;">${terms}</div></div>`:''}
+    <div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(13,43,62,0.08);font-size:9px;color:var(--text-tertiary);display:flex;justify-content:space-between;">
+      <span>Lockwood Advisory Pty Ltd · ABN 76 979 340 565 · GST Registered</span>
+      <span>${expiryDate?'Expires: '+formatDate(expiryDate):''}</span>
+    </div>`;
+}
+function downloadContractPDF(){
+  const clientName=document.getElementById('ct-client-name').value||'Client';
+  const contact=document.getElementById('ct-contact').value;
+  const email=document.getElementById('ct-email').value;
+  const title=document.getElementById('ct-title').value||'Contract';
+  const docNum=document.getElementById('ct-doc-number').value||'CON-001';
+  const status=document.getElementById('ct-status').value||'Draft';
+  const effectiveDate=document.getElementById('ct-effective-date').value;
+  const expiryDate=document.getElementById('ct-expiry-date').value;
+  const scope=document.getElementById('ct-scope').value;
+  const fees=document.getElementById('ct-fees').value;
+  const terms=document.getElementById('ct-terms').value;
+  const fmtDate=d=>d?new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—';
+  const pdfContent=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',Helvetica,sans-serif;font-size:10pt;color:#1a1a1a;padding:0;}
+    .header{background:#0D2B3E;color:white;padding:14mm 20mm 12mm;display:flex;justify-content:space-between;align-items:center;}
+    .doc-type{font-size:22pt;font-weight:700;letter-spacing:.04em;}
+    .company-block{text-align:right;}.company-name{font-size:10pt;font-weight:600;}.company-sub{font-size:8pt;opacity:.7;margin-top:2px;}
+    .accent{height:3.5px;background:linear-gradient(to right,#1b8aaa,#5dd0ec);}
+    .body{padding:10mm 20mm;}
+    .meta{display:flex;justify-content:space-between;margin-bottom:8mm;}
+    .meta-label{font-size:7pt;font-weight:700;color:#2b8fab;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+    .meta-block p{font-size:9pt;line-height:1.7;}.meta-right{text-align:right;}
+    .section{margin-bottom:6mm;border-radius:6px;overflow:hidden;border:1px solid #dce6ed;}
+    .section-hdr{background:#0D2B3E;color:white;font-size:7.5pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;}
+    .section-body{padding:10px 13px;font-size:9.5pt;line-height:1.6;white-space:pre-line;}
+    .status-badge{display:inline-block;font-size:8pt;padding:2px 8px;border-radius:4px;font-weight:500;background:rgba(46,139,168,0.12);color:#1b6a8a;}
+    .footer{background:#0D2B3E;color:#90bdd4;font-size:7.5pt;padding:5mm 20mm;display:flex;justify-content:space-between;margin-top:10mm;}
+  </style></head><body>
+  <div class="header"><div class="doc-type">CONTRACT</div><div class="company-block"><div class="company-name">LOCKWOOD ADVISORY PTY LTD</div><div class="company-sub">ABN 76 979 340 565 &nbsp;·&nbsp; nicole@lockwoodadvisory.com.au</div></div></div>
+  <div class="accent"></div>
+  <div class="body">
+    <div class="meta">
+      <div class="meta-block"><div class="meta-label">Contract</div><p><strong>${docNum}</strong><br>Effective: ${fmtDate(effectiveDate)}<br>Expires: ${fmtDate(expiryDate)}<br><span class="status-badge">${status}</span></p></div>
+      <div class="meta-block meta-right"><div class="meta-label">Engagement Party</div><p><strong>${clientName}</strong><br>${contact}<br><span style="color:#2b8fab;">${email}</span></p></div>
+    </div>
+    ${title?`<div style="font-size:13pt;font-weight:600;margin-bottom:6mm;padding-bottom:4mm;border-bottom:1px solid #e0e8f0;">${title}</div>`:''}
+    ${scope?`<div class="section"><div class="section-hdr">Scope of Engagement</div><div class="section-body">${scope}</div></div>`:''}
+    ${fees?`<div class="section"><div class="section-hdr">Fees &amp; Rates</div><div class="section-body">${fees}</div></div>`:''}
+    ${terms?`<div class="section"><div class="section-hdr">Terms &amp; Conditions</div><div class="section-body">${terms}</div></div>`:''}
+    <div style="margin-top:8mm;padding-top:5mm;border-top:1px solid #e0e8f0;display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div style="font-size:8pt;color:#666;margin-bottom:12mm;">Signed for and on behalf of Lockwood Advisory Pty Ltd:</div><div style="border-top:1px solid #333;width:60mm;padding-top:4px;font-size:8pt;color:#666;">Signature / Date</div></div>
+      <div style="text-align:right;"><div style="font-size:8pt;color:#666;margin-bottom:12mm;">Accepted by ${clientName}:</div><div style="border-top:1px solid #333;width:60mm;padding-top:4px;font-size:8pt;color:#666;">Signature / Date</div></div>
+    </div>
+  </div>
+  <div class="footer"><span>Lockwood Advisory Pty Ltd &nbsp;·&nbsp; ABN 76 979 340 565 &nbsp;·&nbsp; GST Registered</span><span>${expiryDate?'Expires: '+fmtDate(expiryDate):''}</span></div>
+  </body></html>`;
+  const opt={margin:[0,0,0,0],filename:`LockwoodAdvisory_${docNum}_${clientName.replace(/\s+/g,'')}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  html2pdf().set(opt).from(pdfContent).save();
+}
+
 </script>
 </body>
 </html>
