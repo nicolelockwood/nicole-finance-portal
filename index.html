@@ -314,7 +314,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.5.0';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
