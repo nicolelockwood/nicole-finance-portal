@@ -734,7 +734,7 @@ const APP_VERSION = '2.4.0';
   <!-- LIST VIEW — shown by default, shows all saved quotes/invoices -->
   <div id="quotes-list-view">
     <div class="page-header">
-      <div><div class="page-title">Quotes & Invoices</div><div class="page-subtitle">Professional documents in seconds</div></div>
+      <div><div class="page-title">Quotes</div><div class="page-subtitle">Client proposals and rate cards</div></div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-glass btn-sm" onclick="showQuoteFormNew('quote')">+ New quote</button>
         <button class="btn btn-primary btn-sm" onclick="showQuoteFormNew('invoice')">+ New invoice</button>
@@ -1819,7 +1819,7 @@ function renderClientsPage(){
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid rgba(13,43,62,0.08);padding-top:12px;">
         <button class="btn btn-glass btn-sm" onclick="showPage('quotes');setTimeout(()=>{showQuoteFormNew('quote');document.getElementById('q-client-name').value='${c.org}';document.getElementById('q-contact-person').value='${c.contact||''}';document.getElementById('q-contact-email').value='${c.email||''}';document.getElementById('q-contact-phone').value='${c.phone||''}';updateQuotePreview();},80)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New quote</button>
-        <button class="btn btn-glass btn-sm" onclick="showPage('contracts');setTimeout(()=>{showContractForm();document.getElementById('ct-client-name').value='${c.org}';},80)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New contract</button>
+        <button class="btn btn-glass btn-sm" onclick="showPage('contracts');setTimeout(()=>{showContractForm();document.getElementById('ct-client-name').value='${c.org}';document.getElementById('ct-contact').value='${(c.contact||"").replace(/'/g,"\\'")}';document.getElementById('ct-email').value='${c.email||""}';const csel=document.getElementById('ct-client-select');if(csel){const copt=Array.from(csel.options).find(o=>o.text.toLowerCase()==='${c.org.toLowerCase()}');if(copt)csel.value=copt.value;}updateContractPreview();},120)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New contract</button>
         <button class="btn btn-glass btn-sm" onclick="showPage('invoices');setTimeout(()=>{showInvoiceForm();applyClientToInvoice('${c.id}');},80)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New invoice</button>
       </div>
     </div>`;
@@ -2241,8 +2241,9 @@ function showContractForm(id){
   if(!id){clearContractForm();document.getElementById('contract-form-title').textContent='New Contract';document.getElementById('contract-card-title').textContent='New Contract';document.getElementById('contract-delete-btn').style.display='none';}
   document.getElementById('contracts-list-view').style.display='none';
   document.getElementById('contracts-form-view').style.display='block';
-  document.getElementById('ct-signed-upload-section').style.display='block';
-  refreshSignedStatus(id);
+  populateContractClientDropdown();
+  document.getElementById('ct-signed-upload-section').style.display=id?'block':'none';
+  if(id)refreshSignedStatus(id);
   updateContractPreview();
 }
 function backToContractsList(){
@@ -2251,6 +2252,7 @@ function backToContractsList(){
   renderContractsPage();
 }
 function clearContractForm(){
+  window._pendingAgreementData=null;
   ['ct-client-name','ct-contact','ct-email','ct-title','ct-doc-number','ct-effective-date','ct-expiry-date','ct-scope','ct-fees','ct-terms','ct-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const statusEl=document.getElementById('ct-status');if(statusEl)statusEl.value='Draft';
   currentContractId=null;document.getElementById('ct-signed-upload-section').style.display='none';
@@ -2264,6 +2266,8 @@ function clearContractForm(){
   document.getElementById('ct-doc-number').value='CON-'+String(nextNum).padStart(3,'0');
 }
 function saveContract(){
+  const existing=currentContractId?loadContracts().find(x=>x.id===currentContractId):null;
+  const agDoc=window._pendingAgreementData;
   const contract={
     id:currentContractId||Date.now(),
     clientName:document.getElementById('ct-client-name').value,
@@ -2278,7 +2282,12 @@ function saveContract(){
     fees:document.getElementById('ct-fees').value,
     terms:document.getElementById('ct-terms').value,
     notes:document.getElementById('ct-notes').value,
-    savedAt:new Date().toLocaleString('en-AU')
+    savedAt:new Date().toLocaleString('en-AU'),
+    signedCopyData:existing?.signedCopyData||null,
+    signedCopyName:existing?.signedCopyName||null,
+    signedAt:existing?.signedAt||null,
+    agreementDocData:agDoc?agDoc.data:(existing?.agreementDocData||null),
+    agreementDocName:agDoc?agDoc.name:(existing?.agreementDocName||null)
   };
   let contracts=loadContracts();
   if(currentContractId)contracts=contracts.filter(c=>c.id!==currentContractId);
@@ -2312,6 +2321,13 @@ function editContract(id){
   document.getElementById('contract-delete-btn').style.display='block';
   document.getElementById('contracts-list-view').style.display='none';
   document.getElementById('contracts-form-view').style.display='block';
+  window._pendingAgreementData=contract.agreementDocData?{data:contract.agreementDocData,name:contract.agreementDocName||'agreement.pdf'}:null;
+  refreshAgreementStatus();
+  populateContractClientDropdown();
+  const csel=document.getElementById('ct-client-select');
+  if(csel&&contract.clientName){const copt=Array.from(csel.options).find(o=>o.text.toLowerCase()===contract.clientName.toLowerCase());if(copt)csel.value=copt.value;}
+  document.getElementById('ct-signed-upload-section').style.display='block';
+  refreshSignedStatus(contract.id);
   updateContractPreview();
 }
 function deleteCurrentContract(){
@@ -2515,6 +2531,84 @@ function downloadSignedFromModal(){
 function closePdfModal(){
   document.getElementById('pdf-preview-modal').style.display='none';
   document.getElementById('pdf-preview-frame').src='';
+}
+
+
+// ── CONTRACT EXTENDED HELPERS ────────────────────────────────────────────────
+function populateContractClientDropdown(){
+  const sel=document.getElementById('ct-client-select');
+  if(!sel)return;
+  const clients=loadClients();
+  sel.innerHTML='<option value="">— Select saved client —</option>'+clients.map(cl=>`<option value="${cl.id}">${cl.org}</option>`).join('');
+}
+function applyClientToContract(clientId){
+  if(!clientId)return;
+  const cl=loadClients().find(x=>String(x.id)===String(clientId));
+  if(!cl)return;
+  document.getElementById('ct-client-name').value=cl.org;
+  document.getElementById('ct-contact').value=cl.contact||'';
+  document.getElementById('ct-email').value=cl.email||'';
+  updateContractPreview();
+}
+function handleAgreementUpload(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    window._pendingAgreementData={data:e.target.result.split(',')[1],name:file.name};
+    refreshAgreementStatus();
+    showToast('Agreement uploaded — save contract to attach it');
+  };
+  reader.readAsDataURL(file);
+}
+function refreshAgreementStatus(){
+  const statusEl=document.getElementById('ct-agreement-status');
+  const previewBtn=document.getElementById('ct-agreement-preview-btn');
+  if(!statusEl)return;
+  const d=window._pendingAgreementData;
+  if(d){
+    statusEl.innerHTML=`<div style="font-size:11px;color:var(--positive);display:flex;align-items:center;gap:8px;background:rgba(30,102,69,0.08);padding:7px 10px;border-radius:6px;border:1px solid rgba(30,102,69,0.15);">📎 <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</span><button onclick="clearAgreementDoc()" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:11px;padding:0;flex-shrink:0;">Remove</button></div>`;
+    if(previewBtn)previewBtn.style.display='flex';
+  } else {
+    statusEl.innerHTML='';
+    if(previewBtn)previewBtn.style.display='none';
+  }
+}
+function clearAgreementDoc(){
+  window._pendingAgreementData=null;
+  const inp=document.getElementById('ct-agreement-file-input');
+  if(inp)inp.value='';
+  refreshAgreementStatus();
+}
+function previewAgreementDoc(){
+  const d=window._pendingAgreementData;if(!d)return;
+  const bytes=Uint8Array.from(atob(d.data),ch=>ch.charCodeAt(0));
+  const blob=new Blob([bytes],{type:'application/pdf'});
+  currentPdfBlobUrl=URL.createObjectURL(blob);
+  document.getElementById('pdf-preview-frame').src=currentPdfBlobUrl;
+  document.getElementById('pdf-modal-title').textContent='Agreement Document';
+  document.getElementById('pdf-modal-sub').textContent=d.name;
+  document.getElementById('pdf-preview-modal').style.display='flex';
+}
+function convertQuoteToContract(quoteId){
+  const stored=localStorage.getItem('quoteDrafts_quote');
+  const quotes=stored?JSON.parse(stored):[];
+  const q=quotes.find(d=>d.id===quoteId);
+  if(!q)return;
+  showPage('contracts');
+  setTimeout(()=>{
+    showContractForm();
+    document.getElementById('ct-client-name').value=q.clientName||'';
+    document.getElementById('ct-contact').value=q.contact||'';
+    document.getElementById('ct-email').value=q.email||'';
+    document.getElementById('ct-scope').value=q.scope||'';
+    document.getElementById('ct-terms').value=q.terms||'';
+    const conNum=(q.docNum||'QTE-001').replace('QTE','CON');
+    document.getElementById('ct-doc-number').value=conNum;
+    const sel=document.getElementById('ct-client-select');
+    if(sel&&q.clientName){const opt=Array.from(sel.options).find(o=>o.text.toLowerCase()===q.clientName.toLowerCase());if(opt)sel.value=opt.value;}
+    updateContractPreview();
+    showToast('Quote details applied — add fees, terms & save');
+  },120);
 }
 
 </script>
