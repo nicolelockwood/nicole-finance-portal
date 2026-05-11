@@ -2010,15 +2010,15 @@ function updateQuotePreview(){
       </div>
     </div>
     <!-- TEAL ACCENT LINE -->
-    <div style="background:#2E8BA8;height:3px;margin:0 -20px 20px -20px;"></div>
+    <div style="background:linear-gradient(90deg,#C8956B,#D7AD80);height:3px;margin:0 -20px 20px -20px;"></div>
     <!-- DOC DETAILS + BILL TO -->
     <div style="display:flex;justify-content:space-between;margin-bottom:24px;">
       <div>
-        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#2E8BA8;margin-bottom:6px;">${typeLabel} Details</div>
+        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#C8956B;margin-bottom:6px;">${typeLabel} Details</div>
         <div style="font-size:11px;color:#2C5570;line-height:1.9;">${typeLabel} #: <strong style="color:#0D2B3E;">${docNum}</strong><br>Issued: <strong style="color:#0D2B3E;">${formatDate(issueDate)}</strong><br>${dueLabel}: <strong style="color:#0D2B3E;">${formatDate(dueDate)}</strong></div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#2E8BA8;margin-bottom:6px;">Bill To</div>
+        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#C8956B;margin-bottom:6px;">Bill To</div>
         <div style="font-size:11px;color:#2C5570;line-height:1.9;"><strong style="color:#0D2B3E;">${clientName}</strong><br>${contact}<br><span style="color:#6A8FA8;">${email}</span>${phone_q?'<br>'+phone_q:''}${abn?'<br><span style="color:#6A8FA8;">ABN: '+abn+'</span>':''}</div>
       </div>
     </div>
@@ -2047,7 +2047,7 @@ function updateQuotePreview(){
     </div>
     <!-- MONTHLY BREAKDOWN -->
     ${useMonthly&&subtotal>0?`<div style="margin-bottom:24px;border:1px solid rgba(13,43,62,0.12);border-radius:6px;overflow:hidden;">
-      <div style="background:#2E8BA8;padding:8px 12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#fff;">Monthly Payment Schedule</div>
+      <div style="background:linear-gradient(135deg,#C8956B,#D7AD80);padding:8px 12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#fff;">Monthly Payment Schedule</div>
       <div style="padding:12px;">
         <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:#2C5570;"><span>Monthly fee (excl. GST):</span><span style="font-family:'DM Mono',monospace;">\$${(subtotal/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
         <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:8px;color:#2C5570;"><span>Monthly GST:</span><span style="font-family:'DM Mono',monospace;">\$${(gst/12).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
@@ -2056,7 +2056,7 @@ function updateQuotePreview(){
     </div>`:''}
     <!-- NOTES -->
     ${notes?`<div style="margin-bottom:24px;border:1px solid rgba(13,43,62,0.12);border-radius:6px;overflow:hidden;">
-      <div style="background:#2E8BA8;padding:8px 12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#fff;">Notes</div>
+      <div style="background:linear-gradient(135deg,#C8956B,#D7AD80);padding:8px 12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#fff;">Notes</div>
       <div style="padding:12px;font-size:10px;line-height:1.7;color:#2C5570;white-space:pre-wrap;">${notes}</div>
     </div>`:''}
     <!-- TERMS & CONDITIONS -->
@@ -2114,17 +2114,17 @@ html,body{width:210mm;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ar
 .company-block{text-align:right;}
 .company-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#F4F0EB;}
 .company-sub{font-size:9px;color:rgba(244,240,235,0.6);margin-top:3px;}
-.accent{background:#2E8BA8;height:3px;}
+.accent{background:linear-gradient(90deg,#C8956B,#D7AD80);height:3px;}
 .body{padding:28px 32px;}
 .meta{display:flex;justify-content:space-between;margin-bottom:24px;}
-.meta-block h4{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#2E8BA8;margin-bottom:6px;}
+.meta-block h4{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#C8956B;margin-bottom:6px;}
 .meta-block p{font-size:11px;color:#2C5570;line-height:1.9;}
 .meta-block p strong{font-weight:600;color:#0D2B3E;}
 .meta-right{text-align:right;}
 .section{border:1px solid rgba(13,43,62,0.12);border-radius:6px;overflow:hidden;margin-bottom:18px;page-break-inside:avoid;}
 .section-header{padding:7px 14px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;}
 .section-header.dark{background:#0D2B3E;color:#F4F0EB;}
-.section-header.teal{background:#2E8BA8;color:#fff;}
+.section-header.teal{background:linear-gradient(135deg,#C8956B,#D7AD80);color:#fff;}
 .section-body{padding:12px 14px;font-size:10.5px;color:#2C5570;line-height:1.7;}
 .section-body.pre{white-space:pre-wrap;}
 table{width:100%;border-collapse:collapse;}
