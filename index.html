@@ -316,7 +316,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '2.6.11';
+const APP_VERSION = '2.6.12';
 const OWNER_ID = '01a085a5-e0af-4a6c-9fe1-9b7d6bc6db05'; // Nicole's user_id — all data loads/writes use this
 (async function checkForUpdate(){
   try{
@@ -707,7 +707,8 @@ const OWNER_ID = '01a085a5-e0af-4a6c-9fe1-9b7d6bc6db05'; // Nicole's user_id —
           <div class="divider" style="margin:4px 0;"></div>
           <div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Contract scope</div>
           <div class="field"><label>Contract / project description</label><input type="text" class="input" id="inv-scope" placeholder="e.g. Consulting services to support ECHO development"></div>
-          <div class="field"><label>Services rendered (one per line)</label><textarea class="input" id="inv-services" rows="6" placeholder="9/3/26: Meeting with Scitech to finalise scope&#10;11/3/26: Meeting with Harriet re Mannifera ecosystem&#10;..."></textarea></div>
+          <div class="field"><label>Description heading</label><select class="input" id="inv-desc-type" onchange="updateInvoicePreview()"><option value="Services rendered">Services rendered</option><option value="Expense reimbursement">Expense reimbursement</option><option value="Consulting services">Consulting services</option><option value="Advisory services">Advisory services</option><option value="Commission">Commission</option><option value="Board services">Board services</option></select></div>
+          <div class="field"><label>Line items (one per line)</label><textarea class="input" id="inv-services" rows="6" placeholder="9/3/26: Meeting with Scitech to finalise scope&#10;11/3/26: Meeting with Harriet re Mannifera ecosystem&#10;..."></textarea></div>
           <div class="form-grid">
             <div class="field"><label>Amount (excl. GST)</label><div class="input-pfx"><span class="pfx">$</span><input type="number" class="input" id="inv-amount" placeholder="3000" step="0.01" oninput="updateInvoicePreview()"></div></div>
             <div class="field"><label>GST</label><select class="input" id="inv-gst" onchange="updateInvoicePreview()"><option value="yes">GST included (10%)</option><option value="no">No GST</option></select></div>
@@ -1711,6 +1712,7 @@ function showInvoiceForm(){
   const num=parseInt(last.replace(/[^0-9]/g,'')||215)+1;
   document.getElementById('inv-number').value='INV-'+String(num).padStart(4,'0');
   ['inv-period','inv-org','inv-contact','inv-email','inv-phone','inv-address','inv-scope','inv-services','inv-amount'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('inv-desc-type').value='Services rendered';
   document.getElementById('inv-terms').value='10 business days';
   document.getElementById('inv-gst').value='yes';
   document.getElementById('inv-client-select').value='';
@@ -1737,6 +1739,7 @@ function editInvoice(id){
   document.getElementById('inv-address').value=inv.address||'';
   document.getElementById('inv-scope').value=inv.scope||'';
   document.getElementById('inv-services').value=inv.services||'';
+  document.getElementById('inv-desc-type').value=inv.descType||'Services rendered';
   document.getElementById('inv-amount').value=inv.amount||'';
   document.getElementById('inv-gst').value=inv.hasGst===false?'no':'yes';
   document.getElementById('inv-client-select').value='';
@@ -1758,6 +1761,8 @@ function updateInvoicePreview(){
   const address=document.getElementById('inv-address').value||'';
   const scope=document.getElementById('inv-scope').value||'—';
   const services=document.getElementById('inv-services').value;
+  const descTypeVal=document.getElementById('inv-desc-type')?.value||'Services rendered';
+  const prevTitle=document.getElementById('prev-services-title');if(prevTitle)prevTitle.textContent=descTypeVal;
   const amount=parseFloat(document.getElementById('inv-amount').value)||0;
   const hasGst=document.getElementById('inv-gst').value==='yes';
   const excl=amount; const gstAmt=hasGst?amount*0.1:0; const incl=excl+gstAmt;
@@ -1806,7 +1811,8 @@ async function saveInvoice(status){
     period:document.getElementById('inv-period').value,
     terms:document.getElementById('inv-terms').value,
     scope:document.getElementById('inv-scope').value,
-    services:document.getElementById('inv-services').value
+    services:document.getElementById('inv-services').value,
+    descType:document.getElementById('inv-desc-type')?.value||'Services rendered'
   };
   if(editingInvoiceId){
     const idx=state.invoices.findIndex(i=>String(i.id)===String(editingInvoiceId));
@@ -2021,6 +2027,7 @@ async function downloadInvoicePDF(){
   const address=document.getElementById('inv-address')?.value||'';
   const scope=document.getElementById('inv-scope')?.value||'';
   const services=document.getElementById('inv-services').value;
+  const descType=document.getElementById('inv-desc-type')?.value||'Services rendered';
   const amount=parseFloat(document.getElementById('inv-amount').value)||0;
   const hasGst=document.getElementById('inv-gst').value==='yes';
   const gstAmt=hasGst?amount*0.1:0;
@@ -2029,7 +2036,7 @@ async function downloadInvoicePDF(){
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',sans-serif;font-size:13px;color:#0D2B3E;line-height:1.5;}.header{background:linear-gradient(135deg,#163C55 0%,#1F5874 52%,#2D7389 100%);padding:14px 36px;display:flex;justify-content:space-between;align-items:center;min-height:0;}.header-left{color:#F4F0EB;}.header-right{text-align:right;color:#F4F0EB;}.doc-type{font-size:18px;font-weight:700;letter-spacing:0.06em;color:#F4F0EB;}.company-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#F4F0EB;}.company-detail{font-size:9.5px;color:rgba(244,240,235,0.6);margin-top:3px;line-height:1.6;}.accent-bar{background:linear-gradient(90deg,#2D7389,#3A89A3);height:3px;}.body{padding:28px 36px;}.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}.meta-section h4{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2D7389;margin-bottom:7px;}.meta-section p{font-size:12px;line-height:1.9;}.meta-section strong{font-weight:600;}.meta-section.right{text-align:right;}.scope{font-size:11px;color:#9A7428;margin-bottom:16px;}.scope strong{font-weight:500;color:#0D2B3E;}table{width:100%;border-collapse:collapse;margin-bottom:0;}thead tr{background:linear-gradient(90deg,#0D2B3E,#1E5068);}th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#F4F0EB;padding:9px 10px;text-align:left;}th:last-child,td:last-child{text-align:right;}td{padding:11px 10px;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;vertical-align:top;}.desc-detail{font-size:10.5px;color:#6A8FA8;margin-top:3px;line-height:1.6;}.mono{font-family:'DM Mono',monospace;font-size:12px;}.totals-wrap{background:rgba(45,115,137,0.06);border:1px solid rgba(58,137,163,0.18);border-top:none;border-radius:0 0 6px 6px;padding:10px 10px;margin-bottom:22px;}.total-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:#9A7428;}.total-row.grand{border-top:1px solid rgba(45,115,137,0.25);margin-top:8px;padding-top:8px;font-weight:700;font-size:13px;color:#0D2B3E;}.payment{border:1px solid #3A89A3;border-radius:6px;overflow:hidden;margin-bottom:22px;}.payment-header{background:linear-gradient(135deg,#1E5068,#2D7389);padding:8px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#fff;}.payment-body{padding:12px 14px;font-size:11px;color:#9A7428;line-height:1.9;}.payment-body strong{font-weight:600;color:#0D2B3E;}.footer{background:linear-gradient(135deg,#163C55,#1F5874);padding:10px 36px;display:flex;justify-content:space-between;align-items:center;}.footer-text{font-size:9px;color:rgba(244,240,235,0.5);}
+  *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',sans-serif;font-size:13px;color:#0D2B3E;line-height:1.5;}.header{background:linear-gradient(135deg,#163C55 0%,#1F5874 52%,#2D7389 100%);padding:14px 36px;display:flex;justify-content:space-between;align-items:center;min-height:0;}.header-left{color:#F4F0EB;}.header-right{text-align:right;color:#F4F0EB;}.doc-type{font-size:22px;font-weight:700;letter-spacing:0.06em;color:#F4F0EB;display:block;margin-bottom:10px;}.company-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#F4F0EB;margin-bottom:5px;}.company-detail{font-size:10px;color:rgba(244,240,235,0.82);margin-top:3px;line-height:1.75;}.accent-bar{background:linear-gradient(90deg,#2D7389,#3A89A3);height:3px;}.body{padding:28px 36px;}.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}.meta-section h4{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2D7389;margin-bottom:7px;}.meta-section p{font-size:12px;line-height:1.9;}.meta-section strong{font-weight:600;}.meta-section.right{text-align:right;}.scope{font-size:11px;color:#9A7428;margin-bottom:16px;}.scope strong{font-weight:500;color:#0D2B3E;}table{width:100%;border-collapse:collapse;margin-bottom:0;}thead tr{background:linear-gradient(90deg,#0D2B3E,#1E5068);}th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#F4F0EB;padding:9px 10px;text-align:left;}th:last-child,td:last-child{text-align:right;}td{padding:11px 10px;border-bottom:1px solid rgba(13,43,62,0.07);font-size:12px;vertical-align:top;}.desc-detail{font-size:10.5px;color:#6A8FA8;margin-top:3px;line-height:1.6;}.mono{font-family:'DM Mono',monospace;font-size:12px;}.totals-wrap{background:rgba(45,115,137,0.06);border:1px solid rgba(58,137,163,0.18);border-top:none;border-radius:0 0 6px 6px;padding:10px 10px;margin-bottom:22px;}.total-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:#9A7428;}.total-row.grand{border-top:1px solid rgba(45,115,137,0.25);margin-top:8px;padding-top:8px;font-weight:700;font-size:13px;color:#0D2B3E;}.payment{border:1px solid #3A89A3;border-radius:6px;overflow:hidden;margin-bottom:22px;}.payment-header{background:linear-gradient(135deg,#1E5068,#2D7389);padding:8px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#fff;}.payment-body{padding:12px 14px;font-size:11px;color:#9A7428;line-height:1.9;}.payment-body strong{font-weight:600;color:#0D2B3E;}.footer{background:linear-gradient(135deg,#163C55,#1F5874);padding:10px 36px;display:flex;justify-content:space-between;align-items:center;}.footer-text{font-size:9px;color:rgba(244,240,235,0.5);}
 </style>
 </head><body>
 <div style="display:flex;flex-direction:column;min-height:1056px;">
@@ -2038,7 +2045,7 @@ async function downloadInvoicePDF(){
 <div class="body" style="flex:1;">
 <div class="meta-grid"><div class="meta-section"><h4>Billed To</h4><div style="font-size:12px;line-height:1.85;"><strong>${org}</strong>${contact?'<div>'+contact+'</div>':''}${email?'<div style="color:#6A8FA8;">'+email+'</div>':''}${phone?'<div style="color:#6A8FA8;">'+phone+'</div>':''}${address?'<div style="color:#6A8FA8;">'+address+'</div>':''}</div></div><div class="meta-section right"><h4>Invoice Details</h4><p><strong>${number}</strong><br>Date: ${date?new Date(date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}):'—'}<br>Period: ${period||'—'}<br>Terms: ${terms}</p></div></div>
 ${scope?`<div class="scope"><strong>Contract Scope:</strong> ${scope}</div>`:''}
-<table><thead><tr><th>Organisation</th><th>Description</th><th style="text-align:right;">Excl. GST</th><th style="text-align:right;">Incl. GST</th></tr></thead><tbody><tr><td>${org}</td><td><div>Services rendered</div><div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>'· '+l.trim()).join('<br>'):'—'}</div></td><td class="mono" style="text-align:right;">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="mono" style="text-align:right;">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tbody></table>
+<table><thead><tr><th>Organisation</th><th>Description</th><th style="text-align:right;">Excl. GST</th><th style="text-align:right;">Incl. GST</th></tr></thead><tbody><tr><td>${org}</td><td><div style="font-weight:600;margin-bottom:3px;">${descType}</div><div class="desc-detail">${services?services.split('\n').filter(Boolean).map(l=>'· '+l.trim()).join('<br>'):'—'}</div></td><td class="mono" style="text-align:right;">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="mono" style="text-align:right;">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tbody></table>
 <div class="totals-wrap"><div class="total-row"><span>Subtotal</span><span class="mono">\$${amount.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row"><span>${hasGst?'GST (10%)':'GST (N/A — international)'}</span><span class="mono">\$${gstAmt.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div><div class="total-row grand"><span>TOTAL (incl. GST)</span><span class="mono">\$${total.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div></div>
 </div>
 <div class="payment" style="margin:0 36px 20px;"><div class="payment-header">Payment Details</div><div class="payment-body"><strong>Account Name:</strong> N and N Lockwood<br><strong>BSB:</strong> 086061 &nbsp; <strong>Account #:</strong> 816239874<br><strong>Institution:</strong> National Australia Bank</div></div>
