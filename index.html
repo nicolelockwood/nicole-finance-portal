@@ -316,7 +316,7 @@ textarea.input{resize:vertical;min-height:80px;}
 // ── AUTO-UPDATE CHECK ──
 // Fetches version.json on every load. If the version has changed since last visit,
 // silently reloads so Nicole always has the latest without needing to hard refresh.
-const APP_VERSION = '2.6.5';
+const APP_VERSION = '2.6.6';
 (async function checkForUpdate(){
   try{
     const res = await fetch('version.json?t=' + Date.now());
@@ -471,28 +471,42 @@ const APP_VERSION = '2.6.5';
 <!-- ═══ MONEY MAP ═══ -->
 <div id="page-moneymap" class="page">
   <div class="page-header"><div><div class="page-title">Money Map</div><div class="page-subtitle">Where it comes from. Where it needs to go.</div></div></div>
-  <div class="map-grid">
-    <div class="map-card glass">
-      <div class="map-card-hdr">
-        <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
-        <div><div class="map-card-title">Income Streams</div><div class="map-card-sub">Annual targets</div></div>
-      </div>
-      <div class="map-stream"><span class="map-stream-name">Board / Governance</span><input class="map-stream-input" type="number" id="ms-board" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-      <div class="map-stream"><span class="map-stream-name">Consulting</span><input class="map-stream-input" type="number" id="ms-consult" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-      <div class="map-stream"><span class="map-stream-name">Commission</span><input class="map-stream-input" type="number" id="ms-commission" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-      <div class="map-stream"><span class="map-stream-name">Mission / Speaking</span><input class="map-stream-input" type="number" id="ms-mission" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-      <div class="map-stream"><span class="map-stream-name">Investments</span><input class="map-stream-input" type="number" id="ms-invest" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-    </div>
+
+  <!-- Row 1: Life Costs (Current) + This Year Actual -->
+  <div class="map-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px;">
+
+    <!-- Card 1: Life Costs (Current) -->
     <div class="map-card glass">
       <div class="map-card-hdr">
         <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-        <div><div class="map-card-title">Life Costs</div><div class="map-card-sub">What it costs to live</div></div>
+        <div><div class="map-card-title">Life Costs (Current)</div><div class="map-card-sub">Monthly reality</div></div>
       </div>
-      <div class="map-stream"><span class="map-stream-name">Monthly budget (now)</span><input class="map-stream-input" type="number" id="life-now" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-      <div class="map-stream"><span class="map-stream-name">Monthly budget (future)</span><input class="map-stream-input" type="number" id="life-future" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-      <div class="map-stream"><span class="map-stream-name">Safety buffer (target)</span><input class="map-stream-input" type="number" id="life-buffer" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
-      <div class="map-stream"><span class="map-stream-name">Debts to clear</span><input class="map-stream-input" type="number" id="life-debt" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Security Fund</span><input class="map-stream-input" type="number" id="lc-security" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Savings Fund</span><input class="map-stream-input" type="number" id="lc-savings" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Monthly Spending (everyday)</span><input class="map-stream-input" type="number" id="lc-spending" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream"><span class="map-stream-name">Monthly Mortgage</span><input class="map-stream-input" type="number" id="lc-mortgage" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      <div class="map-stream" style="border-bottom:1px solid rgba(13,43,62,0.055);padding-bottom:12px;">
+        <span class="map-stream-name" style="font-size:11px;color:var(--text-tertiary);">Total mortgage remaining (optional)</span>
+        <input class="map-stream-input" type="number" id="lc-mortgage-total" placeholder="0" style="font-size:11px;width:115px;" oninput="updateMoneyMapAndSave()">
+      </div>
+      <div style="margin:14px 0 0;border-radius:10px;background:rgba(45,115,137,0.07);border:1px solid rgba(45,115,137,0.16);padding:13px 15px;">
+        <div style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ocean-mid);margin-bottom:10px;">To cover spending + mortgage, you need to earn</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <span style="font-size:12px;color:var(--text-secondary);">After-tax monthly need</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text-primary);" id="lc-net-need">$0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <span style="font-size:12px;color:var(--text-secondary);">Gross monthly required</span>
+          <span style="font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color:var(--gold-deep);" id="lc-gross-month">~$0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="font-size:11px;color:var(--text-tertiary);">Tax + super slice</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--warning);" id="lc-tax-chunk">$0/mo</span>
+        </div>
+      </div>
     </div>
+
+    <!-- Card 2: This Year (Actual) -->
     <div class="map-card glass">
       <div class="map-card-hdr">
         <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
@@ -504,11 +518,48 @@ const APP_VERSION = '2.6.5';
       <div class="map-stream" style="border-bottom:none;"><span class="map-stream-name" style="font-weight:500;">Net in pocket</span><span class="map-stream-static" id="mm-actual-net" style="color:var(--ocean-mid);font-weight:500;">$0</span></div>
     </div>
   </div>
+
+  <!-- Row 2: Overall Goals (Intention) — full width -->
+  <div class="map-card glass" style="margin-bottom:16px;">
+    <div class="map-card-hdr">
+      <div class="photo-icon md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+      <div><div class="map-card-title">Overall Goals (Intention)</div><div class="map-card-sub">The life you're building toward</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:start;">
+      <div style="padding-right:24px;border-right:1px solid rgba(13,43,62,0.07);">
+        <div class="map-stream"><span class="map-stream-name">Security Fund Intention</span><input class="map-stream-input" type="number" id="gi-security" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+        <div class="map-stream"><span class="map-stream-name">Savings Fund Intention</span><input class="map-stream-input" type="number" id="gi-savings" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+        <div class="map-stream"><span class="map-stream-name">Monthly Spending Intention (everyday)</span><input class="map-stream-input" type="number" id="gi-spending" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+        <div class="map-stream"><span class="map-stream-name">Monthly Mortgage Intention</span><input class="map-stream-input" type="number" id="gi-mortgage" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+        <div class="map-stream" style="border-bottom:none;"><span class="map-stream-name" style="color:var(--gold-deep);font-weight:400;">Monthly Abundance Intention <span style="font-size:10px;opacity:0.7;">(overflow)</span></span><input class="map-stream-input" type="number" id="gi-abundance" placeholder="0" oninput="updateMoneyMapAndSave()"></div>
+      </div>
+      <div style="padding-left:28px;display:flex;align-items:center;min-height:220px;">
+        <div style="width:100%;">
+          <div style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ocean-mid);margin-bottom:14px;">To live this life, you need to earn</div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:3px;">Monthly total (net, after tax + super)</div>
+            <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:var(--text-primary);" id="gi-net-total">$0</div>
+          </div>
+          <div style="border-top:1px solid rgba(45,115,137,0.15);padding-top:12px;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:3px;">Gross monthly required</div>
+            <div style="font-family:'DM Mono',monospace;font-size:30px;font-weight:800;color:var(--gold-deep);" id="gi-gross-month">~$0</div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-top:5px;">That's <span id="gi-gross-year" style="color:var(--gold-deep);font-weight:600;">$0</span> gross per year</div>
+          </div>
+          <div style="background:rgba(200,149,107,0.1);border:1px solid rgba(200,149,107,0.2);border-radius:8px;padding:10px 13px;">
+            <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:4px;">Tax + super on this gross (the government + future-you slice)</div>
+            <div style="font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--warning);" id="gi-tax-chunk">$0/mo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Totals bar -->
   <div class="map-total-bar">
-    <div><div class="map-total-label">Income target (annual)</div><div class="map-total-value" id="mm-total-target">$0</div></div>
-    <div><div class="map-total-label">Annual life cost (now)</div><div class="map-total-value amber" id="mm-total-life">$0</div></div>
-    <div><div class="map-total-label">Annual surplus / gap</div><div class="map-total-value green" id="mm-total-surplus">+$0</div></div>
-    <div><div class="map-total-label">Buffer months covered</div><div class="map-total-value" id="mm-months">—</div></div>
+    <div><div class="map-total-label">Current gross needed /mo</div><div class="map-total-value" id="mm-current-gross-mo">$0</div></div>
+    <div><div class="map-total-label">Goals gross needed /mo</div><div class="map-total-value amber" id="mm-goals-gross-mo">$0</div></div>
+    <div><div class="map-total-label">Actual gross this year</div><div class="map-total-value" id="mm-total-target">$0</div></div>
+    <div><div class="map-total-label">Net in pocket (actual)</div><div class="map-total-value green" id="mm-total-surplus">$0</div></div>
   </div>
 </div>
 
@@ -1050,7 +1101,7 @@ const { createClient } = supabase;
 const sb = createClient('https://mkctnzgjywxwglnyokxq.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rY3RuemdqeXd4d2dsbnlva3hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDcwNDcsImV4cCI6MjA5MDQyMzA0N30.tZAXE9tnZzGzIrmJ597GH1Vr0V_RJJC-mkakweEpI58');
 
 // ── STATE ──
-const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5,lastSaved:null,moneyMap:{msBoard:0,msConsult:0,msCommission:0,msMission:0,msInvest:0,lifeNow:0,lifeFuture:0,lifeBuffer:0,lifeDebt:0},superFund:''};
+const state={expenses:[],income:[],invoices:[],receiptFile:null,incomeFile:null,superRate:11.5,lastSaved:null,moneyMap:{lcSecurity:0,lcSavings:0,lcSpending:0,lcMortgage:0,lcMortgageTotal:0,giSecurity:0,giSavings:0,giSpending:0,giMortgage:0,giAbundance:0},superFund:''};
 let currentUser = null;
 let editingInvoiceId = null;
 let editingExpenseId = null;
@@ -1134,7 +1185,7 @@ async function loadAllData(){
     state.invoices = (invRes.data||[]).map(i=>({id:i.id,number:i.number,org:i.org,date:i.date,amount:i.amount,gstAmt:i.gst_amt,total:i.total,status:i.status,contact:i.contact,email:i.email||'',address:i.address||'',terms:i.terms||'10 business days',hasGst:i.has_gst!==false,period:i.period,scope:i.scope,services:i.services}));
     if(mmRes.data&&mmRes.data[0]){
       const mm = mmRes.data[0];
-      state.moneyMap = {msBoard:mm.ms_board||0,msConsult:mm.ms_consult||0,msCommission:mm.ms_commission||0,msMission:mm.ms_mission||0,msInvest:mm.ms_invest||0,lifeNow:mm.life_now||0,lifeFuture:mm.life_future||0,lifeBuffer:mm.life_buffer||0,lifeDebt:mm.life_debt||0};
+      state.moneyMap={lcSecurity:mm.ms_board||0,lcSavings:mm.ms_consult||0,lcSpending:mm.ms_commission||0,lcMortgage:mm.ms_mission||0,lcMortgageTotal:mm.ms_invest||0,giSecurity:mm.life_now||0,giSavings:mm.life_future||0,giSpending:mm.life_buffer||0,giMortgage:mm.life_debt||0,giAbundance:parseFloat(localStorage.getItem('nl_mm_abundance'))||0};
     }
     if(superRes.data&&superRes.data[0]){
       state.superRate = superRes.data[0].super_rate||11.5;
@@ -1249,9 +1300,9 @@ async function updateInvoiceStatusDB(id, status){
 }
 
 async function saveMoneyMapDB(){
-  if(!currentUser) return;
-  const mm = state.moneyMap;
-  await sb.from('money_map').upsert({user_id:currentUser.id,ms_board:mm.msBoard,ms_consult:mm.msConsult,ms_commission:mm.msCommission,ms_mission:mm.msMission,ms_invest:mm.msInvest,life_now:mm.lifeNow,life_future:mm.lifeFuture,life_buffer:mm.lifeBuffer,life_debt:mm.lifeDebt},{onConflict:'user_id'});
+  if(!currentUser)return;
+  const mm=state.moneyMap;
+  await sb.from('money_map').upsert({user_id:currentUser.id,ms_board:mm.lcSecurity,ms_consult:mm.lcSavings,ms_commission:mm.lcSpending,ms_mission:mm.lcMortgage,ms_invest:mm.lcMortgageTotal,life_now:mm.giSecurity,life_future:mm.giSavings,life_buffer:mm.giSpending,life_debt:mm.giMortgage},{onConflict:'user_id'});
 }
 
 async function saveSettingsDB(){
@@ -1268,15 +1319,16 @@ function saveState(){ updateLastSavedDisplay(); showToast('✓ Saved'); }
 
 function restoreMoneyMapAndSuper(){
   if(state.moneyMap){
-    document.getElementById('ms-board').value=state.moneyMap.msBoard||0;
-    document.getElementById('ms-consult').value=state.moneyMap.msConsult||0;
-    document.getElementById('ms-commission').value=state.moneyMap.msCommission||0;
-    document.getElementById('ms-mission').value=state.moneyMap.msMission||0;
-    document.getElementById('ms-invest').value=state.moneyMap.msInvest||0;
-    document.getElementById('life-now').value=state.moneyMap.lifeNow||0;
-    document.getElementById('life-future').value=state.moneyMap.lifeFuture||0;
-    document.getElementById('life-buffer').value=state.moneyMap.lifeBuffer||0;
-    document.getElementById('life-debt').value=state.moneyMap.lifeDebt||0;
+    document.getElementById('lc-security').value=state.moneyMap.lcSecurity||0;
+    document.getElementById('lc-savings').value=state.moneyMap.lcSavings||0;
+    document.getElementById('lc-spending').value=state.moneyMap.lcSpending||0;
+    document.getElementById('lc-mortgage').value=state.moneyMap.lcMortgage||0;
+    document.getElementById('lc-mortgage-total').value=state.moneyMap.lcMortgageTotal||0;
+    document.getElementById('gi-security').value=state.moneyMap.giSecurity||0;
+    document.getElementById('gi-savings').value=state.moneyMap.giSavings||0;
+    document.getElementById('gi-spending').value=state.moneyMap.giSpending||0;
+    document.getElementById('gi-mortgage').value=state.moneyMap.giMortgage||0;
+    document.getElementById('gi-abundance').value=state.moneyMap.giAbundance||0;
   }
   if(state.superRate) document.getElementById('super-rate-input').value=state.superRate;
   if(state.superFund) document.getElementById('super-fund').value=state.superFund;
@@ -1366,41 +1418,58 @@ function updateSuperPage(){
 // ── MONEY MAP ──
 function updateMoneyMapAndSave(){
   state.moneyMap={
-    msBoard:parseFloat(document.getElementById('ms-board').value)||0,
-    msConsult:parseFloat(document.getElementById('ms-consult').value)||0,
-    msCommission:parseFloat(document.getElementById('ms-commission').value)||0,
-    msMission:parseFloat(document.getElementById('ms-mission').value)||0,
-    msInvest:parseFloat(document.getElementById('ms-invest').value)||0,
-    lifeNow:parseFloat(document.getElementById('life-now').value)||0,
-    lifeFuture:parseFloat(document.getElementById('life-future').value)||0,
-    lifeBuffer:parseFloat(document.getElementById('life-buffer').value)||0,
-    lifeDebt:parseFloat(document.getElementById('life-debt').value)||0
+    lcSecurity:parseFloat(document.getElementById('lc-security').value)||0,
+    lcSavings:parseFloat(document.getElementById('lc-savings').value)||0,
+    lcSpending:parseFloat(document.getElementById('lc-spending').value)||0,
+    lcMortgage:parseFloat(document.getElementById('lc-mortgage').value)||0,
+    lcMortgageTotal:parseFloat(document.getElementById('lc-mortgage-total').value)||0,
+    giSecurity:parseFloat(document.getElementById('gi-security').value)||0,
+    giSavings:parseFloat(document.getElementById('gi-savings').value)||0,
+    giSpending:parseFloat(document.getElementById('gi-spending').value)||0,
+    giMortgage:parseFloat(document.getElementById('gi-mortgage').value)||0,
+    giAbundance:parseFloat(document.getElementById('gi-abundance').value)||0
   };
+  localStorage.setItem('nl_mm_abundance',state.moneyMap.giAbundance);
   saveMoneyMapDB();saveState();updateMoneyMap();
 }
+function neededGross(annualNet){
+  if(annualNet<=0)return 0;
+  let lo=0,hi=annualNet*3.5;
+  for(let i=0;i<60;i++){const mid=(lo+hi)/2;const net=mid-calcTax(mid)-mid*0.02-mid*(state.superRate/100);if(net<annualNet)lo=mid;else hi=mid;}
+  return(lo+hi)/2;
+}
 function updateMoneyMap(){
-  const board=parseFloat(document.getElementById('ms-board').value)||0;
-  const consult=parseFloat(document.getElementById('ms-consult').value)||0;
-  const commission=parseFloat(document.getElementById('ms-commission').value)||0;
-  const mission=parseFloat(document.getElementById('ms-mission').value)||0;
-  const invest=parseFloat(document.getElementById('ms-invest').value)||0;
-  const lifeNow=parseFloat(document.getElementById('life-now').value)||0;
-  const buffer=parseFloat(document.getElementById('life-buffer').value)||0;
-  const total=board+consult+commission+mission+invest;
-  const annualLife=lifeNow*12;
-  const surplus=total-annualLife;
-  const months=buffer>0&&lifeNow>0?(buffer/lifeNow).toFixed(1)+'mo':'—';
-  document.getElementById('mm-total-target').textContent=fmtK(total);
-  document.getElementById('mm-total-life').textContent=fmtK(annualLife);
-  const sEl=document.getElementById('mm-total-surplus');
-  sEl.textContent=(surplus>=0?'+':'')+fmtK(surplus);
-  sEl.className='map-total-value '+(surplus>=0?'green':'red');
-  document.getElementById('mm-months').textContent=months;
+  const lcSpending=parseFloat(document.getElementById('lc-spending').value)||0;
+  const lcMortgage=parseFloat(document.getElementById('lc-mortgage').value)||0;
+  const essMonthly=lcSpending+lcMortgage;
+  const lcGrossAnnual=neededGross(essMonthly*12);
+  const lcGrossMonthly=lcGrossAnnual/12;
+  const lcTaxSlice=Math.max(0,lcGrossMonthly-essMonthly);
+  const elLcNet=document.getElementById('lc-net-need');if(elLcNet)elLcNet.textContent=fmtK(essMonthly);
+  const elLcGross=document.getElementById('lc-gross-month');if(elLcGross)elLcGross.textContent='~'+fmtK(lcGrossMonthly);
+  const elLcTax=document.getElementById('lc-tax-chunk');if(elLcTax)elLcTax.textContent=fmtK(lcTaxSlice)+'/mo';
+  const giSecurity=parseFloat(document.getElementById('gi-security').value)||0;
+  const giSavings=parseFloat(document.getElementById('gi-savings').value)||0;
+  const giSpending=parseFloat(document.getElementById('gi-spending').value)||0;
+  const giMortgage=parseFloat(document.getElementById('gi-mortgage').value)||0;
+  const giAbundance=parseFloat(document.getElementById('gi-abundance').value)||0;
+  const goalsMonthly=giSecurity+giSavings+giSpending+giMortgage+giAbundance;
+  const giGrossAnnual=neededGross(goalsMonthly*12);
+  const giGrossMonthly=giGrossAnnual/12;
+  const giTaxSlice=Math.max(0,giGrossMonthly-goalsMonthly);
+  const elGiNet=document.getElementById('gi-net-total');if(elGiNet)elGiNet.textContent=fmtK(goalsMonthly);
+  const elGiGrossM=document.getElementById('gi-gross-month');if(elGiGrossM)elGiGrossM.textContent='~'+fmtK(giGrossMonthly);
+  const elGiGrossY=document.getElementById('gi-gross-year');if(elGiGrossY)elGiGrossY.textContent=fmtK(giGrossAnnual);
+  const elGiTax=document.getElementById('gi-tax-chunk');if(elGiTax)elGiTax.textContent=fmtK(giTaxSlice)+'/mo';
+  const elCurrGross=document.getElementById('mm-current-gross-mo');if(elCurrGross)elCurrGross.textContent=fmtK(lcGrossMonthly);
+  const elGoalGross=document.getElementById('mm-goals-gross-mo');if(elGoalGross)elGoalGross.textContent=fmtK(giGrossMonthly);
   const c=getCalcs();
   document.getElementById('mm-actual-income').textContent=fmtK(c.gross);
   document.getElementById('mm-actual-expenses').textContent=fmtK(c.expenses);
   document.getElementById('mm-actual-obligations').textContent=fmtK(c.totalObligation);
   document.getElementById('mm-actual-net').textContent=fmtK(c.yours);
+  const elTarget=document.getElementById('mm-total-target');if(elTarget)elTarget.textContent=fmtK(c.gross);
+  const elSurplus=document.getElementById('mm-total-surplus');if(elSurplus)elSurplus.textContent=fmtK(c.yours);
 }
 
 // ── P&L ──
